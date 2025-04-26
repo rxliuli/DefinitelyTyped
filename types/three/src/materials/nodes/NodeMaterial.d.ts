@@ -24,9 +24,11 @@ export interface NodeMaterialParameters extends MaterialParameters {
     alphaTestNode?: Node | null | undefined;
 
     positionNode?: Node | null | undefined;
+    geometryNode?: Node | null | undefined;
 
     depthNode?: Node | null | undefined;
-    shadowNode?: Node | null | undefined;
+    receivedShadowPositionNode?: Node | null | undefined;
+    castShadowPositionNode?: Node | null | undefined;
 
     outputNode?: Node | null | undefined;
 
@@ -41,6 +43,7 @@ declare class NodeMaterial extends Material {
 
     fog: boolean;
     lights: boolean;
+    hardwareClipping: boolean;
 
     lightsNode: LightsNode | null;
     envNode: Node | null;
@@ -54,10 +57,13 @@ declare class NodeMaterial extends Material {
     alphaTestNode: Node | null;
 
     positionNode: Node | null;
+    geometryNode: Node | null;
 
     depthNode: Node | null;
-    shadowNode: Node | null;
-    shadowPositionNode: Node | null;
+    receivedShadowPositionNode: Node | null;
+    castShadowPositionNode: Node | null;
+    receivedShadowNode: (() => Node) | null;
+    castShadowNode: Node | null;
 
     outputNode: Node | null;
     mrtNode: MRTNode | null;
@@ -65,12 +71,22 @@ declare class NodeMaterial extends Material {
     fragmentNode: Node | null;
     vertexNode: Node | null;
 
+    /**
+     * @deprecated ".shadowPositionNode" was renamed to ".receivedShadowPositionNode".'
+     */
+    get shadowPositionNode(): Node | null;
+    set shadowPositionNode(value: Node | null);
+
     constructor();
 
     build(builder: NodeBuilder): void;
     setup(builder: NodeBuilder): void;
     setupClipping(builder: NodeBuilder): ClippingNode | null;
+    setupHardwareClipping(builder: NodeBuilder): void;
     setupDepth(builder: NodeBuilder): void;
+    setupPositionView(): Node;
+    setupModelViewProjection(): Node;
+    setupVertex(builder: NodeBuilder): Node;
     setupPosition(builder: NodeBuilder): Node;
     setupDiffuseColor(builder: NodeBuilder): void;
     setupVariants(builder: NodeBuilder): void;
@@ -81,6 +97,7 @@ declare class NodeMaterial extends Material {
     setupOutgoingLight(): Node;
     setupLightingModel(builder: NodeBuilder): LightingModel;
     setupLighting(builder: NodeBuilder): Node;
+    setupFog(builder: NodeBuilder, outputNode: Node): Node;
     setupOutput(builder: NodeBuilder, outputNode: Node): Node;
 
     setDefaultValues(material: Material): void;

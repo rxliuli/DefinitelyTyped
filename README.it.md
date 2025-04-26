@@ -177,7 +177,7 @@ Se hai file `.d.ts` oltre all'`index.d.ts`, assicurati che siano referenziati o 
 
 I membri di Definitely Typed controllano continuamente le nuove pull request, perciò sii al corrente che un alto numero di pull request potrebbe rallentarci il lavoro.
 
-Per l'esempio di un buon package, guarda [base64-js](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/base64-js).
+Per l'esempio di un buon package, guarda [base64-js](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/a2ff1d2088143cbacc15786c7f3b0ec67179523c/types/base64-js).
 
 #### Rimuovere un package
 
@@ -392,7 +392,7 @@ Quindi dipende, anche se la maggior parte dei merge avvengono nell'arco di una s
 
 > Le pull request che cambiano solo i tipi di un modulo e che hanno i test corrispondenti vengono vengono accettati più velocemente
 
-Alle pull request che sono state approvate da un'autore presente nella lista dei proprietari vengono di solito fatti i merge più rapidamente; le pull request che introducono nuove definizioni ci mettono più tempo in quanto hanno bisogno di più controlli da parte dei mantenitori. Ogni pull request viene controllata da un membro di TypeScript o Definitely Type prima di ottenere un merge, quindi abbi pazienza in quanto fattori umani possono causare ritardi. Leggi la [New Pull Request Status Board](https://github.com/DefinitelyTyped/DefinitelyTyped/projects/5) per vedere a che punto sono i mantenitori nel controllare le pull request.
+Alle pull request che sono state approvate da un'autore presente nella lista dei proprietari vengono di solito fatti i merge più rapidamente; le pull request che introducono nuove definizioni ci mettono più tempo in quanto hanno bisogno di più controlli da parte dei mantenitori. Ogni pull request viene controllata da un membro di TypeScript o Definitely Type prima di ottenere un merge, quindi abbi pazienza in quanto fattori umani possono causare ritardi. Leggi la [Pull Request Status Board](https://github.com/orgs/DefinitelyTyped/projects/1) per vedere a che punto sono i mantenitori nel controllare le pull request.
 
 #### La mia pull request ha ottenuto un merge; quand'è che il package `@types` verra aggiornato su npm?
 

@@ -12,12 +12,14 @@ import {
     fetchQuery,
     FragmentRefs,
     getDefaultMissingFieldHandlers,
+    getRefetchMetadata,
     getRequest,
     graphql,
     isPromise,
     LiveState,
     Network,
     PreloadableConcreteRequest,
+    PreloadableQueryRegistry,
     QueryResponseCache,
     ReaderFragment,
     ReaderInlineDataFragment,
@@ -34,6 +36,7 @@ import {
     Variables,
 } from "relay-runtime";
 
+import type { HandlerProvider } from "relay-runtime/lib/handlers/RelayDefaultHandlerProvider";
 import * as multiActorEnvironment from "relay-runtime/multi-actor-environment";
 
 const source = new RecordSource();
@@ -82,6 +85,28 @@ const network = Network.create(fetchFunction);
 
 // Create a cache for storing query responses
 const cache = new QueryResponseCache({ size: 250, ttl: 60000 });
+
+// ~~~~~~~~~~~~~~~~~~~~~
+// Handler Provider
+// ~~~~~~~~~~~~~~~~~~~~~
+
+const handlerProvider: HandlerProvider = (handle: string) => {
+    switch (handle) {
+        // Augment (or remove from) this list:
+        case "connection":
+            return ConnectionHandler;
+            // case 'viewer':
+            //     // ViewerHandler is special-cased and does not have an `update` method
+            //     return ViewerHandler;
+        case "custom":
+            return {
+                update(store, fieldPayload) {
+                    // Implementation
+                },
+            };
+    }
+    throw new Error(`handlerProvider: No handler provided for ${handle}`);
+};
 
 // ~~~~~~~~~~~~~~~~~~~~~
 // Environment
@@ -176,34 +201,24 @@ const environment = new Environment({
         }
     },
     relayFieldLogger: arg => {
-        if (arg.kind === "missing_field.log") {
+        if (arg.kind === "missing_required_field.log") {
             console.log(arg.fieldPath, arg.owner);
-        } else if (arg.kind === "missing_field.throw") {
+        } else if (arg.kind === "missing_required_field.throw") {
             console.log(arg.fieldPath, arg.owner);
         } else if (arg.kind === "relay_resolver.error") {
             console.log(arg.fieldPath, arg.owner);
-        } else {
-            arg.kind; // $ExpectType "relay_field_payload.error"
+        } else if (arg.kind === "relay_field_payload.error") {
+            arg.kind;
             console.log(arg.fieldPath, arg.owner, arg.error);
+        } else if (arg.kind === "missing_expected_data.throw") {
+            arg.kind;
+            console.log(arg.fieldPath, arg.owner, arg.handled);
+        } else {
+            arg.kind; // $ExpectType "missing_expected_data.log"
+            console.log(arg.fieldPath, arg.owner);
         }
     },
 });
-
-// ~~~~~~~~~~~~~~~~~~~~~
-// Handler Provider
-// ~~~~~~~~~~~~~~~~~~~~~
-
-function handlerProvider(handle: any) {
-    switch (handle) {
-        // Augment (or remove from) this list:
-        case "connection":
-            return ConnectionHandler;
-            // case 'viewer':
-            //     // ViewerHandler is special-cased and does not have an `update` method
-            //     return ViewerHandler;
-    }
-    throw new Error(`handlerProvider: No handler provided for ${handle}`);
-}
 
 // Updatable fragment.
 interface UserFragment_updatable$data {
@@ -370,6 +385,10 @@ const preloadableNode: PreloadableConcreteRequest<FooQuery> = {
     },
 };
 
+if (preloadableNode.params.id !== null) {
+    const module = PreloadableQueryRegistry.get(preloadableNode.params.id);
+}
+
 // ~~~~~~~~~~~~~~~~~~~~~
 // ConcreteRequest
 // ~~~~~~~~~~~~~~~~~~~~~
@@ -419,7 +438,7 @@ const node: ConcreteRequest = (function() {
                 },
             ],
         },
-    ];
+    ] as const;
     return {
         kind: "Request",
         fragment: {
@@ -444,7 +463,7 @@ const node: ConcreteRequest = (function() {
             text: "query FooQuery {\n  __typename\n}\n",
             metadata: {},
         },
-    };
+    } as const;
 })();
 /* tslint:enable:only-arrow-functions no-var-keyword prefer-const */
 
@@ -639,6 +658,12 @@ const operation = createOperationDescriptor(request, variables);
 const operationWithCacheConfig = createOperationDescriptor(request, variables, cacheConfig);
 const operationWithDataID = createOperationDescriptor(request, variables, undefined, dataID);
 const operationWithAll = createOperationDescriptor(request, variables, cacheConfig, dataID);
+
+__internal.fetchQueryDeduped(
+    environment,
+    operation.request.identifier,
+    () => environment.execute({ operation }),
+);
 
 // ~~~~~~~~~~~~~~~~~~~~~~~
 // MULTI ACTOR ENVIRONMENT
@@ -891,3 +916,30 @@ export function handleResult<T, E>(result: Result<T, E>) {
         const errors: readonly E[] = result.errors;
     }
 }
+
+// ~~~~~~~~~~~~~~~~~~
+// Metadata
+// ~~~~~~~~~~~~~~~~~~
+
+const refetchMetadata: {
+    fragmentRefPathInResponse: readonly (string | number)[];
+    identifierInfo:
+        | {
+            identifierField: string;
+            identifierQueryVariableName: string;
+        }
+        | null
+        | undefined;
+    refetchableRequest: ConcreteRequest;
+    refetchMetadata: {
+        operation: string | ConcreteRequest;
+        fragmentPathInResult: string[];
+        identifierInfo?:
+            | {
+                identifierField: string;
+                identifierQueryVariableName: string;
+            }
+            | null
+            | undefined;
+    };
+} = getRefetchMetadata(node.fragment, "getRefetchMetadata()");

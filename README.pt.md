@@ -152,7 +152,7 @@ Se há outros arquivos `.d.ts` além do arquivo `index.d.ts`, tenha certeza de q
 
 Os membros do Definitely Typed frequentemente monitoram os novos PRs, porém tenha em mente de que a quantidade de PRs pode atrasar o processo.
 
-Para ver um bom exemplo, veja o pacote [base64-js](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/base64-js).
+Para ver um bom exemplo, veja o pacote [base64-js](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/a2ff1d2088143cbacc15786c7f3b0ec67179523c/types/base64-js).
 
 #### Removendo um pacote
 
@@ -345,7 +345,7 @@ Superficialmente:
 
 > PRs que alteram apenas os tipos de um módulo, e têm mudanças de testes correspondentes sofrerão merges muito mais rapidamente.
 
-PRs que forem aprovadas por um autor listado no cabeçalho da definição geralmente sofrem merge mais rápido; PRs para novas definições levarão mais tempo para serem aprovadas, uma vez que requerem mais revisão dos mantenedores. Cada PR é revisada por um membro do time do TypeScript ou Definitely Typed antes de sofrer merge, então por favor, seja paciente, pois fatores humanos podem causar alguns atrasos. Verifique o [Painel de Status de Novas Pull Requests](https://github.com/DefinitelyTyped/DefinitelyTyped/projects/5) para checar o progresso enquanto os mantenedores revisam as PRs abertas.
+PRs que forem aprovadas por um autor listado no cabeçalho da definição geralmente sofrem merge mais rápido; PRs para novas definições levarão mais tempo para serem aprovadas, uma vez que requerem mais revisão dos mantenedores. Cada PR é revisada por um membro do time do TypeScript ou Definitely Typed antes de sofrer merge, então por favor, seja paciente, pois fatores humanos podem causar alguns atrasos. Verifique o [Painel de Status de Pull Requests](https://github.com/orgs/DefinitelyTyped/projects/1) para checar o progresso enquanto os mantenedores revisam as PRs abertas.
 
 #### Minha PR já sofreu merge; Quando é que o pacote `@types` no npm será atualizado?
 

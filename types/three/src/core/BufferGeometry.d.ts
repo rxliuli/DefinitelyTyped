@@ -4,6 +4,7 @@ import { Quaternion } from "../math/Quaternion.js";
 import { Sphere } from "../math/Sphere.js";
 import { Vector2 } from "../math/Vector2.js";
 import { Vector3, Vector3Tuple } from "../math/Vector3.js";
+import IndirectStorageBufferAttribute from "../renderers/common/IndirectStorageBufferAttribute.js";
 import { BufferAttribute, BufferAttributeJSON } from "./BufferAttribute.js";
 import { EventDispatcher } from "./EventDispatcher.js";
 import { GLBufferAttribute } from "./GLBufferAttribute.js";
@@ -155,6 +156,8 @@ export class BufferGeometry<
      */
     index: BufferAttribute | null;
 
+    indirect: IndirectStorageBufferAttribute | null;
+
     /**
      * This hashmap has as id the name of the attribute to be set and as value the {@link THREE.BufferAttribute | buffer} to set it to. Rather than accessing this property directly,
      * use {@link setAttribute | .setAttribute} and {@link getAttribute | .getAttribute} to access attributes of this geometry.
@@ -169,9 +172,7 @@ export class BufferGeometry<
      * You will have to call {@link dispose | .dispose}(), and create a new instance of {@link THREE.BufferGeometry | BufferGeometry}.
      * @defaultValue `{}`
      */
-    morphAttributes: {
-        [name: string]: Array<BufferAttribute | InterleavedBufferAttribute>; // TODO Replace for 'Record<>'
-    };
+    morphAttributes: Record<"position" | "normal" | "color", Array<BufferAttribute | InterleavedBufferAttribute>>;
 
     /**
      * Used to control the morph target behavior; when set to true, the morph target data is treated as relative offsets, rather than as absolute positions/normals.
@@ -232,6 +233,10 @@ export class BufferGeometry<
      * @param index
      */
     setIndex(index: BufferAttribute | number[] | null): this;
+
+    setIndirect(indirect: IndirectStorageBufferAttribute | null): this;
+
+    getIndirect(): IndirectStorageBufferAttribute | null;
 
     /**
      * Sets an {@link attributes | attribute} to this geometry with the specified name.
@@ -352,8 +357,12 @@ export class BufferGeometry<
     center(): this;
 
     /**
-     * Sets the attributes for this BufferGeometry from an array of points.
-     * @param points
+     * Defines a geometry by creating a `position` attribute based on the given array of points. The array can hold
+     * instances of {@link Vector2} or {@link Vector3}. When using two-dimensional data, the `z` coordinate for all
+     * vertices is set to `0`.
+     *
+     * If the method is used with an existing `position` attribute, the vertex data are overwritten with the data from
+     * the array. The length of the array must match the vertex count.
      */
     setFromPoints(points: Vector3[] | Vector2[]): this;
 

@@ -1,9 +1,9 @@
-import { BoxPlotData, BoxPlotMarker } from "./lib/traces/box";
-import { CandlestickData } from "./lib/traces/candlestick";
-import { OhlcData } from "./lib/traces/ohlc";
-import { PieData } from "./lib/traces/pie";
-import { SankeyData } from "./lib/traces/sankey";
-import { ViolinData } from "./lib/traces/violin";
+import { BoxPlotData, BoxPlotMarker } from "./lib/box";
+import { CandlestickData } from "./lib/candlestick";
+import { OhlcData } from "./lib/ohlc";
+import { PieData } from "./lib/pie";
+import { SankeyData } from "./lib/sankey";
+import { ViolinData } from "./lib/violin";
 
 export as namespace Plotly;
 export { BoxPlotData, CandlestickData, OhlcData, PieData, SankeyData, ViolinData };
@@ -406,6 +406,32 @@ export function animate(
     opts?: Partial<AnimationOpts>,
 ): Promise<void>;
 
+export interface ValidateResult {
+    code: string;
+    container: "data" | "layout";
+    trace: number | null;
+    path: string | (string | number)[];
+    astr: string;
+    msg: string;
+}
+export function validate(data: Data[], layout: Partial<Layout>): ValidateResult[];
+export function setPlotConfig(config: Partial<Config>): void;
+
+export type TemplateFigure = Root | { data: Data[]; layout: Partial<Layout> };
+export function makeTemplate(figure: TemplateFigure): Template;
+
+export interface ValidateTemplateResult {
+    code: string;
+    index?: number;
+    traceType?: string;
+    templateCount?: number;
+    dataCount?: number;
+    path?: string;
+    templateitemname?: string;
+    msg: string;
+}
+export function validateTemplate(figure: TemplateFigure, template: Template): ValidateTemplateResult[];
+
 // Layout
 export interface Layout {
     colorway: string[];
@@ -421,6 +447,12 @@ export interface Layout {
             xanchor: "auto" | "left" | "center" | "right";
             yanchor: "auto" | "top" | "middle" | "bottom";
             pad: Partial<Padding>;
+            subtitle:
+                | string
+                | Partial<{
+                    text: string;
+                    font: Partial<Font>;
+                }>;
         }>;
     titlefont: Partial<Font>;
     autosize: boolean;
@@ -472,7 +504,19 @@ export interface Layout {
     subplot: string;
     radialaxis: Partial<Axis>;
     angularaxis: {}; // TODO
-    dragmode: "zoom" | "pan" | "select" | "lasso" | "orbit" | "turntable" | false;
+    dragmode:
+        | "zoom"
+        | "pan"
+        | "select"
+        | "lasso"
+        | "drawclosedpath"
+        | "drawopenpath"
+        | "drawline"
+        | "drawrect"
+        | "drawcircle"
+        | "orbit"
+        | "turntable"
+        | false;
     orientation: number;
     annotations: Array<Partial<Annotations>>;
     shapes: Array<Partial<Shape>>;
@@ -1301,7 +1345,6 @@ export type ColorScale = string | string[] | Array<[number, string]>;
 export type DataTransform = Partial<Transform>;
 export type ScatterData = PlotData;
 
-// Bar Scatter
 export interface PlotData {
     type: PlotType;
     x: Datum[] | Datum[][] | TypedArray;
@@ -1527,6 +1570,7 @@ export interface PlotData {
     }>;
     autocontour: boolean;
     ncontours: number;
+    maxdepth: number;
     uirevision: string | number;
     uid: string;
 }
@@ -1948,7 +1992,7 @@ export interface Label {
 
 export interface LegendTitle {
     font: Partial<Font>;
-    side: "top" | "left" | "top left";
+    side: "top" | "left" | "top left" | "top center" | "top right";
     text: string;
 }
 
@@ -2718,8 +2762,9 @@ interface TraceModule {
     moduleType: "trace";
     name: string;
     categories: string[];
-    meta: Record<string, unknown>;
-    [key: string]: unknown;
+    meta: {
+        description: string;
+    };
 }
 
 interface LocaleModule {
@@ -2741,7 +2786,6 @@ interface TransformModule {
 interface ComponentModule {
     moduleType: "component";
     name: string;
-    [key: string]: unknown;
 }
 
 interface ApiMethodModule {

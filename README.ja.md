@@ -176,7 +176,7 @@ dts-gen の全オプションは[こちら](https://github.com/microsoft/Definit
 
 Definitely Typed のメンバーは常に新しい PR をチェックしていますが、他の PR の数によっては対応が遅れる場合があることをご了承ください。
 
-[base64-js](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/base64-js) を、パッケージのサンプルとして参考にするのがよいでしょう。
+[base64-js](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/a2ff1d2088143cbacc15786c7f3b0ec67179523c/types/base64-js) を、パッケージのサンプルとして参考にするのがよいでしょう。
 
 #### パッケージを削除する
 
@@ -412,7 +412,7 @@ Definitely TypedはGitHubで最もアクティブなリポジトリの1つです
 
 > モジュールの型定義のみの変更で、対応するテストもきちんと変更されている PR は早くマージされる
 
-通例、型定義ファイルのヘッダーに載っている著者が承認した PR はより早くマージされます。新しい型定義の PR は、 DefinitelyTyped のメンテナーからのレビューも必要になるので時間がかかります。各 PR は TypeScript や DefinitelyTyped のチームメンバーがマージ前にレビューします。人為的要因で遅れが発生する場合があるので、しばらくお待ちください。メンテナーがオープンな PR を処理している間は、 [New Pull Request Status Board](https://github.com/DefinitelyTyped/DefinitelyTyped/projects/5) で進捗を確認できます。
+通例、型定義ファイルのヘッダーに載っている著者が承認した PR はより早くマージされます。新しい型定義の PR は、 DefinitelyTyped のメンテナーからのレビューも必要になるので時間がかかります。各 PR は TypeScript や DefinitelyTyped のチームメンバーがマージ前にレビューします。人為的要因で遅れが発生する場合があるので、しばらくお待ちください。メンテナーがオープンな PR を処理している間は、 [Pull Request Status Board](https://github.com/orgs/DefinitelyTyped/projects/1) で進捗を確認できます。
 
 #### 非常に人気のあるプロジェクトへの変更を提出したい場合、なぜ異なる扱いを受けるのですか？
 
