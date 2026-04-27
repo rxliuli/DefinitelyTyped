@@ -198,6 +198,7 @@ declare module "@mapbox/mapbox-sdk/lib/classes/mapi-error" {
 
 // eslint-disable-next-line @definitelytyped/no-declare-current-package
 declare module "@mapbox/mapbox-sdk/services/datasets" {
+    import * as GeoJSON from "geojson";
     // eslint-disable-next-line @definitelytyped/no-self-import
     import { MapiRequest } from "@mapbox/mapbox-sdk/lib/classes/mapi-request";
     // eslint-disable-next-line @definitelytyped/no-self-import
@@ -918,7 +919,7 @@ declare module "@mapbox/mapbox-sdk/services/geocoding-v6" {
          * Bias local results based on a provided coordinate location or a
          * user's IP address.
          */
-        proximity?: Coordinates | "ip";
+        proximity?: MapiRequestCoordinates | "ip";
         /**
          * Filter results by feature types.
          */
@@ -1350,7 +1351,6 @@ declare module "@mapbox/mapbox-sdk/services/isochrone" {
 
 // eslint-disable-next-line @definitelytyped/no-declare-current-package
 declare module "@mapbox/mapbox-sdk/services/geocoding" {
-    import { LngLatLike } from "mapbox-gl";
     // eslint-disable-next-line @definitelytyped/no-self-import
     import { Coordinates, MapiRequest } from "@mapbox/mapbox-sdk/lib/classes/mapi-request";
     // eslint-disable-next-line @definitelytyped/no-self-import
@@ -1387,7 +1387,7 @@ declare module "@mapbox/mapbox-sdk/services/geocoding" {
         /**
          * A location. This will be a place name for forward geocoding or a coordinate pair (longitude, latitude) for reverse geocoding.
          */
-        query: string | LngLatLike;
+        query: string;
         /**
          * Either  mapbox.places for ephemeral geocoding, or  mapbox.places-permanent for storing results and batch geocoding.
          */
@@ -1844,9 +1844,17 @@ declare module "@mapbox/mapbox-sdk/services/optimization" {
 
 // eslint-disable-next-line @definitelytyped/no-declare-current-package
 declare module "@mapbox/mapbox-sdk/services/static" {
-    import { AnyLayer, LngLatBoundsLike, LngLatLike } from "mapbox-gl";
+    import * as GeoJSON from "geojson";
+    /**
+     * It is now the only remaining place that still requires `mapbox-gl`.
+     *
+     * Since the js source of `mapbox__mapbox-sdk` does not import codes from `mapbox-gl`,
+     * the `AnyLayer` usage can probably be made gone in further PR, so that `mapbox-gl` dependency
+     * is no longer needed in this type lib.
+     */
+    import { LayerSpecification as AnyLayer } from "mapbox-gl";
     // eslint-disable-next-line @definitelytyped/no-self-import
-    import { MapiRequest } from "@mapbox/mapbox-sdk/lib/classes/mapi-request";
+    import { Coordinates, MapiRequest } from "@mapbox/mapbox-sdk/lib/classes/mapi-request";
     // eslint-disable-next-line @definitelytyped/no-self-import
     import MapiClient, { SdkConfig } from "@mapbox/mapbox-sdk/lib/classes/mapi-client";
 
@@ -1870,7 +1878,7 @@ declare module "@mapbox/mapbox-sdk/services/static" {
         height: number;
         position:
             | {
-                coordinates: LngLatLike | "auto";
+                coordinates: Coordinates;
                 zoom: number;
                 bearing?: number | undefined;
                 pitch?: number | undefined;
@@ -1893,7 +1901,7 @@ declare module "@mapbox/mapbox-sdk/services/static" {
     }
 
     interface CustomMarker {
-        coordinates: LngLatLike;
+        coordinates: Coordinates;
         url: string;
     }
 
@@ -1902,7 +1910,7 @@ declare module "@mapbox/mapbox-sdk/services/static" {
     }
 
     interface SimpleMarker {
-        coordinates: [number, number];
+        coordinates: Coordinates;
         label?: string | undefined;
         color?: string | undefined;
         size?: "large" | "small" | undefined;
@@ -1916,7 +1924,7 @@ declare module "@mapbox/mapbox-sdk/services/static" {
         /**
          * An array of coordinates describing the path.
          */
-        coordinates: LngLatBoundsLike[];
+        coordinates: Coordinates[];
         strokeWidth?: number | undefined;
         strokeColor?: string | undefined;
         /**
@@ -2107,6 +2115,7 @@ declare module "@mapbox/mapbox-sdk/services/styles" {
 
 // eslint-disable-next-line @definitelytyped/no-declare-current-package
 declare module "@mapbox/mapbox-sdk/services/tilequery" {
+    import * as GeoJSON from "geojson";
     // eslint-disable-next-line @definitelytyped/no-self-import
     import { Coordinates, MapiRequest } from "@mapbox/mapbox-sdk/lib/classes/mapi-request";
     // eslint-disable-next-line @definitelytyped/no-self-import
@@ -2122,7 +2131,9 @@ declare module "@mapbox/mapbox-sdk/services/tilequery" {
          * Get a static map image..
          * @param request
          */
-        listFeatures(request: TileQueryRequest): MapiRequest;
+        listFeatures(
+            request: TileQueryRequest,
+        ): MapiRequest<GeoJSON.FeatureCollection<GeoJSON.Point, TileQueryResponseProperty>>;
     }
 
     interface TileQueryRequest {
@@ -2150,7 +2161,27 @@ declare module "@mapbox/mapbox-sdk/services/tilequery" {
          * Queries for a specific geometry type.
          */
         geometry?: GeometryType | undefined;
+        /**
+         * An array of bands to query, rather than querying all bands.
+         * If a specified layer does not exist, it is skipped.
+         * If no bands exist, returns an empty `FeatureCollection`.
+         */
+        bands?: string[] | undefined;
+        /**
+         * An array of layers to query, rather than querying all layers.
+         * If a specified layer does not exist, it is skipped.
+         * If no layers exist, returns an empty `FeatureCollection`.
+         */
         layers?: string[] | undefined;
+    }
+
+    interface TileQueryResponseProperty {
+        tilequery: {
+            distance: number;
+            geometry: GeometryType;
+            layer: string;
+        };
+        [name: string]: any;
     }
 
     type GeometryType = "polygon" | "linestring" | "point";

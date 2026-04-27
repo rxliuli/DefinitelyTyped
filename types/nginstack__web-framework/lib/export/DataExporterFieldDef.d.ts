@@ -9,23 +9,17 @@ declare class DataExporterFieldDef {
     type: string;
     isGroup: boolean;
     lookupType: number;
-    displayFormat:
-        | DateFormat
-        | LatitudeFormat
-        | LongitudeFormat
-        | AngleFormat
-        | string
-        | number
-        | null;
+    displayFormat: DateFormat | LatitudeFormat | LongitudeFormat | AngleFormat | NumberFormat;
 }
 declare namespace DataExporterFieldDef {
-    export { AngleFormat, DataSet, DateFormat, Field, LatitudeFormat, LongitudeFormat, newFromField };
+    export { AngleFormat, DataSet, DateFormat, Field, LatitudeFormat, LongitudeFormat, newFromField, NumberFormat };
 }
 import LegacyEvent = require("@nginstack/engine/lib/event/LegacyEvent.js");
-type DateFormat = typeof import("@nginstack/engine/lib/date/DateFormat");
+declare function newFromField(field: Field): DataExporterFieldDef;
 type LatitudeFormat = typeof import("@nginstack/engine/lib/geo/LatitudeFormat");
 type LongitudeFormat = typeof import("@nginstack/engine/lib/geo/LongitudeFormat");
 type AngleFormat = typeof import("@nginstack/engine/lib/geo/AngleFormat");
-declare function newFromField(field: Field): DataExporterFieldDef;
+type DateFormat = typeof import("@nginstack/engine/lib/date/DateFormat");
+type NumberFormat = typeof import("@nginstack/engine/lib/number/NumberFormat");
 type Field = import("@nginstack/engine/lib/classdef/Field");
 type DataSet = import("@nginstack/engine/lib/dataset/DataSet");

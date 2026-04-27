@@ -1,4 +1,4 @@
-// For Library Version: 1.134.0
+// For Library Version: 1.147.0
 
 declare module "sap/tnt/library" {
   export interface IToolHeader {
@@ -114,6 +114,31 @@ declare module "sap/f/library" {
     Persist = "Persist",
   }
   /**
+   * Defines the media breakpoints for DynamicPage.
+   *
+   * This enum is part of the 'sap/f/library' module export and must be accessed by the property 'DynamicPageMediaRange'.
+   *
+   * @since 1.147
+   */
+  export enum DynamicPageMediaRange {
+    /**
+     * Desktop breakpoint (1025px to 1439px).
+     */
+    Desktop = "Desktop",
+    /**
+     * Desktop Extra Large breakpoint (1440px and above).
+     */
+    DesktopExtraLarge = "DesktopExtraLarge",
+    /**
+     * Phone breakpoint (up to 600px).
+     */
+    Phone = "Phone",
+    /**
+     * Tablet breakpoint (601px to 1024px).
+     */
+    Tablet = "Tablet",
+  }
+  /**
    * Defines the areas within the `sap.f.DynamicPageTitle` control.
    *
    * This enum is part of the 'sap/f/library' module export and must be accessed by the property 'DynamicPageTitleArea'.
@@ -222,7 +247,7 @@ declare module "sap/f/library" {
    *
    * Each layout has a default predefined ratio for the three columns, depending on device size. Based on
    * the device and layout, some columns are hidden. For more information, refer to the ratios (in %) for
-   * each value, listed below: (dash "-" means non-accessible columns).
+   * each value, listed below: (hyphen "-" means non-accessible columns).
    *
    * **Notes:**
    * 	 - The user is allowed to customize the default ratio by dragging the column separators to resize the
@@ -434,8 +459,7 @@ declare module "sap/f/library" {
      *
      * This enum is part of the 'sap/f/library' module export and must be accessed by the property 'cards.SemanticRole'.
      *
-     * @since 1.131
-     * @experimental
+     * @experimental As of version 1.131.
      */
     enum SemanticRole {
       /**
@@ -1815,8 +1839,6 @@ declare module "sap/f/cards/BaseHeader" {
 
   import { IBar, WrappingType } from "sap/m/library";
 
-  import Text from "sap/m/Text";
-
   import Event from "sap/ui/base/Event";
 
   import ElementMetadata from "sap/ui/core/ElementMetadata";
@@ -1894,18 +1916,17 @@ declare module "sap/f/cards/BaseHeader" {
      */
     static getMetadata(): ElementMetadata;
     /**
-     * Adds some bannerLine to the aggregation {@link #getBannerLines bannerLines}.
+     * Adds some infoSection to the aggregation {@link #getInfoSection infoSection}.
      *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
+     * @experimental As of version 1.136.
      *
      * @returns Reference to `this` in order to allow method chaining
      */
-    addBannerLine(
+    addInfoSection(
       /**
-       * The bannerLine to add; if empty, nothing is inserted
+       * The infoSection to add; if empty, nothing is inserted
        */
-      oBannerLine: Text
+      oInfoSection: Control
     ): this;
     /**
      * Attaches event handler `fnFunction` to the {@link #event:press press} event of this `sap.f.cards.BaseHeader`.
@@ -1955,18 +1976,16 @@ declare module "sap/f/cards/BaseHeader" {
       oListener?: object
     ): this;
     /**
-     * Destroys all the bannerLines in the aggregation {@link #getBannerLines bannerLines}.
+     * Destroys all the infoSection in the aggregation {@link #getInfoSection infoSection}.
      *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
+     * @experimental As of version 1.136.
      *
      * @returns Reference to `this` in order to allow method chaining
      */
-    destroyBannerLines(): this;
+    destroyInfoSection(): this;
     /**
      * Destroys the toolbar in the aggregation {@link #getToolbar toolbar}.
      *
-     * @since 1.86
      * @experimental As of version 1.86.
      *
      * @returns Reference to `this` in order to allow method chaining
@@ -2004,15 +2023,6 @@ declare module "sap/f/cards/BaseHeader" {
       mParameters?: object
     ): this;
     /**
-     * Gets content of aggregation {@link #getBannerLines bannerLines}.
-     *
-     * Show as a banner in the header area. Use for example for system info and application shortcut.
-     *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
-     */
-    getBannerLines(): Text[];
-    /**
      * Gets current value of property {@link #getDataTimestamp dataTimestamp}.
      *
      * Defines the timestamp of the oldest data in the card. Use this to show to the end user how fresh the
@@ -2024,21 +2034,19 @@ declare module "sap/f/cards/BaseHeader" {
      *
      * Default value is `empty string`.
      *
-     * @experimental As of version 1.89. this feature is experimental and the API may change.
+     * @experimental As of version 1.89.
      *
      * @returns Value of property `dataTimestamp`
      */
     getDataTimestamp(): string;
     /**
-     * Gets current value of property {@link #getHref href}.
+     * Gets content of aggregation {@link #getInfoSection infoSection}.
      *
-     * Defines the href which the header should open. If set - the header will act and render as a link.
+     * Info sections to be displayed in the header.
      *
-     * @experimental As of version 1.122. Do not use this feature outside of sap.ui.integration.widgets.Card.
-     *
-     * @returns Value of property `href`
+     * @experimental As of version 1.136.
      */
-    getHref(): string;
+    getInfoSection(): Control[];
     /**
      * Gets current value of property {@link #getStatusVisible statusVisible}.
      *
@@ -2046,27 +2054,16 @@ declare module "sap/f/cards/BaseHeader" {
      *
      * Default value is `true`.
      *
-     * @experimental As of version 1.116. this feature is experimental and the API may change.
+     * @experimental As of version 1.116.
      *
      * @returns Value of property `statusVisible`
      */
     getStatusVisible(): boolean;
     /**
-     * Gets current value of property {@link #getTarget target}.
-     *
-     * Defines the target for the case when `href` is given.
-     *
-     * @experimental As of version 1.122. Do not use this feature outside of sap.ui.integration.widgets.Card.
-     *
-     * @returns Value of property `target`
-     */
-    getTarget(): string;
-    /**
      * Gets content of aggregation {@link #getToolbar toolbar}.
      *
      * Defines the toolbar.
      *
-     * @since 1.86
      * @experimental As of version 1.86.
      */
     getToolbar(): Control;
@@ -2078,71 +2075,67 @@ declare module "sap/f/cards/BaseHeader" {
      *
      * Default value is `Normal`.
      *
-     * @experimental As of version 1.122. this feature is experimental and the API may change.
+     * @experimental As of version 1.122.
      *
      * @returns Value of property `wrappingType`
      */
     getWrappingType(): WrappingType;
     /**
-     * Checks for the provided `sap.m.Text` in the aggregation {@link #getBannerLines bannerLines}. and returns
-     * its index if found or -1 otherwise.
+     * Checks for the provided `sap.ui.core.Control` in the aggregation {@link #getInfoSection infoSection}.
+     * and returns its index if found or -1 otherwise.
      *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
+     * @experimental As of version 1.136.
      *
      * @returns The index of the provided control in the aggregation if found, or -1 otherwise
      */
-    indexOfBannerLine(
+    indexOfInfoSection(
       /**
-       * The bannerLine whose index is looked for
+       * The infoSection whose index is looked for
        */
-      oBannerLine: Text
+      oInfoSection: Control
     ): int;
     /**
-     * Inserts a bannerLine into the aggregation {@link #getBannerLines bannerLines}.
+     * Inserts a infoSection into the aggregation {@link #getInfoSection infoSection}.
      *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
+     * @experimental As of version 1.136.
      *
      * @returns Reference to `this` in order to allow method chaining
      */
-    insertBannerLine(
+    insertInfoSection(
       /**
-       * The bannerLine to insert; if empty, nothing is inserted
+       * The infoSection to insert; if empty, nothing is inserted
        */
-      oBannerLine: Text,
+      oInfoSection: Control,
       /**
-       * The `0`-based index the bannerLine should be inserted at; for a negative value of `iIndex`, the bannerLine
-       * is inserted at position 0; for a value greater than the current size of the aggregation, the bannerLine
+       * The `0`-based index the infoSection should be inserted at; for a negative value of `iIndex`, the infoSection
+       * is inserted at position 0; for a value greater than the current size of the aggregation, the infoSection
        * is inserted at the last position
        */
       iIndex: int
     ): this;
     /**
-     * Removes all the controls from the aggregation {@link #getBannerLines bannerLines}.
+     * Removes all the controls from the aggregation {@link #getInfoSection infoSection}.
      *
      * Additionally, it unregisters them from the hosting UIArea.
      *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
+     * @experimental As of version 1.136.
      *
      * @returns An array of the removed elements (might be empty)
      */
-    removeAllBannerLines(): Text[];
+    removeAllInfoSection(): Control[];
     /**
-     * Removes a bannerLine from the aggregation {@link #getBannerLines bannerLines}.
+     * Removes a infoSection from the aggregation {@link #getInfoSection infoSection}.
      *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
+     * @experimental As of version 1.136.
      *
-     * @returns The removed bannerLine or `null`
+     * @returns The removed infoSection or `null`
      */
-    removeBannerLine(
+    removeInfoSection(
       /**
-       * The bannerLine to remove or its index or id
+       * The infoSection to remove or its index or id
        */
-      vBannerLine: int | string | Text
-    ): Text | null;
+      vInfoSection: int | string | Control
+    ): Control | null;
     /**
      * Sets a new value for property {@link #getDataTimestamp dataTimestamp}.
      *
@@ -2157,7 +2150,7 @@ declare module "sap/f/cards/BaseHeader" {
      *
      * Default value is `empty string`.
      *
-     * @experimental As of version 1.89. this feature is experimental and the API may change.
+     * @experimental As of version 1.89.
      *
      * @returns Reference to `this` in order to allow method chaining
      */
@@ -2168,23 +2161,6 @@ declare module "sap/f/cards/BaseHeader" {
       sDataTimestamp?: string
     ): this;
     /**
-     * Sets a new value for property {@link #getHref href}.
-     *
-     * Defines the href which the header should open. If set - the header will act and render as a link.
-     *
-     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
-     *
-     * @experimental As of version 1.122. Do not use this feature outside of sap.ui.integration.widgets.Card.
-     *
-     * @returns Reference to `this` in order to allow method chaining
-     */
-    setHref(
-      /**
-       * New value for property `href`
-       */
-      sHref: string
-    ): this;
-    /**
      * Sets a new value for property {@link #getStatusVisible statusVisible}.
      *
      * Defines the status text visibility.
@@ -2193,7 +2169,7 @@ declare module "sap/f/cards/BaseHeader" {
      *
      * Default value is `true`.
      *
-     * @experimental As of version 1.116. this feature is experimental and the API may change.
+     * @experimental As of version 1.116.
      *
      * @returns Reference to `this` in order to allow method chaining
      */
@@ -2204,26 +2180,8 @@ declare module "sap/f/cards/BaseHeader" {
       bStatusVisible?: boolean
     ): this;
     /**
-     * Sets a new value for property {@link #getTarget target}.
-     *
-     * Defines the target for the case when `href` is given.
-     *
-     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
-     *
-     * @experimental As of version 1.122. Do not use this feature outside of sap.ui.integration.widgets.Card.
-     *
-     * @returns Reference to `this` in order to allow method chaining
-     */
-    setTarget(
-      /**
-       * New value for property `target`
-       */
-      sTarget: string
-    ): this;
-    /**
      * Sets the aggregated {@link #getToolbar toolbar}.
      *
-     * @since 1.86
      * @experimental As of version 1.86.
      *
      * @returns Reference to `this` in order to allow method chaining
@@ -2244,7 +2202,7 @@ declare module "sap/f/cards/BaseHeader" {
      *
      * Default value is `Normal`.
      *
-     * @experimental As of version 1.122. this feature is experimental and the API may change.
+     * @experimental As of version 1.122.
      *
      * @returns Reference to `this` in order to allow method chaining
      */
@@ -2267,14 +2225,14 @@ declare module "sap/f/cards/BaseHeader" {
      *
      * Will be shown as a relative time like "5 minutes ago".
      *
-     * @experimental As of version 1.89. this feature is experimental and the API may change.
+     * @experimental As of version 1.89.
      */
     dataTimestamp?: string | PropertyBindingInfo;
 
     /**
      * Defines the status text visibility.
      *
-     * @experimental As of version 1.116. this feature is experimental and the API may change.
+     * @experimental As of version 1.116.
      */
     statusVisible?: boolean | PropertyBindingInfo | `{${string}}`;
 
@@ -2282,7 +2240,7 @@ declare module "sap/f/cards/BaseHeader" {
      * Defines the type of text wrapping to be used inside the header. This applies to title, subtitle and details
      * texts of the header.
      *
-     * @experimental As of version 1.122. this feature is experimental and the API may change.
+     * @experimental As of version 1.122.
      */
     wrappingType?:
       | (WrappingType | keyof typeof WrappingType)
@@ -2290,34 +2248,18 @@ declare module "sap/f/cards/BaseHeader" {
       | `{${string}}`;
 
     /**
-     * Defines the href which the header should open. If set - the header will act and render as a link.
+     * Info sections to be displayed in the header.
      *
-     * @experimental As of version 1.122. Do not use this feature outside of sap.ui.integration.widgets.Card.
+     * @experimental As of version 1.136.
      */
-    href?: string | PropertyBindingInfo;
-
-    /**
-     * Defines the target for the case when `href` is given.
-     *
-     * @experimental As of version 1.122. Do not use this feature outside of sap.ui.integration.widgets.Card.
-     */
-    target?: string | PropertyBindingInfo;
+    infoSection?: Control[] | Control | AggregationBindingInfo | `{${string}}`;
 
     /**
      * Defines the toolbar.
      *
-     * @since 1.86
      * @experimental As of version 1.86.
      */
     toolbar?: Control;
-
-    /**
-     * Show as a banner in the header area. Use for example for system info and application shortcut.
-     *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
-     */
-    bannerLines?: Text[] | Text | AggregationBindingInfo | `{${string}}`;
 
     /**
      * Fires when the user presses the control.
@@ -2645,7 +2587,7 @@ declare module "sap/f/cards/Header" {
 
   import AvatarSize from "sap/m/AvatarSize";
 
-  import { URI } from "sap/ui/core/library";
+  import { URI, ValueState } from "sap/ui/core/library";
 
   import ElementMetadata from "sap/ui/core/ElementMetadata";
 
@@ -2753,7 +2695,7 @@ declare module "sap/f/cards/Header" {
      *
      * Default value is `empty string`.
      *
-     * @experimental As of version 1.81. this feature is experimental and the API may change.
+     * @experimental As of version 1.81.
      *
      * @returns Value of property `iconAlt`
      */
@@ -2765,7 +2707,7 @@ declare module "sap/f/cards/Header" {
      *
      * Default value is `Transparent`.
      *
-     * @experimental As of version 1.83. this feature is experimental and the API may change.
+     * @experimental As of version 1.83.
      *
      * @returns Value of property `iconBackgroundColor`
      */
@@ -2811,7 +2753,7 @@ declare module "sap/f/cards/Header" {
      *
      * Default value is `S`.
      *
-     * @experimental As of version 1.119. this feature is experimental and the API may change.
+     * @experimental As of version 1.119.
      *
      * @returns Value of property `iconSize`
      */
@@ -2828,13 +2770,25 @@ declare module "sap/f/cards/Header" {
      */
     getIconSrc(): URI;
     /**
+     * Gets current value of property {@link #getIconState iconState}.
+     *
+     * Defines a status-colored, non-interactive message icon in the icon area.
+     *
+     * Default value is `None`.
+     *
+     * @since 1.141
+     *
+     * @returns Value of property `iconState`
+     */
+    getIconState(): ValueState;
+    /**
      * Gets current value of property {@link #getIconVisible iconVisible}.
      *
      * Defines whether the card icon is visible.
      *
      * Default value is `true`.
      *
-     * @experimental As of version 1.83. this feature is experimental and the API may change.
+     * @experimental As of version 1.83.
      *
      * @returns Value of property `iconVisible`
      */
@@ -2905,7 +2859,7 @@ declare module "sap/f/cards/Header" {
      *
      * Default value is `empty string`.
      *
-     * @experimental As of version 1.81. this feature is experimental and the API may change.
+     * @experimental As of version 1.81.
      *
      * @returns Reference to `this` in order to allow method chaining
      */
@@ -2924,7 +2878,7 @@ declare module "sap/f/cards/Header" {
      *
      * Default value is `Transparent`.
      *
-     * @experimental As of version 1.83. this feature is experimental and the API may change.
+     * @experimental As of version 1.83.
      *
      * @returns Reference to `this` in order to allow method chaining
      */
@@ -2998,7 +2952,7 @@ declare module "sap/f/cards/Header" {
      *
      * Default value is `S`.
      *
-     * @experimental As of version 1.119. this feature is experimental and the API may change.
+     * @experimental As of version 1.119.
      *
      * @returns Reference to `this` in order to allow method chaining
      */
@@ -3027,6 +2981,25 @@ declare module "sap/f/cards/Header" {
       sIconSrc?: URI
     ): this;
     /**
+     * Sets a new value for property {@link #getIconState iconState}.
+     *
+     * Defines a status-colored, non-interactive message icon in the icon area.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `None`.
+     *
+     * @since 1.141
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setIconState(
+      /**
+       * New value for property `iconState`
+       */
+      sIconState?: ValueState | keyof typeof ValueState
+    ): this;
+    /**
      * Sets a new value for property {@link #getIconVisible iconVisible}.
      *
      * Defines whether the card icon is visible.
@@ -3035,7 +3008,7 @@ declare module "sap/f/cards/Header" {
      *
      * Default value is `true`.
      *
-     * @experimental As of version 1.83. this feature is experimental and the API may change.
+     * @experimental As of version 1.83.
      *
      * @returns Reference to `this` in order to allow method chaining
      */
@@ -3198,14 +3171,14 @@ declare module "sap/f/cards/Header" {
     /**
      * Defines an alt text for the avatar or icon.
      *
-     * @experimental As of version 1.81. this feature is experimental and the API may change.
+     * @experimental As of version 1.81.
      */
     iconAlt?: string | PropertyBindingInfo;
 
     /**
      * Defines a background color for the avatar or icon.
      *
-     * @experimental As of version 1.83. this feature is experimental and the API may change.
+     * @experimental As of version 1.83.
      */
     iconBackgroundColor?:
       | (AvatarColor | keyof typeof AvatarColor)
@@ -3215,14 +3188,14 @@ declare module "sap/f/cards/Header" {
     /**
      * Defines whether the card icon is visible.
      *
-     * @experimental As of version 1.83. this feature is experimental and the API may change.
+     * @experimental As of version 1.83.
      */
     iconVisible?: boolean | PropertyBindingInfo | `{${string}}`;
 
     /**
      * Defines the size of the icon.
      *
-     * @experimental As of version 1.119. this feature is experimental and the API may change.
+     * @experimental As of version 1.119.
      */
     iconSize?:
       | (AvatarSize | keyof typeof AvatarSize)
@@ -3236,6 +3209,16 @@ declare module "sap/f/cards/Header" {
      */
     iconFitType?:
       | (AvatarImageFitType | keyof typeof AvatarImageFitType)
+      | PropertyBindingInfo
+      | `{${string}}`;
+
+    /**
+     * Defines a status-colored, non-interactive message icon in the icon area.
+     *
+     * @since 1.141
+     */
+    iconState?:
+      | (ValueState | keyof typeof ValueState)
       | PropertyBindingInfo
       | `{${string}}`;
   }
@@ -3296,12 +3279,6 @@ declare module "sap/f/cards/NumericHeader" {
   import NumericSideIndicator from "sap/f/cards/NumericSideIndicator";
 
   import Control from "sap/ui/core/Control";
-
-  import { ValueState, URI } from "sap/ui/core/library";
-
-  import AvatarColor from "sap/m/AvatarColor";
-
-  import AvatarShape from "sap/m/AvatarShape";
 
   import AvatarImageFitType from "sap/m/AvatarImageFitType";
 
@@ -3466,58 +3443,6 @@ declare module "sap/f/cards/NumericHeader" {
      */
     getDetailsMaxLines(): int;
     /**
-     * Gets current value of property {@link #getDetailsState detailsState}.
-     *
-     * The semantic color which represents the state of the details text.
-     *
-     * Default value is `None`.
-     *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
-     *
-     * @returns Value of property `detailsState`
-     */
-    getDetailsState(): ValueState;
-    /**
-     * Gets current value of property {@link #getIconAlt iconAlt}.
-     *
-     * Defines an alt text for the avatar or icon.
-     *
-     * Default value is `empty string`.
-     *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
-     *
-     * @returns Value of property `iconAlt`
-     */
-    getIconAlt(): string;
-    /**
-     * Gets current value of property {@link #getIconBackgroundColor iconBackgroundColor}.
-     *
-     * Defines a background color for the avatar or icon.
-     *
-     * Default value is `Transparent`.
-     *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
-     *
-     * @returns Value of property `iconBackgroundColor`
-     */
-    getIconBackgroundColor(): AvatarColor;
-    /**
-     * Gets current value of property {@link #getIconDisplayShape iconDisplayShape}.
-     *
-     * Defines the shape of the icon.
-     *
-     * Default value is `Circle`.
-     *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
-     *
-     * @returns Value of property `iconDisplayShape`
-     */
-    getIconDisplayShape(): AvatarShape;
-    /**
      * Gets current value of property {@link #getIconFitType iconFitType}.
      *
      * Defines how the image fits in the icon area.
@@ -3530,56 +3455,17 @@ declare module "sap/f/cards/NumericHeader" {
      */
     getIconFitType(): AvatarImageFitType;
     /**
-     * Gets current value of property {@link #getIconInitials iconInitials}.
-     *
-     * Defines the initials of the icon.
-     *
-     * Default value is `empty string`.
-     *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
-     *
-     * @returns Value of property `iconInitials`
-     */
-    getIconInitials(): string;
-    /**
      * Gets current value of property {@link #getIconSize iconSize}.
      *
      * Defines the size of the icon.
      *
      * Default value is `S`.
      *
-     * @experimental As of version 1.119. this feature is experimental and the API may change.
+     * @experimental As of version 1.119.
      *
      * @returns Value of property `iconSize`
      */
     getIconSize(): AvatarSize;
-    /**
-     * Gets current value of property {@link #getIconSrc iconSrc}.
-     *
-     * Defines the icon source.
-     *
-     * Default value is `empty string`.
-     *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
-     *
-     * @returns Value of property `iconSrc`
-     */
-    getIconSrc(): URI;
-    /**
-     * Gets current value of property {@link #getIconVisible iconVisible}.
-     *
-     * Defines whether the card icon is visible.
-     *
-     * Default value is `true`.
-     *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
-     *
-     * @returns Value of property `iconVisible`
-     */
-    getIconVisible(): boolean;
     /**
      * Gets content of aggregation {@link #getMicroChart microChart}.
      *
@@ -3601,7 +3487,7 @@ declare module "sap/f/cards/NumericHeader" {
     /**
      * Gets current value of property {@link #getNumberSize numberSize}.
      *
-     * The size of the of the main indicator. Possible values are "S" and "L".
+     * The size of the main indicator. Possible values are "S" and "L".
      *
      * Default value is `"L"`.
      *
@@ -3657,8 +3543,7 @@ declare module "sap/f/cards/NumericHeader" {
      *
      * Default value is `"Neutral"`.
      *
-     * @experimental As of version 1.64. Disclaimer: this property is in a beta state - incompatible API changes
-     * may be done before its official public release. Use at your own discretion.
+     * @experimental As of version 1.64.
      *
      * @returns Value of property `state`
      */
@@ -3824,86 +3709,6 @@ declare module "sap/f/cards/NumericHeader" {
       iDetailsMaxLines?: int
     ): this;
     /**
-     * Sets a new value for property {@link #getDetailsState detailsState}.
-     *
-     * The semantic color which represents the state of the details text.
-     *
-     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
-     *
-     * Default value is `None`.
-     *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
-     *
-     * @returns Reference to `this` in order to allow method chaining
-     */
-    setDetailsState(
-      /**
-       * New value for property `detailsState`
-       */
-      sDetailsState?: ValueState | keyof typeof ValueState
-    ): this;
-    /**
-     * Sets a new value for property {@link #getIconAlt iconAlt}.
-     *
-     * Defines an alt text for the avatar or icon.
-     *
-     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
-     *
-     * Default value is `empty string`.
-     *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
-     *
-     * @returns Reference to `this` in order to allow method chaining
-     */
-    setIconAlt(
-      /**
-       * New value for property `iconAlt`
-       */
-      sIconAlt?: string
-    ): this;
-    /**
-     * Sets a new value for property {@link #getIconBackgroundColor iconBackgroundColor}.
-     *
-     * Defines a background color for the avatar or icon.
-     *
-     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
-     *
-     * Default value is `Transparent`.
-     *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
-     *
-     * @returns Reference to `this` in order to allow method chaining
-     */
-    setIconBackgroundColor(
-      /**
-       * New value for property `iconBackgroundColor`
-       */
-      sIconBackgroundColor?: AvatarColor | keyof typeof AvatarColor
-    ): this;
-    /**
-     * Sets a new value for property {@link #getIconDisplayShape iconDisplayShape}.
-     *
-     * Defines the shape of the icon.
-     *
-     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
-     *
-     * Default value is `Circle`.
-     *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
-     *
-     * @returns Reference to `this` in order to allow method chaining
-     */
-    setIconDisplayShape(
-      /**
-       * New value for property `iconDisplayShape`
-       */
-      sIconDisplayShape?: AvatarShape | keyof typeof AvatarShape
-    ): this;
-    /**
      * Sets a new value for property {@link #getIconFitType iconFitType}.
      *
      * Defines how the image fits in the icon area.
@@ -3923,26 +3728,6 @@ declare module "sap/f/cards/NumericHeader" {
       sIconFitType?: AvatarImageFitType | keyof typeof AvatarImageFitType
     ): this;
     /**
-     * Sets a new value for property {@link #getIconInitials iconInitials}.
-     *
-     * Defines the initials of the icon.
-     *
-     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
-     *
-     * Default value is `empty string`.
-     *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
-     *
-     * @returns Reference to `this` in order to allow method chaining
-     */
-    setIconInitials(
-      /**
-       * New value for property `iconInitials`
-       */
-      sIconInitials?: string
-    ): this;
-    /**
      * Sets a new value for property {@link #getIconSize iconSize}.
      *
      * Defines the size of the icon.
@@ -3951,7 +3736,7 @@ declare module "sap/f/cards/NumericHeader" {
      *
      * Default value is `S`.
      *
-     * @experimental As of version 1.119. this feature is experimental and the API may change.
+     * @experimental As of version 1.119.
      *
      * @returns Reference to `this` in order to allow method chaining
      */
@@ -3960,46 +3745,6 @@ declare module "sap/f/cards/NumericHeader" {
        * New value for property `iconSize`
        */
       sIconSize?: AvatarSize | keyof typeof AvatarSize
-    ): this;
-    /**
-     * Sets a new value for property {@link #getIconSrc iconSrc}.
-     *
-     * Defines the icon source.
-     *
-     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
-     *
-     * Default value is `empty string`.
-     *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
-     *
-     * @returns Reference to `this` in order to allow method chaining
-     */
-    setIconSrc(
-      /**
-       * New value for property `iconSrc`
-       */
-      sIconSrc?: URI
-    ): this;
-    /**
-     * Sets a new value for property {@link #getIconVisible iconVisible}.
-     *
-     * Defines whether the card icon is visible.
-     *
-     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
-     *
-     * Default value is `true`.
-     *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
-     *
-     * @returns Reference to `this` in order to allow method chaining
-     */
-    setIconVisible(
-      /**
-       * New value for property `iconVisible`
-       */
-      bIconVisible?: boolean
     ): this;
     /**
      * Sets the aggregated {@link #getMicroChart microChart}.
@@ -4034,7 +3779,7 @@ declare module "sap/f/cards/NumericHeader" {
     /**
      * Sets a new value for property {@link #getNumberSize numberSize}.
      *
-     * The size of the of the main indicator. Possible values are "S" and "L".
+     * The size of the main indicator. Possible values are "S" and "L".
      *
      * When called with a value of `null` or `undefined`, the default value of the property will be restored.
      *
@@ -4115,8 +3860,7 @@ declare module "sap/f/cards/NumericHeader" {
      *
      * Default value is `"Neutral"`.
      *
-     * @experimental As of version 1.64. Disclaimer: this property is in a beta state - incompatible API changes
-     * may be done before its official public release. Use at your own discretion.
+     * @experimental As of version 1.64.
      *
      * @returns Reference to `this` in order to allow method chaining
      */
@@ -4289,63 +4033,9 @@ declare module "sap/f/cards/NumericHeader" {
     statusText?: string | PropertyBindingInfo;
 
     /**
-     * Defines the shape of the icon.
-     *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
-     */
-    iconDisplayShape?:
-      | (AvatarShape | keyof typeof AvatarShape)
-      | PropertyBindingInfo
-      | `{${string}}`;
-
-    /**
-     * Defines the icon source.
-     *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
-     */
-    iconSrc?: URI | PropertyBindingInfo | `{${string}}`;
-
-    /**
-     * Defines the initials of the icon.
-     *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
-     */
-    iconInitials?: string | PropertyBindingInfo;
-
-    /**
-     * Defines an alt text for the avatar or icon.
-     *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
-     */
-    iconAlt?: string | PropertyBindingInfo;
-
-    /**
-     * Defines a background color for the avatar or icon.
-     *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
-     */
-    iconBackgroundColor?:
-      | (AvatarColor | keyof typeof AvatarColor)
-      | PropertyBindingInfo
-      | `{${string}}`;
-
-    /**
-     * Defines whether the card icon is visible.
-     *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
-     */
-    iconVisible?: boolean | PropertyBindingInfo | `{${string}}`;
-
-    /**
      * Defines the size of the icon.
      *
-     * @experimental As of version 1.119. this feature is experimental and the API may change.
+     * @experimental As of version 1.119.
      */
     iconSize?:
       | (AvatarSize | keyof typeof AvatarSize)
@@ -4374,7 +4064,7 @@ declare module "sap/f/cards/NumericHeader" {
     number?: string | PropertyBindingInfo;
 
     /**
-     * The size of the of the main indicator. Possible values are "S" and "L".
+     * The size of the main indicator. Possible values are "S" and "L".
      */
     numberSize?: string | PropertyBindingInfo;
 
@@ -4403,8 +4093,7 @@ declare module "sap/f/cards/NumericHeader" {
     /**
      * The semantic color which represents the state of the main number indicator.
      *
-     * @experimental As of version 1.64. Disclaimer: this property is in a beta state - incompatible API changes
-     * may be done before its official public release. Use at your own discretion.
+     * @experimental As of version 1.64.
      */
     state?:
       | (ValueColor | keyof typeof ValueColor)
@@ -4415,17 +4104,6 @@ declare module "sap/f/cards/NumericHeader" {
      * Additional text which adds more details to what is shown in the numeric header.
      */
     details?: string | PropertyBindingInfo;
-
-    /**
-     * The semantic color which represents the state of the details text.
-     *
-     * @since 1.118
-     * @experimental As of version 1.118. For usage only by Work Zone.
-     */
-    detailsState?:
-      | (ValueState | keyof typeof ValueState)
-      | PropertyBindingInfo
-      | `{${string}}`;
 
     /**
      * Limits the number of lines for the details.
@@ -4557,8 +4235,7 @@ declare module "sap/f/cards/NumericSideIndicator" {
      *
      * Default value is `"None"`.
      *
-     * @experimental As of version 1.95. Disclaimer: this property is in a beta state - incompatible API changes
-     * may be done before its official public release. Use at your own discretion.
+     * @experimental As of version 1.95.
      *
      * @returns Value of property `state`
      */
@@ -4602,8 +4279,7 @@ declare module "sap/f/cards/NumericSideIndicator" {
      *
      * Default value is `"None"`.
      *
-     * @experimental As of version 1.95. Disclaimer: this property is in a beta state - incompatible API changes
-     * may be done before its official public release. Use at your own discretion.
+     * @experimental As of version 1.95.
      *
      * @returns Reference to `this` in order to allow method chaining
      */
@@ -4660,8 +4336,7 @@ declare module "sap/f/cards/NumericSideIndicator" {
     /**
      * The semantic color which represents the state of the side indicator.
      *
-     * @experimental As of version 1.95. Disclaimer: this property is in a beta state - incompatible API changes
-     * may be done before its official public release. Use at your own discretion.
+     * @experimental As of version 1.95.
      */
     state?:
       | (ValueColor | keyof typeof ValueColor)
@@ -4857,7 +4532,10 @@ declare module "sap/f/DynamicPage" {
 
   import DynamicPageTitle from "sap/f/DynamicPageTitle";
 
-  import { IDynamicPageStickyContent } from "sap/f/library";
+  import {
+    IDynamicPageStickyContent,
+    DynamicPageMediaRange,
+  } from "sap/f/library";
 
   import { PropertyBindingInfo } from "sap/ui/base/ManagedObject";
 
@@ -4982,6 +4660,59 @@ declare module "sap/f/DynamicPage" {
      */
     static getMetadata(): ElementMetadata;
     /**
+     * Attaches event handler `fnFunction` to the {@link #event:breakpointChange breakpointChange} event of
+     * this `sap.f.DynamicPage`.
+     *
+     * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
+     * otherwise it will be bound to this `sap.f.DynamicPage` itself.
+     *
+     * The event is fired when the media breakpoint changes. Applications can use this event to adjust content
+     * based on the current screen size.
+     *
+     * @since 1.147
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    attachBreakpointChange(
+      /**
+       * An application-specific payload object that will be passed to the event handler along with the event
+       * object when firing the event
+       */
+      oData: object,
+      /**
+       * The function to be called when the event occurs
+       */
+      fnFunction: (p1: DynamicPage$BreakpointChangeEvent) => void,
+      /**
+       * Context object to call the event handler with. Defaults to this `sap.f.DynamicPage` itself
+       */
+      oListener?: object
+    ): this;
+    /**
+     * Attaches event handler `fnFunction` to the {@link #event:breakpointChange breakpointChange} event of
+     * this `sap.f.DynamicPage`.
+     *
+     * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
+     * otherwise it will be bound to this `sap.f.DynamicPage` itself.
+     *
+     * The event is fired when the media breakpoint changes. Applications can use this event to adjust content
+     * based on the current screen size.
+     *
+     * @since 1.147
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    attachBreakpointChange(
+      /**
+       * The function to be called when the event occurs
+       */
+      fnFunction: (p1: DynamicPage$BreakpointChangeEvent) => void,
+      /**
+       * Context object to call the event handler with. Defaults to this `sap.f.DynamicPage` itself
+       */
+      oListener?: object
+    ): this;
+    /**
      * Attaches event handler `fnFunction` to the {@link #event:pinnedStateChange pinnedStateChange} event of
      * this `sap.f.DynamicPage`.
      *
@@ -5069,6 +4800,26 @@ declare module "sap/f/DynamicPage" {
      */
     destroyTitle(): this;
     /**
+     * Detaches event handler `fnFunction` from the {@link #event:breakpointChange breakpointChange} event of
+     * this `sap.f.DynamicPage`.
+     *
+     * The passed function and listener object must match the ones used for event registration.
+     *
+     * @since 1.147
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    detachBreakpointChange(
+      /**
+       * The function to be called, when the event occurs
+       */
+      fnFunction: (p1: DynamicPage$BreakpointChangeEvent) => void,
+      /**
+       * Context object on which the given function had to be called
+       */
+      oListener?: object
+    ): this;
+    /**
      * Detaches event handler `fnFunction` from the {@link #event:pinnedStateChange pinnedStateChange} event
      * of this `sap.f.DynamicPage`.
      *
@@ -5087,6 +4838,20 @@ declare module "sap/f/DynamicPage" {
        * Context object on which the given function had to be called
        */
       oListener?: object
+    ): this;
+    /**
+     * Fires event {@link #event:breakpointChange breakpointChange} to attached listeners.
+     *
+     * @since 1.147
+     * @ui5-protected Do not call from applications (only from related classes in the framework)
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    fireBreakpointChange(
+      /**
+       * Parameters to pass along with the event
+       */
+      mParameters?: DynamicPage$BreakpointChangeEventParameters
     ): this;
     /**
      * Fires event {@link #event:pinnedStateChange pinnedStateChange} to attached listeners.
@@ -5684,7 +5449,38 @@ declare module "sap/f/DynamicPage" {
      * @since 1.93
      */
     pinnedStateChange?: (oEvent: DynamicPage$PinnedStateChangeEvent) => void;
+
+    /**
+     * The event is fired when the media breakpoint changes. Applications can use this event to adjust content
+     * based on the current screen size.
+     *
+     * @since 1.147
+     */
+    breakpointChange?: (oEvent: DynamicPage$BreakpointChangeEvent) => void;
   }
+
+  /**
+   * Parameters of the DynamicPage#breakpointChange event.
+   */
+  export interface DynamicPage$BreakpointChangeEventParameters {
+    /**
+     * The current media range as defined by {@link sap.f.DynamicPageMediaRange}.
+     */
+    currentRange?: DynamicPageMediaRange | keyof typeof DynamicPageMediaRange;
+
+    /**
+     * The current width of the control in pixels.
+     */
+    currentWidth?: int;
+  }
+
+  /**
+   * Event object of the DynamicPage#breakpointChange event.
+   */
+  export type DynamicPage$BreakpointChangeEvent = Event<
+    DynamicPage$BreakpointChangeEventParameters,
+    DynamicPage
+  >;
 
   /**
    * Parameters of the DynamicPage#pinnedStateChange event.
@@ -6798,8 +6594,8 @@ declare module "sap/f/DynamicPageTitle" {
      * Gets content of aggregation {@link #getActions actions}.
      *
      * The `DynamicPageTitle` actions.
-     * **Note:** The `actions` aggregation accepts any UI5 control, but it`s recommended to use controls, suitable
-     * for {@link sap.m.Toolbar} and {@link sap.m.OverflowToolbar}.
+     * **Note:** The `actions` aggregation accepts any UI5 control. However, it is best to use buttons or controls
+     * that work well inside toolbars, such as those typically used with {@link sap.m.Toolbar} and {@link sap.m.OverflowToolbar}.
      *
      * **Note:** If the `snappedTitleOnMobile` aggregation is set, its content overrides this aggregation when
      * the control is viewed on a phone mobile device and the `DynamicPageHeader` is in its collapsed (snapped)
@@ -7514,8 +7310,8 @@ declare module "sap/f/DynamicPageTitle" {
 
     /**
      * The `DynamicPageTitle` actions.
-     * **Note:** The `actions` aggregation accepts any UI5 control, but it`s recommended to use controls, suitable
-     * for {@link sap.m.Toolbar} and {@link sap.m.OverflowToolbar}.
+     * **Note:** The `actions` aggregation accepts any UI5 control. However, it is best to use buttons or controls
+     * that work well inside toolbars, such as those typically used with {@link sap.m.Toolbar} and {@link sap.m.OverflowToolbar}.
      *
      * **Note:** If the `snappedTitleOnMobile` aggregation is set, its content overrides this aggregation when
      * the control is viewed on a phone mobile device and the `DynamicPageHeader` is in its collapsed (snapped)
@@ -10721,7 +10517,7 @@ declare module "sap/f/FlexibleColumnLayoutData" {
 
   /**
    * Holds layout data for `sap.f.FlexibleColumnLayout`. Allows LayoutData of type `sap.f.FlexibleColumnLayoutDataForDesktop`
-   * or `sap.f.FlexibleColumnLayoutFlexibleColumnLayoutDataForTablet`
+   * or `sap.f.FlexibleColumnLayoutDataForTablet`
    *
    * @since 1.128
    */
@@ -14572,9 +14368,9 @@ declare module "sap/f/ProductSwitch" {
 declare module "sap/f/ProductSwitchItem" {
   import { default as Control, $ControlSettings } from "sap/ui/core/Control";
 
-  import ElementMetadata from "sap/ui/core/ElementMetadata";
-
   import { URI } from "sap/ui/core/library";
+
+  import ElementMetadata from "sap/ui/core/ElementMetadata";
 
   import { PropertyBindingInfo } from "sap/ui/base/ManagedObject";
 
@@ -14649,6 +14445,18 @@ declare module "sap/f/ProductSwitchItem" {
      */
     static getMetadata(): ElementMetadata;
     /**
+     * Gets current value of property {@link #getImageSrc imageSrc}.
+     *
+     * Defines the image to be displayed as graphical element within the `ProductSwitchItem`.
+     *
+     * **Note:** This property takes precedence over the `src` property.
+     *
+     * @since 1.140
+     *
+     * @returns Value of property `imageSrc`
+     */
+    getImageSrc(): URI;
+    /**
      * Gets current value of property {@link #getSrc src}.
      *
      * Defines the icon to be displayed as graphical element within the `ProductSwitchItem`. It can be an icon
@@ -14700,6 +14508,25 @@ declare module "sap/f/ProductSwitchItem" {
      * @returns Value of property `title`
      */
     getTitle(): string;
+    /**
+     * Sets a new value for property {@link #getImageSrc imageSrc}.
+     *
+     * Defines the image to be displayed as graphical element within the `ProductSwitchItem`.
+     *
+     * **Note:** This property takes precedence over the `src` property.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * @since 1.140
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setImageSrc(
+      /**
+       * New value for property `imageSrc`
+       */
+      sImageSrc?: URI
+    ): this;
     /**
      * Sets a new value for property {@link #getSrc src}.
      *
@@ -14799,6 +14626,15 @@ declare module "sap/f/ProductSwitchItem" {
     src?: URI | PropertyBindingInfo | `{${string}}`;
 
     /**
+     * Defines the image to be displayed as graphical element within the `ProductSwitchItem`.
+     *
+     * **Note:** This property takes precedence over the `src` property.
+     *
+     * @since 1.140
+     */
+    imageSrc?: URI | PropertyBindingInfo | `{${string}}`;
+
+    /**
      * Determines the title of the `ProductSwitchItem`.
      */
     title?: string | PropertyBindingInfo;
@@ -14836,16 +14672,24 @@ declare module "sap/f/routing/Router" {
   import TargetHandler from "sap/f/routing/TargetHandler";
 
   /**
-   * The `sap.f.routing.Router` class is intended to be used with `{@link sap.f.FlexibleColumnLayout}` as
-   * a root control.
+   * The `sap.f.routing.Router` extends the capabilities of the standard `{@link sap.ui.core.routing.Router}`
+   * to support flexible and responsive layouts based on `{@link sap.f.FlexibleColumnLayout}` as the root
+   * control.
    *
-   * The difference to the `{@link sap.ui.core.routing.Router}` are the `level`, `transition`, and `transitionParameters`
-   * properties that you can specify in every Route or Target created by this router.
+   * This router enables advanced navigation scenarios tailored to flexible column layouts, such as changing
+   * both the layout type (e.g., OneColumn, TwoColumnsMidExpanded) and the currently displayed views within
+   * individual columns.
    *
-   * The difference to the `{@link sap.m.routing.Router}` is the additional `layout` property that can be
-   * specified in every Route, in which case it is applied to the root control. Also, the `sap.f.routing.Router`
-   * supports navigations that involve both change of `{@link sap.f.LayoutType}` and change of the current
-   * page within a single column of the `sap.f.FlexibleColumnLayout`.
+   * Compared to `{@link sap.ui.core.routing.Router}`, it adds support for additional target properties:
+   *
+   * 	 - `level`: Defines the hierarchical level of the target view for proper history and back navigation
+   *     handling
+   * 	 - `transition`: Specifies the type of transition animation between views (e.g., `slide`, `fade`)
+   * 	 - `transitionParameters`: Custom parameters for transitions
+   *
+   * Compared to `{@link sap.m.routing.Router}`, it further introduces a `layout` property on each route,
+   * allowing you to define the desired `{@link sap.f.LayoutType}` to be applied to the `FlexibleColumnLayout`
+   * root control during navigation.
    *
    * See `{@link sap.ui.core.routing.Router}` for the constructor arguments.
    *
@@ -18658,7 +18502,7 @@ declare module "sap/f/semantic/SemanticPage" {
     /**
      * Gets content of aggregation {@link #getLandmarkInfo landmarkInfo}.
      *
-     * Accessible landmark settings to be applied to the containers of the `sap.f.SemanticPage` control.
+     * Accessible landmark settings to be applied to the containers of the `sap.f.semantic.SemanticPage` control.
      *
      * If not set, no landmarks will be written.
      *
@@ -20386,7 +20230,7 @@ declare module "sap/f/semantic/SemanticPage" {
       | `{${string}}`;
 
     /**
-     * Accessible landmark settings to be applied to the containers of the `sap.f.SemanticPage` control.
+     * Accessible landmark settings to be applied to the containers of the `sap.f.semantic.SemanticPage` control.
      *
      * If not set, no landmarks will be written.
      *
@@ -20861,8 +20705,6 @@ declare module "sap/f/ShellBar" {
 
   import { IBar } from "sap/m/library";
 
-  import { IToolHeader } from "sap/tnt/library";
-
   import { BarContexts } from "sap/m/BarInPageEnabler";
 
   import { URI } from "sap/ui/core/library";
@@ -20887,6 +20729,13 @@ declare module "sap/f/ShellBar" {
   import Button from "sap/m/Button";
 
   /**
+   * **Note:** `sap.f.ShellBar` is not UXC-compliant and will no longer be aligned with future UXC design
+   * updates. For UXC-compliant applications, use the ui5-shellbar web component instead. It can be integrated
+   * seamlessly using ui5-tooling-modules. See {@link https://ui5.sap.com/#/topic/1c80793df5bb424091954697fc0b2828 Using Web Components}.
+   *
+   *
+   *
+   *
    * A horizontal bar control holding multiple child controls used as application shell header.
    *
    * Overview:
@@ -20901,13 +20750,9 @@ declare module "sap/f/ShellBar" {
    *
    * @since 1.63
    */
-  export default class ShellBar
-    extends Control
-    implements IShellBar, IBar, IToolHeader
-  {
+  export default class ShellBar extends Control implements IShellBar, IBar {
     __implements__sap_f_IShellBar: boolean;
     __implements__sap_m_IBar: boolean;
-    __implements__sap_tnt_IToolHeader: boolean;
     /**
      * Constructor for a new `ShellBar`.
      *
@@ -23281,6 +23126,8 @@ declare module "sap/f/SidePanelItem" {
 
   import ElementMetadata from "sap/ui/core/ElementMetadata";
 
+  import Title from "sap/m/Title";
+
   import {
     PropertyBindingInfo,
     AggregationBindingInfo,
@@ -23376,6 +23223,14 @@ declare module "sap/f/SidePanelItem" {
      */
     destroyContent(): this;
     /**
+     * Destroys the title in the aggregation {@link #getTitle title}.
+     *
+     * @since 1.146
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    destroyTitle(): this;
+    /**
      * Gets content of aggregation {@link #getContent content}.
      *
      * The list of controls for side content of the action item.
@@ -23392,6 +23247,14 @@ declare module "sap/f/SidePanelItem" {
      * @returns Value of property `icon`
      */
     getIcon(): URI;
+    /**
+     * Gets content of aggregation {@link #getTitle title}.
+     *
+     * The title of the action item. If not set, the title of the parent side panel will be used.
+     *
+     * @since 1.146
+     */
+    getTitle(): Title;
     /**
      * Checks for the provided `sap.ui.core.Control` in the aggregation {@link #getContent content}. and returns
      * its index if found or -1 otherwise.
@@ -23462,6 +23325,19 @@ declare module "sap/f/SidePanelItem" {
        */
       sIcon?: URI
     ): this;
+    /**
+     * Sets the aggregated {@link #getTitle title}.
+     *
+     * @since 1.146
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setTitle(
+      /**
+       * The title to set
+       */
+      oTitle: Title
+    ): this;
   }
   /**
    * Describes the settings that can be provided to the SidePanelItem constructor.
@@ -23471,6 +23347,13 @@ declare module "sap/f/SidePanelItem" {
      * Specifies the icon for the item.
      */
     icon?: URI | PropertyBindingInfo | `{${string}}`;
+
+    /**
+     * The title of the action item. If not set, the title of the parent side panel will be used.
+     *
+     * @since 1.146
+     */
+    title?: Title;
 
     /**
      * The list of controls for side content of the action item.

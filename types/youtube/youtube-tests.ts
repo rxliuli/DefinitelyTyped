@@ -1,3 +1,5 @@
+import * as YT from "youtube";
+
 const players: YT.Player[] = [
     new YT.Player(document.body, {}),
     new YT.Player(document.body, {
@@ -61,6 +63,9 @@ const players: YT.Player[] = [
                 const error: YT.PlayerError = event.data;
             },
             onApiChange(event: YT.PlayerEvent) {
+                const targetPlayer: YT.Player = event.target;
+            },
+            onAutoplayBlocked(event: YT.PlayerEvent) {
                 const targetPlayer: YT.Player = event.target;
             },
         },
@@ -291,3 +296,9 @@ const sphericalProperties: YT.SphericalProperties = player.getSphericalPropertie
 player.setSphericalProperties({ yaw: 1, pitch: 2, roll: 3, fov: 50, enableOrientationSensor: true });
 
 player.destroy();
+
+const videoData: YT.VideoData = player.getVideoData();
+
+ensureString<typeof videoData.video_id>();
+ensureString<typeof videoData.title>();
+ensureString<typeof videoData.author>();

@@ -14,6 +14,7 @@ const params: twig.Parameters = {
     name: value,
     options: value,
     href: value,
+    ref: value,
     async: value,
 };
 
@@ -92,7 +93,7 @@ twig.extend(Twig => {
             // this is a pattern used heavily in the library itself
             token.stack = Twig.expression.compile({
                 value: expression,
-            }).stack;
+            }).stack!;
 
             return token;
         },
@@ -100,7 +101,7 @@ twig.extend(Twig => {
         // Runs when the template is rendered
         parse(token, context, chain) {
             // parse the tokens into a value with the render context
-            const name = Twig.expression.parse.apply(this, [token.stack, context]);
+            const name = Twig.expression.parse.apply(this, [token.stack!, context]);
             const output = "";
 
             return {

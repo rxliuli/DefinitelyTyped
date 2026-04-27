@@ -1,4 +1,4 @@
-// For Library Version: 1.134.0
+// For Library Version: 1.147.0
 
 declare module "sap/f/library" {
   export interface IShellBar {
@@ -8,6 +8,353 @@ declare module "sap/f/library" {
   export interface IDynamicPageStickyContent {
     __implements__sap_f_IDynamicPageStickyContent: boolean;
   }
+}
+
+declare module "sap/m/p13n/Engine" {
+  import Control from "sap/ui/core/Control";
+
+  import { FilterStateItem } from "sap/m/p13n/FilterController";
+
+  import Event from "sap/ui/base/Event";
+
+  import Metadata from "sap/ui/base/Metadata";
+
+  import Popup from "sap/m/p13n/Popup";
+
+  import MetadataHelper from "sap/m/p13n/MetadataHelper";
+
+  import SelectionController from "sap/m/p13n/SelectionController";
+
+  /**
+   * The personalization state change event.
+   *
+   * @since 1.140.0
+   */
+  export type Engine$StateChangeEvent = {
+    /**
+     * Control for which the state change event was fired.
+     */
+    control?: Control;
+    /**
+     * Changed (delta) state of the control. The keys of the object refer to the controller keys used in the
+     * `Engine` registration. The values can be an array of any of the following types:
+     * 	 - {@link module:sap/m/p13n/Engine$StateChangeEventSelectionState StateChangeEventSelectionState}
+     * 	 - {@link module:sap/m/p13n/Engine$StateChangeEventSortState StateChangeEventSortState}
+     * 	 - {@link module:sap/m/p13n/Engine$StateChangeEventGroupState StateChangeEventGroupState}
+     * 	 - {@link module:sap/m/p13n/Engine$StateChangeEventFilterState StateChangeEventFilterState}
+     * 	 - Custom controller state definitions
+     */
+    state?: Record<
+      string,
+      | Engine$StateChangeEventSelectionState[]
+      | Engine$StateChangeEventSortState[]
+      | Engine$StateChangeEventGroupState[]
+      | Engine$StateChangeEventFilterState[]
+      | any[]
+    >;
+  };
+
+  /**
+   * The state for changes of the `FilterController`. The keys of the object are the filter keys used in the
+   * `Engine` registration. The values are arrays of {@link sap.ui.mdc.condition.ConditionObject ConditionObject}.
+   *
+   * @since 1.140.0
+   */
+  export type Engine$StateChangeEventFilterState = Record<
+    string,
+    FilterStateItem[]
+  >;
+
+  /**
+   * The state for changes of the `GroupController`.
+   *
+   * @since 1.140.0
+   */
+  export type Engine$StateChangeEventGroupState = {
+    /**
+     * The key of the affected group order
+     */
+    key: string;
+    /**
+     * The position of the group order
+     */
+    index: number;
+  };
+
+  /**
+   * The state for changes of the `SelectionController`.
+   *
+   * @since 1.140.0
+   */
+  export type Engine$StateChangeEventSelectionState = {
+    /**
+     * The key of the item affected
+     */
+    key: string;
+  };
+
+  /**
+   * The state for changes of the `SortController`.
+   *
+   * @since 1.140.0
+   */
+  export type Engine$StateChangeEventSortState = {
+    /**
+     * The key of the affected sort order
+     */
+    key: string;
+    /**
+     * The position of the sort order
+     */
+    index: number;
+    /**
+     * Indicates whether the sort order is descending
+     */
+    descending: boolean;
+  };
+
+  /**
+   * The `Engine` entity offers personalization capabilities by registering a control instance for modification,
+   * such as:
+   *
+   *
+   * 	 - `sap.m.p13n.Popup` initialization
+   * 	 - Storing personalization states by choosing the desired persistence layer
+   * 	 - State appliance considering the persistence layer
+   *
+   * The Engine must be used whenever personalization should be enabled by taking a certain persistence layer
+   * into account. Available controller implementations for the registration process are:
+   *
+   *
+   * 	 - {@link sap.m.p13n.SelectionController SelectionController}: Used to define a list of selectable entries
+   *
+   * 	 - {@link sap.m.p13n.SortController SortController}: Used to define a list of sortable properties
+   * 	 - {@link sap.m.p13n.GroupController GroupController}: Used to define a list of groupable properties
+   *
+   *
+   * Can be used in combination with `sap.ui.fl.variants.VariantManagement` to persist a state in variants
+   * using `sap.ui.fl` capabilities.
+   *
+   * @since 1.104
+   */
+  export default class Engine
+    extends /* was: sap.m.p13n.modules.AdaptationProvider */ Object
+  {
+    /**
+     * See:
+     * 	{@link https://ui5.sap.com/#/topic/75c08fdebf784575947927e052712bab Personalization}
+     */
+    constructor();
+
+    /**
+     * Creates a new subclass of class sap.m.p13n.Engine with name `sClassName` and enriches it with the information
+     * contained in `oClassInfo`.
+     *
+     * `oClassInfo` might contain the same kind of information as described in {@link sap.m.p13n.modules.AdaptationProvider.extend}.
+     *
+     *
+     * @returns Created class / constructor function
+     */
+    static extend<T extends Record<string, unknown>>(
+      /**
+       * Name of the class being created
+       */
+      sClassName: string,
+      /**
+       * Object literal with information about the class
+       */
+      oClassInfo?: sap.ClassInfo<T, Engine>,
+      /**
+       * Constructor function for the metadata object; if not given, it defaults to the metadata implementation
+       * used by this class
+       */
+      FNMetaImpl?: Function
+    ): Function;
+    /**
+     * This method is the central point of access to the Engine Singleton.
+     *
+     *
+     * @returns The Engine instance
+     */
+    static getInstance(): Engine;
+    /**
+     * Returns a metadata object for class sap.m.p13n.Engine.
+     *
+     *
+     * @returns Metadata object describing this class
+     */
+    static getMetadata(): Metadata;
+    /**
+     * Applies a state to a control by passing an object that contains the registered controller key and an
+     * object matching the inner subcontroller logic.
+     *
+     *
+     * @returns A Promise resolving after the state has been applied
+     */
+    applyState(
+      /**
+       * The registered control instance
+       */
+      oControl: Control,
+      /**
+       * The state object
+       */
+      oState: State
+    ): Promise<State>;
+    /**
+     * Attaches an event handler to the `StateHandlerRegistry` class. The event handler is fired every time
+     * a user triggers a personalization change for a control instance during runtime.
+     *
+     *
+     * @returns Returns `this` to allow method chaining
+     */
+    attachStateChange(
+      /**
+       * The handler function to call when the event occurs
+       */
+      fnStateEventHandler: (p1: Engine$StateChangeEvent) => void,
+      /**
+       * The context object to call the event handler with (value of `this` in the event handler function).
+       */
+      oListener?: object
+    ): this;
+    /**
+     * Unregisters a registered control. By unregistering a control the control is removed from the `Engine`
+     * registry, and all instance-specific submodules, such as the registered controllers, are destroyed.
+     */
+    deregister(
+      /**
+       * The registered control instance
+       */
+      oControl: Control
+    ): void;
+    /**
+     * Removes a previously attached state change event handler from the `StateHandlerRegistry` class. The passed
+     * parameters must match those used for registration with {@link sap.m.p13n.Engine#attachStateChange} beforehand.
+     *
+     *
+     * @returns Returns `this` to allow method chaining
+     */
+    detachStateChange(
+      /**
+       * The handler function to detach from the event
+       */
+      fnStateEventHandler: (p1: Event) => void,
+      /**
+       * The context object to call the event handler with (value of `this` in the event handler function).
+       */
+      oListener?: object
+    ): this;
+
+    register(
+      /**
+       * The control instance to be registered for adaptation
+       */
+      oControl: Control,
+      /**
+       * The Engine registration configuration
+       */
+      oConfig: EngineRegistrationConfig
+    ): void;
+    /**
+     * This method can be used to trigger a reset to the provided control instance.
+     *
+     *
+     * @returns A Promise resolving once the reset is completed
+     */
+    reset(
+      /**
+       * The related control instance
+       */
+      oControl: Control,
+      /**
+       * The key for the affected configuration
+       */
+      aKeys: string
+    ): Promise<null>;
+    /**
+     * Retrieves the state for a given control instance after all necessary changes have been applied (e.g.
+     * modification handler appliance). After the returned `Promise` has been resolved, the returned state is
+     * in sync with the related state object of the control.
+     *
+     *
+     * @returns A Promise resolving in the current control state
+     */
+    retrieveState(
+      /**
+       * The control instance implementing IxState to retrieve the externalized state
+       */
+      oControl: Control
+    ): Promise<State>;
+    /**
+     * Opens the personalization dialog.
+     *
+     *
+     * @returns Promise resolving in the `sap.m.p13n.Popup` instance
+     */
+    show(
+      /**
+       * The control instance that is personalized
+       */
+      oControl: Control,
+      /**
+       * The affected panels that are added to the `sap.m.p13n.Popup`
+       */
+      vPanelKeys: string | string[],
+      /**
+       * The settings object for the personalization
+       */
+      mSettings: {
+        /**
+         * The title for the `sap.m.p13n.Popup` control
+         */
+        title?: string;
+        /**
+         * The source control to be used by the `sap.m.p13n.Popup` control (only necessary if the mode is set to
+         * `ResponsivePopover`)
+         */
+        source?: Control;
+        /**
+         * The mode is used by the `sap.m.p13n.Popup` control
+         */
+        mode?: object;
+        /**
+         * Height configuration for the related popup container
+         */
+        contentHeight?: object;
+        /**
+         * Width configuration for the related popup container
+         */
+        contentWidth?: object;
+      }
+    ): Promise<Popup>;
+  }
+  /**
+   * The central registration for personalization functionality. The registration is a precondition for using
+   * `Engine` functionality for a control instance. Once the control instance has been registered, it can
+   * be passed to the related `Engine` methods that always expect a control instance as parameter. Only registered
+   * control instances can be used for personalization through the `Engine`.
+   */
+  export type EngineRegistrationConfig = {
+    /**
+     * The `{@link sap.m.p13n.MetadataHelper MetadataHelper}` to provide metadata-specific information. It may
+     * be used to define more granular information for the selection of items.
+     */
+    helper: MetadataHelper;
+    /**
+     * A map of arbitrary keys that contain a controller instance as value. The key must be unique and needs
+     * to be provided for later access when using `Engine` functionality specific for one controller type.
+     */
+    controller: Record<string, SelectionController>;
+  };
+
+  export type State = {
+    /**
+     * A map of arbitrary keys that contain a controller instance as value. The key must be unique and needs
+     * to be provided for later access when using `Engine` functionality specific for one controller type.
+     */
+    controller: Record<string, Object[]>;
+  };
 }
 
 declare module "sap/m/library" {
@@ -480,7 +827,6 @@ declare module "sap/m/library" {
    * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'ContentConfigType'.
    *
    * @since 1.122
-   * @experimental As of version 1.122.
    */
   export enum ContentConfigType {
     /**
@@ -554,11 +900,11 @@ declare module "sap/m/library" {
     /**
      * Represents the ARIA role `alertdialog`.
      */
-    AlertDialog = "alertdialog",
+    AlertDialog = "AlertDialog",
     /**
      * Represents the ARIA role `dialog`.
      */
-    Dialog = "dialog",
+    Dialog = "Dialog",
   }
   /**
    * Enum for the type of {@link sap.m.Dialog} control.
@@ -1053,7 +1399,7 @@ declare module "sap/m/library" {
      *
      * Generic Tile renders buttons that are specified under 'actionButtons' aggregation
      *
-     * @experimental As of version 1.96.
+     * @since 1.96.0
      */
     ActionMode = "ActionMode",
     /**
@@ -1061,7 +1407,7 @@ declare module "sap/m/library" {
      *
      * Enables Article Mode.
      *
-     * @experimental As of version 1.96.
+     * @since 1.96.0
      */
     ArticleMode = "ArticleMode",
     /**
@@ -1080,7 +1426,6 @@ declare module "sap/m/library" {
      * It is applicable only for the OneByOne FrameType and TwoByHalf FrameType.
      *
      * @since 1.96
-     * @experimental As of version 1.96.
      */
     IconMode = "IconMode",
     /**
@@ -1254,7 +1599,7 @@ declare module "sap/m/library" {
    *
    * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'IconTabFilterInteractionMode'.
    *
-   * @experimental As of version 1.121. Behavior might change.
+   * @experimental As of version 1.121.
    */
   export enum IconTabFilterInteractionMode {
     /**
@@ -1311,18 +1656,51 @@ declare module "sap/m/library" {
      * feature works under the Browser's Cross-Origin Resource Sharing (CORS) policy. This means that a web
      * application using those APIs can only request resources from the same origin the application was loaded
      * from unless the response from other origins includes the right CORS headers.
-     *
-     * @experimental As of version 1.106.
      */
     InlineSvg = "InlineSvg",
   }
   /**
-   * Interface for controls which are suitable to be added as items of sap.m.Menu.
+   * Interface definition for controls suitable to be used as items of `sap.m.Menu`.
    *
    * @since 1.127.0
    */
   export interface IMenuItem {
     __implements__sap_m_IMenuItem: boolean;
+  }
+
+  /**
+   * Interface definition for controls suitable to be used as items of `sap.m.Menu`. This interface is used
+   * to define the behavior of the menu item.
+   *
+   * @since 1.137.0
+   */
+  export interface IMenuItemBehavior {
+    __implements__sap_m_IMenuItemBehavior: boolean;
+
+    /**
+     * Returns whether the item can be counted in total items count. **Note:** This method can be overridden
+     * by subclasses to implement custom behavior.
+     *
+     *
+     * @returns Whether the item is counted in total items count
+     */
+    isCountable(): boolean;
+    /**
+     * Returns whether the item can be focused. **Note:** This method can be overridden by subclasses to implement
+     * custom behavior.
+     *
+     *
+     * @returns Whether the item is enabled for focus
+     */
+    isFocusable(): boolean;
+    /**
+     * Returns whether the firing of `press` event is allowed. **Note:** This method can be overridden by subclasses
+     * to implement custom behavior.
+     *
+     *
+     * @returns Whether the item is enabled for click/press
+     */
+    isInteractive(): boolean;
   }
 
   /**
@@ -1396,7 +1774,7 @@ declare module "sap/m/library" {
      */
     L = "L",
     /**
-     * Small: Recommended for smaller controls, such as {@link sap.m.Switch} or {@link sap.m.Checkbox}. If there
+     * Small: Recommended for smaller controls, such as {@link sap.m.Switch} or {@link sap.m.CheckBox}. If there
      * is limited space, only the label is wrapped. The input control is always right-aligned horizontally and
      * middle-aligned vertically.
      */
@@ -1648,6 +2026,17 @@ declare module "sap/m/library" {
   }
 
   /**
+   * Interface for controls placed in the `content` aggregation of `{@link sap.m.Toolbar}` or `{@link sap.m.OverflowToolbar}`,
+   * which need to indicate whether they are interactive or not.
+   *
+   * Controls that implement this interface should have the following method: `_getToolbarInteractive` - returns
+   * boolean value that shows whether the control is interactive or not
+   */
+  export interface IToolbarInteractiveControl {
+    __implements__sap_m_IToolbarInteractiveControl: boolean;
+  }
+
+  /**
    * Available label display modes.
    *
    * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'LabelDesign'.
@@ -1763,6 +2152,30 @@ declare module "sap/m/library" {
     Standard = "Standard",
   }
   /**
+   * Defines the action types available for list items.
+   *
+   * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'ListItemActionType'.
+   *
+   * @since 1.137
+   */
+  export enum ListItemActionType {
+    /**
+     * Defines a custom action for a list item. **Note:** The `icon` and `text` properties in the `sap.m.ListItemAction`
+     * are required for this action type.
+     */
+    Custom = "Custom",
+    /**
+     * Indicates that the list item is deletable. **Note:** The `icon` and `text` properties must not be set
+     * in `sap.m.ListItemAction` for this action type.
+     */
+    Delete = "Delete",
+    /**
+     * Indicates that the list item is editable. **Note:** The `icon` and `text` properties must not be set
+     * in `sap.m.ListItemAction` for this action type.
+     */
+    Edit = "Edit",
+  }
+  /**
    * Defines the keyboard handling behavior of the `sap.m.List` or `sap.m.Table`.
    *
    * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'ListKeyboardMode'.
@@ -1807,6 +2220,8 @@ declare module "sap/m/library" {
     None = "None",
     /**
      * Right-positioned single selection mode (only one list item can be selected).
+     *
+     * @deprecated As of version 1.143. replaced by {@link sap.m.ListMode.SingleSelectLeft}.
      */
     SingleSelect = "SingleSelect",
     /**
@@ -1848,7 +2263,8 @@ declare module "sap/m/library" {
      */
     Active = "Active",
     /**
-     * Enables detail button of the list item that fires `detailPress` event. Also see {@link sap.m.ListItemBase#attachDetailPress}.
+     * Enables the detail button of the list item that fires the {@link sap.m.ListItemBase#event:detailPress detailPress }
+     * event.
      */
     Detail = "Detail",
     /**
@@ -1861,7 +2277,8 @@ declare module "sap/m/library" {
      */
     Inactive = "Inactive",
     /**
-     * Indicates the list item is navigable to show extra information about the item.
+     * Enables the navigation button of the list item to navigate and display additional information about the
+     * item. Fires the {@link sap.m.ListBase#event:itemPress} event when pressed.
      */
     Navigation = "Navigation",
   }
@@ -1907,6 +2324,34 @@ declare module "sap/m/library" {
      * Pressing the text area fires the default (or last) action, pressing the arrow part opens a menu.
      */
     Split = "Split",
+  }
+  /**
+   * Available color set variants for the {@link sap.m.MessageStrip} control.
+   *
+   * **Notes:**
+   * 	 - The Default color set uses standard semantic colors based on the message type (Information, Success,
+   *     Warning, Error).
+   * 	 - ColorSet1 and ColorSet2 provide custom color palettes with 10 predefined color schemes each.
+   * 	 - When using ColorSet1 or ColorSet2, the `colorScheme` property determines which color variation is
+   *     applied.
+   *
+   * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'MessageStripColorSet'.
+   *
+   * @since 1.143.0
+   */
+  export enum MessageStripColorSet {
+    /**
+     * Uses a custom color palette with predefined color schemes
+     */
+    ColorSet1 = "ColorSet1",
+    /**
+     * Uses an alternative custom color palette with predefined color schemes
+     */
+    ColorSet2 = "ColorSet2",
+    /**
+     * Uses standard semantic colors based on the type property (Information, Success, Warning, Error)
+     */
+    Default = "Default",
   }
   /**
    * Enumeration of the `multiSelectMode>/code> in ListBase`.
@@ -2113,6 +2558,30 @@ declare module "sap/m/library" {
      * Forces `OverflowToolbar` items to remain always in the toolbar.
      */
     NeverOverflow = "NeverOverflow",
+  }
+  /**
+   * Types of `sap.m.OverflowToolbarTokenizerRenderMode` responsive modes
+   *
+   * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'OverflowToolbarTokenizerRenderMode'.
+   *
+   * @since 1.139
+   */
+  export enum OverflowToolbarTokenizerRenderMode {
+    /**
+     * In `Loose` mode, `sap.m.OverflowToolbarTokenizer` shows all its tokens, even if it requires scrolling.
+     */
+    Loose = "Loose",
+    /**
+     * In `Narrow` mode, `sap.m.OverflowToolbarTokenizer` shows as many tokens as its width allows and an n-More
+     * indicator with the count of the hidden tokens. The rest of the tokens remain hidden.
+     */
+    Narrow = "Narrow",
+    /**
+     * In `Overflow` mode, `sap.m.OverflowToolbarTokenizer` shows only a `sap.m.Button` as an n-More indicator
+     * without visible tokens. This mode is used when `sap.m.OverflowToolbarTokenizer` is within the `sap.m.OverflowToolbar`
+     * overflow area.
+     */
+    Overflow = "Overflow",
   }
   /**
    * undefined
@@ -2503,9 +2972,6 @@ declare module "sap/m/library" {
      * Sets grid layout for rendering the table popins. The grid width for each table popin is comparatively
      * larger than `GridSmall`, hence this allows less content to be rendered in a single popin row.
      *
-     * **Note:** This feature is currently not supported with Internet Explorer and Edge (version lower than
-     * 16) browsers.
-     *
      * @since 1.52
      */
     GridLarge = "GridLarge",
@@ -2513,9 +2979,6 @@ declare module "sap/m/library" {
      * Sets grid layout for rendering the table popins. The grid width for each table popin is small, hence
      * this allows more content to be rendered in a single popin row. This value defines small grid width for
      * the table popins.
-     *
-     * **Note:** This feature is currently not supported with Internet Explorer and Edge (version lower than
-     * 16) browsers.
      *
      * @since 1.52
      */
@@ -2705,6 +3168,25 @@ declare module "sap/m/library" {
     XXSmall = "XXSmall",
   }
   /**
+   * Different SegmentedButton items sizing modes.
+   *
+   * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'SegmentedButtonContentMode'.
+   */
+  export enum SegmentedButtonContentMode {
+    /**
+     * Each item fits its content and extra space is placed after the last item.
+     *
+     * @since 1.142.0
+     */
+    ContentFit = "ContentFit",
+    /**
+     * All items are sized equally to fill the available space.
+     *
+     * @since 1.142.0
+     */
+    EqualSized = "EqualSized",
+  }
+  /**
    * A string type that represents column ratio.
    *
    * Allowed values are strings that follow the number:number (3:2) format.
@@ -2776,6 +3258,27 @@ declare module "sap/m/library" {
     None = "None",
   }
   /**
+   * Enumeration for different separators for two columns layout when Select is in read-only mode.
+   *
+   * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'SelectTwoColumnSeparator'.
+   *
+   * @since 1.140
+   */
+  export enum SelectTwoColumnSeparator {
+    /**
+     * Will show bullet(·) as separator on two columns layout when Select is in read-only mode.
+     */
+    Bullet = "Bullet",
+    /**
+     * Will show N-dash(–) as separator on two columns layout when Select is in read-only mode.
+     */
+    Dash = "Dash",
+    /**
+     * Will show vertical line(|) as separator on two columns layout when Select is in read-only mode.
+     */
+    VerticalLine = "VerticalLine",
+  }
+  /**
    * Enumeration for different Select types.
    *
    * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'SelectType'.
@@ -2801,11 +3304,11 @@ declare module "sap/m/library" {
     /**
      * Private mode of the `VariantItem`.
      */
-    Private = "private",
+    Private = "Private",
     /**
      * Public mode of the `VariantItem`.
      */
-    Public = "public",
+    Public = "Public",
   }
   /**
    * Available selection modes for the {@link sap.m.SinglePlanningCalendar}
@@ -3492,6 +3995,12 @@ declare module "sap/m/library" {
    */
   export enum TimePickerMaskMode {
     /**
+     * The mask will always be enforced for any time patterns. **Note:** The mask functions correctly only with
+     * fixed-length time formats. Using the `Enforce` value with time formats that do not have a fixed length
+     * may lead to unpredictable behavior.
+     */
+    Enforce = "Enforce",
+    /**
      * The mask is disabled for the `sap.m.TimePicker`.
      */
     Off = "Off",
@@ -3652,7 +4161,7 @@ declare module "sap/m/library" {
     Uploading = "Uploading",
   }
   /**
-   * Type of the upload {@link sap.m.UploadSetItem}.
+   * Type of the upload {@link sap.m.upload.UploadSetItem}.
    *
    * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'UploadType'.
    */
@@ -3896,6 +4405,8 @@ declare module "sap/m/library" {
    * In case the less parameter color cannot be determined, the validation fails. You need to check if less
    * parameters are supported on control level. An empty string is also allowed and has the same effect as
    * setting no color.
+   *
+   * @deprecated As of version 1.135. the concept has been discarded.
    */
   export type ValueCSSColor = string;
 
@@ -4033,6 +4544,20 @@ declare module "sap/m/library" {
        */
       getVerticalScrolling?(): boolean;
       /**
+       * Optional hook that will be executed when the panel is used by a `sap.m.p13n.Popup` that is called before
+       * the popup is closed
+       *
+       * @since 1.145
+       *
+       * @returns A Promise that is fullfilled if the panel is ready to be closed
+       */
+      onBeforeClose?(
+        /**
+         * reason for closing the container
+         */
+        sReason: string
+      ): Promise<any>;
+      /**
        * Optional hook that will be executed when the panel is used by a `sap.m.p13n.Popup` that may trigger a
        * reset on the panel
        */
@@ -4164,7 +4689,7 @@ declare module "sap/m/library" {
          */
         L = "L",
         /**
-         * Small: Recommended for smaller controls, such as {@link sap.m.Switch} or {@link sap.m.Checkbox}. If there
+         * Small: Recommended for smaller controls, such as {@link sap.m.Switch} or {@link sap.m.CheckBox}. If there
          * is limited space, only the label is wrapped. The input control is always right-aligned horizontally and
          * middle-aligned vertically.
          */
@@ -6996,6 +7521,15 @@ declare module "sap/m/Avatar" {
       mParameters?: object
     ): this;
     /**
+     * See:
+     * 	sap.ui.core.Control#getAccessibilityInfo
+     *
+     * @ui5-protected Do not call from applications (only from related classes in the framework)
+     *
+     * @returns Current accessibility state of the Avatar
+     */
+    getAccessibilityInfo(): object;
+    /**
      * Gets current value of property {@link #getActive active}.
      *
      * Determines whether the `Avatar` is active/toggled (default is set to `false`). Active state is meant
@@ -7914,6 +8448,66 @@ declare module "sap/m/AvatarBadgeColor" {
      * Accent 9
      */
     Accent9 = "Accent9",
+    /**
+     * Indication 1
+     *
+     * @since 1.140.0
+     */
+    Indication1 = "Indication1",
+    /**
+     * Indication 10
+     *
+     * @since 1.140.0
+     */
+    Indication10 = "Indication10",
+    /**
+     * Indication 2
+     *
+     * @since 1.140.0
+     */
+    Indication2 = "Indication2",
+    /**
+     * Indication 3
+     *
+     * @since 1.140.0
+     */
+    Indication3 = "Indication3",
+    /**
+     * Indication 4
+     *
+     * @since 1.140.0
+     */
+    Indication4 = "Indication4",
+    /**
+     * Indication 5
+     *
+     * @since 1.140.0
+     */
+    Indication5 = "Indication5",
+    /**
+     * Indication 6
+     *
+     * @since 1.140.0
+     */
+    Indication6 = "Indication6",
+    /**
+     * Indication 7
+     *
+     * @since 1.140.0
+     */
+    Indication7 = "Indication7",
+    /**
+     * Indication 8
+     *
+     * @since 1.140.0
+     */
+    Indication8 = "Indication8",
+    /**
+     * Indication 9
+     *
+     * @since 1.140.0
+     */
+    Indication9 = "Indication9",
   }
   export default AvatarBadgeColor;
 }
@@ -9106,6 +9700,7 @@ declare module "sap/m/Breadcrumbs" {
   import {
     IBreadcrumbs,
     IOverflowToolbarContent,
+    IToolbarInteractiveControl,
     BreadcrumbsSeparatorStyle,
   } from "sap/m/library";
 
@@ -9133,7 +9728,7 @@ declare module "sap/m/Breadcrumbs" {
       IBreadcrumbs,
       IOverflowToolbarContent,
       IShrinkable,
-      /* was: sap.m.IToolbarInteractiveControl */ Object
+      IToolbarInteractiveControl
   {
     __implements__sap_m_IBreadcrumbs: boolean;
     __implements__sap_m_IOverflowToolbarContent: boolean;
@@ -10566,9 +11161,14 @@ declare module "sap/m/Button" {
     CSSSize,
   } from "sap/ui/core/library";
 
-  import Event from "sap/ui/base/Event";
+  import {
+    IToolbarInteractiveControl,
+    ButtonAccessibleRole,
+    BadgeStyle,
+    ButtonType,
+  } from "sap/m/library";
 
-  import { ButtonAccessibleRole, BadgeStyle, ButtonType } from "sap/m/library";
+  import Event from "sap/ui/base/Event";
 
   import ElementMetadata from "sap/ui/core/ElementMetadata";
 
@@ -10596,10 +11196,7 @@ declare module "sap/m/Button" {
    */
   export default class Button
     extends Control
-    implements
-      IFormContent,
-      IAccessKeySupport,
-      /* was: sap.m.IToolbarInteractiveControl */ Object
+    implements IFormContent, IAccessKeySupport, IToolbarInteractiveControl
   {
     __implements__sap_ui_core_IFormContent: boolean;
     __implements__sap_ui_core_IAccessKeySupport: boolean;
@@ -11555,6 +12152,8 @@ declare module "sap/m/Carousel" {
    *     the navigation arrows.
    * 	 - On desktop, navigation is done with the navigation arrows.
    * 	 - The paging indicator (when activated) is visible on each form factor.
+   * 	 - When using {@link sap.m.CarouselLayout CarouselLayout} with the `responsive` property set to `true`,
+   *     the number of visible pages adjusts automatically based on the available width and the specified `minPageWidth`.
    */
   export default class Carousel extends Control {
     /**
@@ -12785,6 +13384,41 @@ declare module "sap/m/CarouselLayout" {
      */
     static getMetadata(): ManagedObjectMetadata;
     /**
+     * Gets current value of property {@link #getMinPageWidth minPageWidth}.
+     *
+     * Defines the minimum width, in pixels, for each page to be displayed in the `Carousel` control.
+     *
+     * This property is used as a constraint when `responsive` mode is enabled, ensuring that pages are never
+     * rendered smaller than this specified width. The carousel automatically calculates the number of pages
+     * that can fit within the available viewport while respecting the specified minimum width requirement.
+     *
+     * **Note:** This property is only effective when the `responsive` property is set to `true`.
+     *
+     * Default value is `148`.
+     *
+     *
+     * @returns Value of property `minPageWidth`
+     */
+    getMinPageWidth(): int;
+    /**
+     * Gets current value of property {@link #getResponsive responsive}.
+     *
+     * Activates the responsive layout mode, where the number of visible carousel pages automatically adjusts
+     * based on the available width and the specified page width.
+     *
+     * When this option is enabled, the carousel dynamically calculates and displays as many items as can fit
+     * within the viewport while adhering to the `minPageWidth` constraint.
+     *
+     * **Note:** Enabling this option overrides the `visiblePagesCount` property and disables the `loop` functionality
+     * of the carousel.
+     *
+     * Default value is `false`.
+     *
+     *
+     * @returns Value of property `responsive`
+     */
+    getResponsive(): boolean;
+    /**
      * Gets current value of property {@link #getScrollMode scrollMode}.
      *
      * Defines how the items will be scrolled through in `Carousel` control. One at a time or depending on the
@@ -12806,8 +13440,10 @@ declare module "sap/m/CarouselLayout" {
      * Defines how many pages are displayed in the visible area of the `Carousel` control. Value should be a
      * positive number.
      *
-     * **Note:** When this property is set to something different than the default value, the `loop` property
+     * **Note:** When this property is set to something different from the default value, the `loop` property
      * of `Carousel` is ignored.
+     *
+     * **Note:** This property is ignored when the `responsive` property is set to `true`.
      *
      * Default value is `1`.
      *
@@ -12815,6 +13451,55 @@ declare module "sap/m/CarouselLayout" {
      * @returns Value of property `visiblePagesCount`
      */
     getVisiblePagesCount(): int;
+    /**
+     * Sets a new value for property {@link #getMinPageWidth minPageWidth}.
+     *
+     * Defines the minimum width, in pixels, for each page to be displayed in the `Carousel` control.
+     *
+     * This property is used as a constraint when `responsive` mode is enabled, ensuring that pages are never
+     * rendered smaller than this specified width. The carousel automatically calculates the number of pages
+     * that can fit within the available viewport while respecting the specified minimum width requirement.
+     *
+     * **Note:** This property is only effective when the `responsive` property is set to `true`.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `148`.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setMinPageWidth(
+      /**
+       * New value for property `minPageWidth`
+       */
+      iMinPageWidth?: int
+    ): this;
+    /**
+     * Sets a new value for property {@link #getResponsive responsive}.
+     *
+     * Activates the responsive layout mode, where the number of visible carousel pages automatically adjusts
+     * based on the available width and the specified page width.
+     *
+     * When this option is enabled, the carousel dynamically calculates and displays as many items as can fit
+     * within the viewport while adhering to the `minPageWidth` constraint.
+     *
+     * **Note:** Enabling this option overrides the `visiblePagesCount` property and disables the `loop` functionality
+     * of the carousel.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `false`.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setResponsive(
+      /**
+       * New value for property `responsive`
+       */
+      bResponsive?: boolean
+    ): this;
     /**
      * Sets a new value for property {@link #getScrollMode scrollMode}.
      *
@@ -12844,8 +13529,10 @@ declare module "sap/m/CarouselLayout" {
      * Defines how many pages are displayed in the visible area of the `Carousel` control. Value should be a
      * positive number.
      *
-     * **Note:** When this property is set to something different than the default value, the `loop` property
+     * **Note:** When this property is set to something different from the default value, the `loop` property
      * of `Carousel` is ignored.
+     *
+     * **Note:** This property is ignored when the `responsive` property is set to `true`.
      *
      * When called with a value of `null` or `undefined`, the default value of the property will be restored.
      *
@@ -12869,8 +13556,10 @@ declare module "sap/m/CarouselLayout" {
      * Defines how many pages are displayed in the visible area of the `Carousel` control. Value should be a
      * positive number.
      *
-     * **Note:** When this property is set to something different than the default value, the `loop` property
+     * **Note:** When this property is set to something different from the default value, the `loop` property
      * of `Carousel` is ignored.
+     *
+     * **Note:** This property is ignored when the `responsive` property is set to `true`.
      */
     visiblePagesCount?: int | PropertyBindingInfo | `{${string}}`;
 
@@ -12887,6 +13576,29 @@ declare module "sap/m/CarouselLayout" {
       | (CarouselScrollMode | keyof typeof CarouselScrollMode)
       | PropertyBindingInfo
       | `{${string}}`;
+
+    /**
+     * Activates the responsive layout mode, where the number of visible carousel pages automatically adjusts
+     * based on the available width and the specified page width.
+     *
+     * When this option is enabled, the carousel dynamically calculates and displays as many items as can fit
+     * within the viewport while adhering to the `minPageWidth` constraint.
+     *
+     * **Note:** Enabling this option overrides the `visiblePagesCount` property and disables the `loop` functionality
+     * of the carousel.
+     */
+    responsive?: boolean | PropertyBindingInfo | `{${string}}`;
+
+    /**
+     * Defines the minimum width, in pixels, for each page to be displayed in the `Carousel` control.
+     *
+     * This property is used as a constraint when `responsive` mode is enabled, ensuring that pages are never
+     * rendered smaller than this specified width. The carousel automatically calculates the number of pages
+     * that can fit within the available viewport while respecting the specified minimum width requirement.
+     *
+     * **Note:** This property is only effective when the `responsive` property is set to `true`.
+     */
+    minPageWidth?: int | PropertyBindingInfo | `{${string}}`;
   }
 }
 
@@ -12904,6 +13616,8 @@ declare module "sap/m/CheckBox" {
     ValueState,
     CSSSize,
   } from "sap/ui/core/library";
+
+  import { IToolbarInteractiveControl } from "sap/m/library";
 
   import ElementMetadata from "sap/ui/core/ElementMetadata";
 
@@ -12951,7 +13665,7 @@ declare module "sap/m/CheckBox" {
       IFormContent,
       ISemanticFormContent,
       IAccessKeySupport,
-      /* was: sap.m.IToolbarInteractiveControl */ Object
+      IToolbarInteractiveControl
   {
     __implements__sap_ui_core_IFormContent: boolean;
     __implements__sap_ui_core_ISemanticFormContent: boolean;
@@ -14186,7 +14900,6 @@ declare module "sap/m/ColorPalette" {
      * The last selected color in the ColorPalette.
      *
      * @since 1.122
-     * @experimental As of version 1.122. this property is in a beta state.
      *
      * @returns Value of property `selectedColor`
      */
@@ -14230,7 +14943,6 @@ declare module "sap/m/ColorPalette" {
      * When called with a value of `null` or `undefined`, the default value of the property will be restored.
      *
      * @since 1.122
-     * @experimental As of version 1.122. this property is in a beta state.
      *
      * @returns Reference to `this` in order to allow method chaining
      */
@@ -14254,7 +14966,6 @@ declare module "sap/m/ColorPalette" {
      * The last selected color in the ColorPalette.
      *
      * @since 1.122
-     * @experimental As of version 1.122. this property is in a beta state.
      */
     selectedColor?: CSSColor | PropertyBindingInfo | `{${string}}`;
 
@@ -14642,7 +15353,6 @@ declare module "sap/m/ColorPalettePopover" {
      * The last selected color in the ColorPalette.
      *
      * @since 1.122
-     * @experimental As of version 1.122. this property is in a beta state.
      *
      * @returns Value of property `selectedColor`
      */
@@ -14775,7 +15485,6 @@ declare module "sap/m/ColorPalettePopover" {
      * When called with a value of `null` or `undefined`, the default value of the property will be restored.
      *
      * @since 1.122
-     * @experimental As of version 1.122. this property is in a beta state.
      *
      * @returns Reference to `this` in order to allow method chaining
      */
@@ -14861,7 +15570,6 @@ declare module "sap/m/ColorPalettePopover" {
      * The last selected color in the ColorPalette.
      *
      * @since 1.122
-     * @experimental As of version 1.122. this property is in a beta state.
      */
     selectedColor?: CSSColor | PropertyBindingInfo | `{${string}}`;
 
@@ -16233,6 +16941,8 @@ declare module "sap/m/ComboBox" {
     $ComboBoxBaseSettings,
   } from "sap/m/ComboBoxBase";
 
+  import { IToolbarInteractiveControl } from "sap/m/library";
+
   import List from "sap/m/List";
 
   import Popover from "sap/m/Popover";
@@ -16305,7 +17015,7 @@ declare module "sap/m/ComboBox" {
    */
   export default class ComboBox
     extends ComboBoxBase
-    implements /* was: sap.m.IToolbarInteractiveControl */ Object
+    implements IToolbarInteractiveControl
   {
     __implements__sap_m_IToolbarInteractiveControl: boolean;
     /**
@@ -17867,7 +18577,6 @@ declare module "sap/m/ContentConfig" {
    * This element is used within the TileAttribute control that generates either a link or text
    *
    * @since 1.122
-   * @experimental As of version 1.122.
    */
   export default class ContentConfig extends UI5Element {
     /**
@@ -18063,8 +18772,6 @@ declare module "sap/m/ContentConfig" {
   }
   /**
    * Describes the settings that can be provided to the ContentConfig constructor.
-   *
-   * @experimental As of version 1.122.
    */
   export interface $ContentConfigSettings extends $ElementSettings {
     /**
@@ -18715,8 +19422,9 @@ declare module "sap/m/DatePicker" {
    *      binding the `value` property by using types
    * ```javascript
    *
+   * // UI5Date imported from sap/ui/core/date/UI5Date
    * new sap.ui.model.json.JSONModel({
-   *     date: sap.ui.core.date.UI5Date.getInstance(2022,10,10,10,10,10)
+   *     date: UI5Date.getInstance(2022,10,10,10,10,10)
    * });
    *
    * new sap.m.DatePicker({
@@ -20697,6 +21405,8 @@ declare module "sap/m/DateTimeField" {
 declare module "sap/m/DateTimeInput" {
   import { default as Control, $ControlSettings } from "sap/ui/core/Control";
 
+  import { IToolbarInteractiveControl, DateTimeInputType } from "sap/m/library";
+
   import {
     ID,
     AccessibilityInfo,
@@ -20709,8 +21419,6 @@ declare module "sap/m/DateTimeInput" {
   import { PropertyBindingInfo } from "sap/ui/base/ManagedObject";
 
   import ElementMetadata from "sap/ui/core/ElementMetadata";
-
-  import { DateTimeInputType } from "sap/m/library";
 
   import Event from "sap/ui/base/Event";
 
@@ -20726,7 +21434,7 @@ declare module "sap/m/DateTimeInput" {
    */
   export default class DateTimeInput
     extends Control
-    implements /* was: sap.m.IToolbarInteractiveControl */ Object
+    implements IToolbarInteractiveControl
   {
     __implements__sap_m_IToolbarInteractiveControl: boolean;
     /**
@@ -21581,7 +22289,10 @@ declare module "sap/m/DateTimePicker" {
    *      binding the `value` property by using types
    * ```javascript
    *
-   * new sap.ui.model.json.JSONModel({date: sap.ui.core.date.UI5Date.getInstance(2022,10,10,12,10,10)});
+   * // UI5Date imported from sap/ui/core/date/UI5Date
+   * new sap.ui.model.json.JSONModel({
+   *     date: UI5Date.getInstance(2022,10,10,12,10,10)
+   * });
    *
    * new sap.m.DateTimePicker({
    *     value: {
@@ -23488,7 +24199,16 @@ declare module "sap/m/Dialog" {
   /**
    * Escape handler for sap.m.Dialog control.
    */
-  export type EscapeHandler = (oHandlers: object) => void;
+  export type EscapeHandler = (oHandlers: {
+    /**
+     * Call this function if the dialog should be closed.
+     */
+    resolve: () => void;
+    /**
+     * Call this function if the dialog should not be closed.
+     */
+    reject: () => void;
+  }) => void;
 
   /**
    * Describes the settings that can be provided to the Dialog constructor.
@@ -23739,11 +24459,11 @@ declare module "sap/m/Dialog" {
     rightButton?: Button | string;
 
     /**
-     * In the Dialog focus is set first on the `beginButton` and then on `endButton`, when available. If another
-     * control needs to get the focus, set the `initialFocus` with the control which should be focused on. Setting
-     * `initialFocus` to input controls doesn't open the On-Screen keyboard on mobile device as, due to browser
-     * restriction, the On-Screen keyboard can't be opened with JavaScript code. The opening of On-Screen keyboard
-     * must be triggered by real user action.
+     * In the Dialog, focus is initially set on the first focusable element, or on the dialog itself if no such
+     * element is available. If another control needs to receive focus, set the `initialFocus` to the control
+     * that should be focused. Setting `initialFocus` on input controls does not open the on-screen keyboard
+     * on mobile devices. Due to browser restrictions, the on-screen keyboard can't be opened with JavaScript
+     * code; it must be triggered explicitly by the user.
      *
      * @since 1.15.0
      */
@@ -28783,7 +29503,10 @@ declare module "sap/m/FeedInput" {
 
   import ElementMetadata from "sap/ui/core/ElementMetadata";
 
-  import { PropertyBindingInfo } from "sap/ui/base/ManagedObject";
+  import {
+    PropertyBindingInfo,
+    AggregationBindingInfo,
+  } from "sap/ui/base/ManagedObject";
 
   import Event from "sap/ui/base/Event";
 
@@ -28856,6 +29579,19 @@ declare module "sap/m/FeedInput" {
      */
     static getMetadata(): ElementMetadata;
     /**
+     * Adds some action to the aggregation {@link #getActions actions}.
+     *
+     * @since 1.139
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    addAction(
+      /**
+       * The action to add; if empty, nothing is inserted
+       */
+      oAction: Control
+    ): this;
+    /**
      * Attaches event handler `fnFunction` to the {@link #event:post post} event of this `sap.m.FeedInput`.
      *
      * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
@@ -28905,6 +29641,14 @@ declare module "sap/m/FeedInput" {
       oListener?: object
     ): this;
     /**
+     * Destroys all the actions in the aggregation {@link #getActions actions}.
+     *
+     * @since 1.139
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    destroyActions(): this;
+    /**
      * Detaches event handler `fnFunction` from the {@link #event:post post} event of this `sap.m.FeedInput`.
      *
      * The passed function and listener object must match the ones used for event registration.
@@ -28935,6 +29679,17 @@ declare module "sap/m/FeedInput" {
        */
       mParameters?: FeedInput$PostEventParameters
     ): this;
+    /**
+     * Gets content of aggregation {@link #getActions actions}.
+     *
+     * Defines the actions that are displayed next to the text area. These buttons can be used to trigger actions,
+     * such as attaching a file. This is a {@link sap.m.Button} If the actions are not set, the post button
+     * is displayed as the last control in the feed input. **Note:** Only `sap.m.Button` is supported for this
+     * aggregation. If another control is provided, an error is logged and actions are ignored.
+     *
+     * @since 1.139
+     */
+    getActions(): Control[];
     /**
      * Gets current value of property {@link #getAriaLabelForPicture ariaLabelForPicture}.
      *
@@ -29133,6 +29888,62 @@ declare module "sap/m/FeedInput" {
      * @returns Value of property `value`
      */
     getValue(): string;
+    /**
+     * Checks for the provided `sap.ui.core.Control` in the aggregation {@link #getActions actions}. and returns
+     * its index if found or -1 otherwise.
+     *
+     * @since 1.139
+     *
+     * @returns The index of the provided control in the aggregation if found, or -1 otherwise
+     */
+    indexOfAction(
+      /**
+       * The action whose index is looked for
+       */
+      oAction: Control
+    ): int;
+    /**
+     * Inserts a action into the aggregation {@link #getActions actions}.
+     *
+     * @since 1.139
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    insertAction(
+      /**
+       * The action to insert; if empty, nothing is inserted
+       */
+      oAction: Control,
+      /**
+       * The `0`-based index the action should be inserted at; for a negative value of `iIndex`, the action is
+       * inserted at position 0; for a value greater than the current size of the aggregation, the action is inserted
+       * at the last position
+       */
+      iIndex: int
+    ): this;
+    /**
+     * Removes a action from the aggregation {@link #getActions actions}.
+     *
+     * @since 1.139
+     *
+     * @returns The removed action or `null`
+     */
+    removeAction(
+      /**
+       * The action to remove or its index or id
+       */
+      vAction: int | string | Control
+    ): Control | null;
+    /**
+     * Removes all the controls from the aggregation {@link #getActions actions}.
+     *
+     * Additionally, it unregisters them from the hosting UIArea.
+     *
+     * @since 1.139
+     *
+     * @returns An array of the removed elements (might be empty)
+     */
+    removeAllActions(): Control[];
     /**
      * Sets a new value for property {@link #getAriaLabelForPicture ariaLabelForPicture}.
      *
@@ -29569,6 +30380,16 @@ declare module "sap/m/FeedInput" {
     ariaLabelForPicture?: string | PropertyBindingInfo;
 
     /**
+     * Defines the actions that are displayed next to the text area. These buttons can be used to trigger actions,
+     * such as attaching a file. This is a {@link sap.m.Button} If the actions are not set, the post button
+     * is displayed as the last control in the feed input. **Note:** Only `sap.m.Button` is supported for this
+     * aggregation. If another control is provided, an error is logged and actions are ignored.
+     *
+     * @since 1.139
+     */
+    actions?: Control[] | Control | AggregationBindingInfo | `{${string}}`;
+
+    /**
      * The Post event is triggered when the user has entered a value and pressed the post button. After firing
      * this event, the value is reset.
      */
@@ -29600,8 +30421,6 @@ declare module "sap/m/FeedListItem" {
     $ListItemBaseSettings,
   } from "sap/m/ListItemBase";
 
-  import FeedListItemAction from "sap/m/FeedListItemAction";
-
   import { URI } from "sap/ui/core/library";
 
   import { LinkConversion, ListType } from "sap/m/library";
@@ -29612,17 +30431,16 @@ declare module "sap/m/FeedListItem" {
 
   import ElementMetadata from "sap/ui/core/ElementMetadata";
 
-  import {
-    PropertyBindingInfo,
-    AggregationBindingInfo,
-  } from "sap/ui/base/ManagedObject";
+  import { PropertyBindingInfo } from "sap/ui/base/ManagedObject";
 
   import Event from "sap/ui/base/Event";
 
   /**
    * The control provides a set of properties for text, sender information, time stamp. Beginning with release
    * 1.23 the new feature expand / collapse was introduced, which uses the property maxCharacters. Beginning
-   * with release 1.44, sap.m.FormattedText was introduced which allows html formatted text to be displayed
+   * with release 1.44, sap.m.FormattedText was introduced which allows html formatted text to be displayed.
+   * The `actions` aggregation must contain instances of {@link sap.m.FeedListItemAction} in order to display
+   * them in the action sheet.
    *
    * @since 1.12
    */
@@ -29690,19 +30508,6 @@ declare module "sap/m/FeedListItem" {
      */
     static getMetadata(): ElementMetadata;
     /**
-     * Adds some action to the aggregation {@link #getActions actions}.
-     *
-     * @since 1.52.0
-     *
-     * @returns Reference to `this` in order to allow method chaining
-     */
-    addAction(
-      /**
-       * The action to add; if empty, nothing is inserted
-       */
-      oAction: FeedListItemAction
-    ): this;
-    /**
      * Attaches event handler `fnFunction` to the {@link #event:iconPress iconPress} event of this `sap.m.FeedListItem`.
      *
      * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
@@ -29796,14 +30601,6 @@ declare module "sap/m/FeedListItem" {
        */
       oListener?: object
     ): this;
-    /**
-     * Destroys all the actions in the aggregation {@link #getActions actions}.
-     *
-     * @since 1.52.0
-     *
-     * @returns Reference to `this` in order to allow method chaining
-     */
-    destroyActions(): this;
     /**
      * Detaches event handler `fnFunction` from the {@link #event:iconPress iconPress} event of this `sap.m.FeedListItem`.
      *
@@ -29867,14 +30664,6 @@ declare module "sap/m/FeedListItem" {
       mParameters?: FeedListItem$SenderPressEventParameters
     ): this;
     /**
-     * Gets content of aggregation {@link #getActions actions}.
-     *
-     * Contains {@link sap.m.FeedListItemAction elements} that are displayed in the action sheet.
-     *
-     * @since 1.52.0
-     */
-    getActions(): FeedListItemAction[];
-    /**
      * Gets current value of property {@link #getActiveIcon activeIcon}.
      *
      * Icon displayed when the list item is active.
@@ -29910,6 +30699,17 @@ declare module "sap/m/FeedListItem" {
      * @returns Value of property `convertLinksToAnchorTags`
      */
     getConvertLinksToAnchorTags(): LinkConversion;
+    /**
+     * Gets current value of property {@link #getDisableStyleAttribute disableStyleAttribute}.
+     *
+     * Disables rendering of the `style` attribute in the `FormattedText`.
+     *
+     * Default value is `false`.
+     *
+     *
+     * @returns Value of property `disableStyleAttribute`
+     */
+    getDisableStyleAttribute(): boolean;
     /**
      * Gets current value of property {@link #getIcon icon}.
      *
@@ -30080,62 +30880,6 @@ declare module "sap/m/FeedListItem" {
      */
     getTimestamp(): string;
     /**
-     * Checks for the provided `sap.m.FeedListItemAction` in the aggregation {@link #getActions actions}. and
-     * returns its index if found or -1 otherwise.
-     *
-     * @since 1.52.0
-     *
-     * @returns The index of the provided control in the aggregation if found, or -1 otherwise
-     */
-    indexOfAction(
-      /**
-       * The action whose index is looked for
-       */
-      oAction: FeedListItemAction
-    ): int;
-    /**
-     * Inserts a action into the aggregation {@link #getActions actions}.
-     *
-     * @since 1.52.0
-     *
-     * @returns Reference to `this` in order to allow method chaining
-     */
-    insertAction(
-      /**
-       * The action to insert; if empty, nothing is inserted
-       */
-      oAction: FeedListItemAction,
-      /**
-       * The `0`-based index the action should be inserted at; for a negative value of `iIndex`, the action is
-       * inserted at position 0; for a value greater than the current size of the aggregation, the action is inserted
-       * at the last position
-       */
-      iIndex: int
-    ): this;
-    /**
-     * Removes a action from the aggregation {@link #getActions actions}.
-     *
-     * @since 1.52.0
-     *
-     * @returns The removed action or `null`
-     */
-    removeAction(
-      /**
-       * The action to remove or its index or id
-       */
-      vAction: int | string | FeedListItemAction
-    ): FeedListItemAction | null;
-    /**
-     * Removes all the controls from the aggregation {@link #getActions actions}.
-     *
-     * Additionally, it unregisters them from the hosting UIArea.
-     *
-     * @since 1.52.0
-     *
-     * @returns An array of the removed elements (might be empty)
-     */
-    removeAllActions(): FeedListItemAction[];
-    /**
      * Sets a new value for property {@link #getActiveIcon activeIcon}.
      *
      * Icon displayed when the list item is active.
@@ -30191,6 +30935,24 @@ declare module "sap/m/FeedListItem" {
        * New value for property `convertLinksToAnchorTags`
        */
       sConvertLinksToAnchorTags?: LinkConversion | keyof typeof LinkConversion
+    ): this;
+    /**
+     * Sets a new value for property {@link #getDisableStyleAttribute disableStyleAttribute}.
+     *
+     * Disables rendering of the `style` attribute in the `FormattedText`.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `false`.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setDisableStyleAttribute(
+      /**
+       * New value for property `disableStyleAttribute`
+       */
+      bDisableStyleAttribute?: boolean
     ): this;
     /**
      * Sets a new value for property {@link #getIcon icon}.
@@ -30617,15 +31379,9 @@ declare module "sap/m/FeedListItem" {
     maxCharacters?: int | PropertyBindingInfo | `{${string}}`;
 
     /**
-     * Contains {@link sap.m.FeedListItemAction elements} that are displayed in the action sheet.
-     *
-     * @since 1.52.0
+     * Disables rendering of the `style` attribute in the `FormattedText`.
      */
-    actions?:
-      | FeedListItemAction[]
-      | FeedListItemAction
-      | AggregationBindingInfo
-      | `{${string}}`;
+    disableStyleAttribute?: boolean | PropertyBindingInfo | `{${string}}`;
 
     /**
      * Event is fired when name of the sender is pressed.
@@ -30688,11 +31444,12 @@ declare module "sap/m/FeedListItem" {
 }
 
 declare module "sap/m/FeedListItemAction" {
-  import { default as UI5Element, $ElementSettings } from "sap/ui/core/Element";
+  import {
+    default as ListItemActionBase,
+    $ListItemActionBaseSettings,
+  } from "sap/m/ListItemActionBase";
 
   import Event from "sap/ui/base/Event";
-
-  import { URI } from "sap/ui/core/library";
 
   import ElementMetadata from "sap/ui/core/ElementMetadata";
 
@@ -30703,7 +31460,7 @@ declare module "sap/m/FeedListItemAction" {
    *
    * @since 1.52.0
    */
-  export default class FeedListItemAction extends UI5Element {
+  export default class FeedListItemAction extends ListItemActionBase {
     /**
      * Constructor for a new FeedListItemAction.
      *
@@ -30739,7 +31496,7 @@ declare module "sap/m/FeedListItemAction" {
      * Creates a new subclass of class sap.m.FeedListItemAction with name `sClassName` and enriches it with
      * the information contained in `oClassInfo`.
      *
-     * `oClassInfo` might contain the same kind of information as described in {@link sap.ui.core.Element.extend}.
+     * `oClassInfo` might contain the same kind of information as described in {@link sap.m.ListItemActionBase.extend}.
      *
      *
      * @returns Created class / constructor function
@@ -30857,15 +31614,6 @@ declare module "sap/m/FeedListItemAction" {
      */
     getEnabled(): boolean;
     /**
-     * Gets current value of property {@link #getIcon icon}.
-     *
-     * The icon of the action.
-     *
-     *
-     * @returns Value of property `icon`
-     */
-    getIcon(): URI;
-    /**
      * Gets current value of property {@link #getKey key}.
      *
      * The key of the item.
@@ -30876,28 +31624,6 @@ declare module "sap/m/FeedListItemAction" {
      * @returns Value of property `key`
      */
     getKey(): string;
-    /**
-     * Gets current value of property {@link #getText text}.
-     *
-     * The text of the item. It is used as a tooltip and for accessibility reasons.
-     *
-     * Default value is `empty string`.
-     *
-     *
-     * @returns Value of property `text`
-     */
-    getText(): string;
-    /**
-     * Gets current value of property {@link #getVisible visible}.
-     *
-     * Hides or shows a button on the UI.
-     *
-     * Default value is `true`.
-     *
-     *
-     * @returns Value of property `visible`
-     */
-    getVisible(): boolean;
     /**
      * Sets a new value for property {@link #getEnabled enabled}.
      *
@@ -30918,22 +31644,6 @@ declare module "sap/m/FeedListItemAction" {
       bEnabled?: boolean
     ): this;
     /**
-     * Sets a new value for property {@link #getIcon icon}.
-     *
-     * The icon of the action.
-     *
-     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
-     *
-     *
-     * @returns Reference to `this` in order to allow method chaining
-     */
-    setIcon(
-      /**
-       * New value for property `icon`
-       */
-      sIcon?: URI
-    ): this;
-    /**
      * Sets a new value for property {@link #getKey key}.
      *
      * The key of the item.
@@ -30951,66 +31661,16 @@ declare module "sap/m/FeedListItemAction" {
        */
       sKey?: string
     ): this;
-    /**
-     * Sets a new value for property {@link #getText text}.
-     *
-     * The text of the item. It is used as a tooltip and for accessibility reasons.
-     *
-     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
-     *
-     * Default value is `empty string`.
-     *
-     *
-     * @returns Reference to `this` in order to allow method chaining
-     */
-    setText(
-      /**
-       * New value for property `text`
-       */
-      sText?: string
-    ): this;
-    /**
-     * Sets a new value for property {@link #getVisible visible}.
-     *
-     * Hides or shows a button on the UI.
-     *
-     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
-     *
-     * Default value is `true`.
-     *
-     *
-     * @returns Reference to `this` in order to allow method chaining
-     */
-    setVisible(
-      /**
-       * New value for property `visible`
-       */
-      bVisible?: boolean
-    ): this;
   }
   /**
    * Describes the settings that can be provided to the FeedListItemAction constructor.
    */
-  export interface $FeedListItemActionSettings extends $ElementSettings {
-    /**
-     * The icon of the action.
-     */
-    icon?: URI | PropertyBindingInfo | `{${string}}`;
-
-    /**
-     * The text of the item. It is used as a tooltip and for accessibility reasons.
-     */
-    text?: string | PropertyBindingInfo;
-
+  export interface $FeedListItemActionSettings
+    extends $ListItemActionBaseSettings {
     /**
      * The key of the item.
      */
     key?: string | PropertyBindingInfo;
-
-    /**
-     * Hides or shows a button on the UI.
-     */
-    visible?: boolean | PropertyBindingInfo | `{${string}}`;
 
     /**
      * Enables or disables a button on the UI. All buttons are enabled by default. Disabled buttons are colored
@@ -32427,6 +33087,7 @@ declare module "sap/m/FormattedText" {
      * 	 - `strong`
      * 	 - `span`
      * 	 - `u`
+     * 	 - `s`
      * 	 - `dl`
      * 	 - `dt`
      * 	 - `dd`
@@ -32712,6 +33373,7 @@ declare module "sap/m/FormattedText" {
      * 	 - `strong`
      * 	 - `span`
      * 	 - `u`
+     * 	 - `s`
      * 	 - `dl`
      * 	 - `dt`
      * 	 - `dd`
@@ -32803,6 +33465,7 @@ declare module "sap/m/GenericTag" {
 
   import {
     IOverflowToolbarContent,
+    IToolbarInteractiveControl,
     GenericTagDesign,
     OverflowToolbarConfig,
     GenericTagValueState,
@@ -32831,9 +33494,7 @@ declare module "sap/m/GenericTag" {
    */
   export default class GenericTag
     extends Control
-    implements
-      IOverflowToolbarContent,
-      /* was: sap.m.IToolbarInteractiveControl */ Object
+    implements IOverflowToolbarContent, IToolbarInteractiveControl
   {
     __implements__sap_m_IOverflowToolbarContent: boolean;
     __implements__sap_m_IToolbarInteractiveControl: boolean;
@@ -35012,8 +35673,13 @@ declare module "sap/m/GroupHeaderListItem" {
 
   /**
    * `sap.m.GroupHeaderListItem` is used to display the title of a group and act as separator between groups
-   * in `sap.m.List` and `sap.m.Table`. **Note:** The inherited properties `unread`, `selected`, `counter`
-   * and `press` event from `sap.m.ListItemBase` are not supported.
+   * in `sap.m.List` and `sap.m.Table`. **Note:** The inherited properties `unread`, `selected`, `counter`,
+   * the `press` event, and the `actions` aggregation from `sap.m.ListItemBase` are not supported.
+   *
+   * There are the following known restrictions:
+   * 	 - When a list is manually populated with items and groups without using data binding, changes to the
+   *     order or group structure will only be correctly applied when all items are removed and reinserted again.
+   *
    *
    * @since 1.12
    */
@@ -37741,8 +38407,7 @@ declare module "sap/m/IconTabFilter" {
      *
      * Default value is `Auto`.
      *
-     * @experimental As of version 1.121. Disclaimer: this property is in a beta state - incompatible API changes
-     * may be done before its official public release. Use at your own discretion.
+     * @experimental As of version 1.121.
      *
      * @returns Value of property `interactionMode`
      */
@@ -38045,8 +38710,7 @@ declare module "sap/m/IconTabFilter" {
      *
      * Default value is `Auto`.
      *
-     * @experimental As of version 1.121. Disclaimer: this property is in a beta state - incompatible API changes
-     * may be done before its official public release. Use at your own discretion.
+     * @experimental As of version 1.121.
      *
      * @returns Reference to `this` in order to allow method chaining
      */
@@ -38157,8 +38821,7 @@ declare module "sap/m/IconTabFilter" {
     /**
      * Specifies the interaction mode.
      *
-     * @experimental As of version 1.121. Disclaimer: this property is in a beta state - incompatible API changes
-     * may be done before its official public release. Use at your own discretion.
+     * @experimental As of version 1.121.
      */
     interactionMode?:
       | (
@@ -39256,6 +39919,10 @@ declare module "sap/m/IllustratedMessage" {
    * and the available space of its parent container. Some of the structural elements are displayed differently
    * or are omitted in the different breakpoint sizes (XS, S, M, L).
    *
+   * **Note:** When using automatic sizing (see {@link #getIllustrationSize illustrationSize} property), ensure
+   * the parent container has a constrained width (for example, an explicit `width`, a `max-width`, or a width
+   * inherited from its parent). Containers without width constraints can cause flickering during resize operations.
+   *
    * @since 1.98
    */
   export default class IllustratedMessage extends Control {
@@ -39415,6 +40082,21 @@ declare module "sap/m/IllustratedMessage" {
      */
     getAriaTitleLevel(): TitleLevel;
     /**
+     * Gets current value of property {@link #getDecorative decorative}.
+     *
+     * Defines whether the illustration is decorative.
+     *
+     * When set to true, the attributes `role="presentation"` and `aria-hidden="true"` are applied to the SVG
+     * element.
+     *
+     * Default value is `false`.
+     *
+     * @since 1.138
+     *
+     * @returns Value of property `decorative`
+     */
+    getDecorative(): boolean;
+    /**
      * Gets current value of property {@link #getDescription description}.
      *
      * Defines the description displayed below the title.
@@ -39490,6 +40172,13 @@ declare module "sap/m/IllustratedMessage" {
      *
      * As `IllustratedMessage` adapts itself around the `Illustration`, the other elements of the control are
      * displayed differently on the different breakpoints/illustration sizes.
+     *
+     * When set to `Auto` (default), the illustration size is determined by the available space in the parent
+     * container.
+     *
+     * **Note:** Auto sizing requires the parent container to have a width constraint — for example, an explicit
+     * `width`, a `max-width`, or a width inherited from its parent. Containers without width constraints may
+     * cause flickering during resize operations.
      *
      * Default value is `Auto`.
      *
@@ -39766,6 +40455,13 @@ declare module "sap/m/IllustratedMessage" {
      * As `IllustratedMessage` adapts itself around the `Illustration`, the other elements of the control are
      * displayed differently on the different breakpoints/illustration sizes.
      *
+     * When set to `Auto` (default), the illustration size is determined by the available space in the parent
+     * container.
+     *
+     * **Note:** Auto sizing requires the parent container to have a width constraint — for example, an explicit
+     * `width`, a `max-width`, or a width inherited from its parent. Containers without width constraints may
+     * cause flickering during resize operations.
+     *
      * When called with a value of `null` or `undefined`, the default value of the property will be restored.
      *
      * Default value is `Auto`.
@@ -39913,6 +40609,13 @@ declare module "sap/m/IllustratedMessage" {
      * As `IllustratedMessage` adapts itself around the `Illustration`, the other elements of the control are
      * displayed differently on the different breakpoints/illustration sizes.
      *
+     * When set to `Auto` (default), the illustration size is determined by the available space in the parent
+     * container.
+     *
+     * **Note:** Auto sizing requires the parent container to have a width constraint — for example, an explicit
+     * `width`, a `max-width`, or a width inherited from its parent. Containers without width constraints may
+     * cause flickering during resize operations.
+     *
      * @since 1.98
      */
     illustrationSize?:
@@ -39974,6 +40677,16 @@ declare module "sap/m/IllustratedMessage" {
       | `{${string}}`;
 
     /**
+     * Defines whether the illustration is decorative.
+     *
+     * When set to true, the attributes `role="presentation"` and `aria-hidden="true"` are applied to the SVG
+     * element.
+     *
+     * @since 1.138
+     */
+    decorative?: boolean | PropertyBindingInfo | `{${string}}`;
+
+    /**
      * Defines the controls placed below the description as additional content.
      *
      * **Note:** Not displayed when `illustrationSize` is set to `Base`.
@@ -40026,20 +40739,52 @@ declare module "sap/m/IllustratedMessageSize" {
     Base = "Base",
     /**
      * Dialog `Illustration` size (M breakpoint). Suitable for dialogs.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageSize.Medium}
      */
     Dialog = "Dialog",
     /**
      * Dot `Illustration` size (XS breakpoint). Suitable for spaces with little vertical space.
      *
      * @since 1.108
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageSize.ExtraSmall}
      */
     Dot = "Dot",
     /**
+     * Extra Small `Illustration` size. Alias for `Dot` size (XS breakpoint). Suitable for spaces with little
+     * vertical space.
+     *
+     * @since 1.136
+     */
+    ExtraSmall = "ExtraSmall",
+    /**
+     * Large `Illustration` size. Alias for `Scene` size (L breakpoint). Suitable for a `Page` or a table.
+     *
+     * @since 1.136
+     */
+    Large = "Large",
+    /**
+     * Medium `Illustration` size. Alias for `Dialog` size (M breakpoint). Suitable for dialogs.
+     *
+     * @since 1.136
+     */
+    Medium = "Medium",
+    /**
      * Scene `Illustration` size (L breakpoint). Suitable for a `Page` or a table.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageSize.Large}
      */
     Scene = "Scene",
     /**
+     * Small `Illustration` size. Alias for `Spot` size (S breakpoint). Suitable for cards (four columns).
+     *
+     * @since 1.136
+     */
+    Small = "Small",
+    /**
      * Spot `Illustration` size (S breakpoint). Suitable for cards (four columns).
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageSize.Small}
      */
     Spot = "Spot",
   }
@@ -40054,7 +40799,13 @@ declare module "sap/m/IllustratedMessageType" {
    */
   enum IllustratedMessageType {
     /**
+     * "Achievement" illustration type.
+     */
+    Achievement = "sapIllus-Achievement",
+    /**
      * "Add Column" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.AddingColumns}
      */
     AddColumn = "sapIllus-AddColumn",
     /**
@@ -40062,11 +40813,23 @@ declare module "sap/m/IllustratedMessageType" {
      */
     AddDimensions = "sapIllus-AddDimensions",
     /**
+     * "Adding Columns" illustration type.
+     */
+    AddingColumns = "sapIllus-AddingColumns",
+    /**
      * "Add People" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.AddPeopleToCalendar}
      */
     AddPeople = "sapIllus-AddPeople",
     /**
+     * "Add People To Calendar" illustration type.
+     */
+    AddPeopleToCalendar = "sapIllus-AddPeopleToCalendar",
+    /**
      * "Balloon Sky" illustration type.
+     *
+     * @deprecated As of version 1.136. replaced by {@link sap.m.IllustratedMessageType.ReceiveAppreciation}
      */
     BalloonSky = "sapIllus-BalloonSky",
     /**
@@ -40075,14 +40838,24 @@ declare module "sap/m/IllustratedMessageType" {
     BeforeSearch = "sapIllus-BeforeSearch",
     /**
      * "Connection" illustration type.
+     *
+     * @deprecated As of version 1.136. replaced by {@link sap.m.IllustratedMessageType.UnableToLoad}
      */
     Connection = "sapIllus-Connection",
     /**
+     * "Drag Files To Upload" illustration type.
+     */
+    DragFilesToUpload = "sapIllus-DragFilesToUpload",
+    /**
      * "Empty Calendar" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.NoActivities}
      */
     EmptyCalendar = "sapIllus-EmptyCalendar",
     /**
      * "Empty List" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.NoEntries}
      */
     EmptyList = "sapIllus-EmptyList",
     /**
@@ -40091,16 +40864,34 @@ declare module "sap/m/IllustratedMessageType" {
     EmptyPlanningCalendar = "sapIllus-EmptyPlanningCalendar",
     /**
      * "Error Screen" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.UnableToUpload}
      */
     ErrorScreen = "sapIllus-ErrorScreen",
     /**
+     * "Filtering Columns" illustration type.
+     */
+    FilteringColumns = "sapIllus-FilteringColumns",
+    /**
      * "Filter Table" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.FilteringColumns}
      */
     FilterTable = "sapIllus-FilterTable",
     /**
+     * "Grouping Columns" illustration type.
+     */
+    GroupingColumns = "sapIllus-GroupingColumns",
+    /**
      * "Group Table" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.GroupingColumns}
      */
     GroupTable = "sapIllus-GroupTable",
+    /**
+     * "KeyTask" illustration type.
+     */
+    KeyTask = "sapIllus-KeyTask",
     /**
      * "New Mail" illustration type.
      */
@@ -40109,6 +40900,10 @@ declare module "sap/m/IllustratedMessageType" {
      * "No Activities" illustration type.
      */
     NoActivities = "sapIllus-NoActivities",
+    /**
+     * "No Chart Data" illustration type.
+     */
+    NoChartData = "sapIllus-NoChartData",
     /**
      * "No Columns Set" illustration type.
      */
@@ -40119,6 +40914,8 @@ declare module "sap/m/IllustratedMessageType" {
     NoData = "sapIllus-NoData",
     /**
      * "No Dimensions Set" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.NoChartData}
      */
     NoDimensionsSet = "sapIllus-NoDimensionsSet",
     /**
@@ -40135,6 +40932,8 @@ declare module "sap/m/IllustratedMessageType" {
     NoMail = "sapIllus-NoMail",
     /**
      * "No Email v1" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.NoMail}
      */
     NoMailV1 = "sapIllus-NoMail_v1",
     /**
@@ -40147,6 +40946,8 @@ declare module "sap/m/IllustratedMessageType" {
     NoSavedItems = "sapIllus-NoSavedItems",
     /**
      * "No Saved Items v1" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.NoSavedItems}
      */
     NoSavedItemsV1 = "sapIllus-NoSavedItems_v1",
     /**
@@ -40159,6 +40960,8 @@ declare module "sap/m/IllustratedMessageType" {
     NoTasks = "sapIllus-NoTasks",
     /**
      * "No Tasks v1" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.NoTasks}
      */
     NoTasksV1 = "sapIllus-NoTasks_v1",
     /**
@@ -40166,19 +40969,35 @@ declare module "sap/m/IllustratedMessageType" {
      */
     PageNotFound = "sapIllus-PageNotFound",
     /**
+     * "Receive Appreciation" illustration type.
+     */
+    ReceiveAppreciation = "sapIllus-ReceiveAppreciation",
+    /**
      * "Reload Screen" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.UnableToLoad}
      */
     ReloadScreen = "sapIllus-ReloadScreen",
     /**
      * "Resize Column" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.ResizingColumns}
      */
     ResizeColumn = "sapIllus-ResizeColumn",
     /**
+     * "Resizing Columns" illustration type.
+     */
+    ResizingColumns = "sapIllus-ResizingColumns",
+    /**
      * "Search Earth" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.BeforeSearch}
      */
     SearchEarth = "sapIllus-SearchEarth",
     /**
      * "Search Folder" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.NoSearchResults}
      */
     SearchFolder = "sapIllus-SearchFolder",
     /**
@@ -40187,82 +41006,126 @@ declare module "sap/m/IllustratedMessageType" {
     SignOut = "sapIllus-SignOut",
     /**
      * "Simple Balloon" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.ReceiveAppreciation}
      */
     SimpleBalloon = "sapIllus-SimpleBalloon",
     /**
      * "Simple Bell" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.NoNotifications}
      */
     SimpleBell = "sapIllus-SimpleBell",
     /**
      * "Simple Calendar" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.NoActivities}
      */
     SimpleCalendar = "sapIllus-SimpleCalendar",
     /**
      * "Simple CheckMark" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.KeyTask}
      */
     SimpleCheckMark = "sapIllus-SimpleCheckMark",
     /**
      * "Simple Connection" illustration type.
+     *
+     * @deprecated As of version 1.136. replaced by {@link sap.m.IllustratedMessageType.UnableToLoad}
      */
     SimpleConnection = "sapIllus-SimpleConnection",
     /**
      * "Simple Empty Doc" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.NoData}
      */
     SimpleEmptyDoc = "sapIllus-SimpleEmptyDoc",
     /**
      * "Simple Empty List" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.NoEntries}
      */
     SimpleEmptyList = "sapIllus-SimpleEmptyList",
     /**
      * "Simple Error" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.UnableToUpload}
      */
     SimpleError = "sapIllus-SimpleError",
     /**
      * "Simple Magnifier" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.BeforeSearch}
      */
     SimpleMagnifier = "sapIllus-SimpleMagnifier",
     /**
      * "Simple Mail" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.NoMail}
      */
     SimpleMail = "sapIllus-SimpleMail",
     /**
      * "Simple No Saved Items" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.NoSavedItems}
      */
     SimpleNoSavedItems = "sapIllus-SimpleNoSavedItems",
     /**
      * "Simple Not Found Magnifier" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.NoSearchResults}
      */
     SimpleNotFoundMagnifier = "sapIllus-SimpleNotFoundMagnifier",
     /**
      * "Simple Reload" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.UnableToLoad}
      */
     SimpleReload = "sapIllus-SimpleReload",
     /**
      * "Simple Task" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.NoTasks}
      */
     SimpleTask = "sapIllus-SimpleTask",
     /**
      * "Sleeping Bell" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.NoNotifications}
      */
     SleepingBell = "sapIllus-SleepingBell",
     /**
      * "Sort Column" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.SortingColumns}
      */
     SortColumn = "sapIllus-SortColumn",
     /**
+     * "Sorting Columns" illustration type.
+     */
+    SortingColumns = "sapIllus-SortingColumns",
+    /**
      * "Success Balloon" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.ReceiveAppreciation}
      */
     SuccessBalloon = "sapIllus-SuccessBalloon",
     /**
      * "Success CheckMark" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.KeyTask}
      */
     SuccessCheckMark = "sapIllus-SuccessCheckMark",
     /**
      * "Success HighFive" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.ReceiveAppreciation}
      */
     SuccessHighFive = "sapIllus-SuccessHighFive",
     /**
      * "Success Screen" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.KeyTask}
      */
     SuccessScreen = "sapIllus-SuccessScreen",
     /**
@@ -40271,6 +41134,8 @@ declare module "sap/m/IllustratedMessageType" {
     Survey = "sapIllus-Survey",
     /**
      * "Tent" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.NoData}
      */
     Tent = "sapIllus-Tent",
     /**
@@ -40287,12 +41152,18 @@ declare module "sap/m/IllustratedMessageType" {
     UnableToUpload = "sapIllus-UnableToUpload",
     /**
      * "Upload Collection" illustration type.
+     *
+     * @deprecated As of version 1.135. replaced by {@link sap.m.IllustratedMessageType.DragFilesToUpload}
      */
     UploadCollection = "sapIllus-UploadCollection",
     /**
      * "Upload To Cloud" illustration type.
      */
     UploadToCloud = "sapIllus-UploadToCloud",
+    /**
+     * "User has signed up for an application" illustration type.
+     */
+    UserHasSignedUp = "sapIllus-UserHasSignedUp",
   }
   export default IllustratedMessageType;
 }
@@ -40415,6 +41286,18 @@ declare module "sap/m/Illustration" {
      */
     getAriaLabelledBy(): ID[];
     /**
+     * Gets current value of property {@link #getDecorative decorative}.
+     *
+     * Defines whether the illustration is decorative.
+     *
+     * Default value is `false`.
+     *
+     * @since 1.138
+     *
+     * @returns Value of property `decorative`
+     */
+    getDecorative(): boolean;
+    /**
      * Gets current value of property {@link #getMedia media}.
      *
      * Defines which media/breakpoint should be used when building the Symbol ID.
@@ -40486,6 +41369,25 @@ declare module "sap/m/Illustration" {
        */
       vAriaLabelledBy: int | ID | Control
     ): ID | null;
+    /**
+     * Sets a new value for property {@link #getDecorative decorative}.
+     *
+     * Defines whether the illustration is decorative.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `false`.
+     *
+     * @since 1.138
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setDecorative(
+      /**
+       * New value for property `decorative`
+       */
+      bDecorative?: boolean
+    ): this;
     /**
      * Sets a new value for property {@link #getMedia media}.
      *
@@ -40562,6 +41464,13 @@ declare module "sap/m/Illustration" {
      * @since 1.98
      */
     type?: string | PropertyBindingInfo;
+
+    /**
+     * Defines whether the illustration is decorative.
+     *
+     * @since 1.138
+     */
+    decorative?: boolean | PropertyBindingInfo | `{${string}}`;
 
     /**
      * Association to controls / IDs which label those controls (see WAI-ARIA attribute aria-labelledBy).
@@ -40662,7 +41571,11 @@ declare module "sap/m/IllustrationPool" {
       /**
        * whether or not all of the assets for the Illustration Set should be loaded once the metadata is loaded
        */
-      bLoadAllResources: boolean
+      bLoadAllResources: boolean,
+      /**
+       * optional array containing the Illustration Set symbols
+       */
+      aOptionalSymbols: any[]
     ): void;
   }
   const IllustrationPool: IllustrationPool;
@@ -44791,6 +45704,8 @@ declare module "sap/m/InputBase" {
     CSSSize,
   } from "sap/ui/core/library";
 
+  import { IToolbarInteractiveControl } from "sap/m/library";
+
   import Icon from "sap/ui/core/Icon";
 
   import { PropertyBindingInfo } from "sap/ui/base/ManagedObject";
@@ -44814,7 +45729,7 @@ declare module "sap/m/InputBase" {
       IFormContent,
       ISemanticFormContent,
       ILabelable,
-      /* was: sap.m.IToolbarInteractiveControl */ Object
+      IToolbarInteractiveControl
   {
     __implements__sap_ui_core_IFormContent: boolean;
     __implements__sap_ui_core_ISemanticFormContent: boolean;
@@ -45288,6 +46203,22 @@ declare module "sap/m/InputBase" {
      * @returns Value of property `valueState`
      */
     getValueState(): ValueState;
+    /**
+     * Gets the ID of the hidden value state message related to value state links
+     *
+     * @ui5-protected Do not call from applications (only from related classes in the framework)
+     *
+     * @returns The ID of the hidden value state message related to value state links
+     */
+    getValueStateLinksShortcutsId(): string;
+    /**
+     * Returns the keyboard shortcuts announcement for the value state links
+     *
+     * @ui5-protected Do not call from applications (only from related classes in the framework)
+     *
+     * @returns The text for value state links shortcuts
+     */
+    getValueStateLinksShortcutsTextAcc(): string;
     /**
      * Gets current value of property {@link #getValueStateText valueStateText}.
      *
@@ -47116,6 +48047,7 @@ declare module "sap/m/Label" {
 
   import {
     IOverflowToolbarContent,
+    IToolbarInteractiveControl,
     LabelDesign,
     OverflowToolbarConfig,
     WrappingType,
@@ -47152,7 +48084,7 @@ declare module "sap/m/Label" {
       IAccessKeySupport,
       ILabelable,
       IOverflowToolbarContent,
-      /* was: sap.m.IToolbarInteractiveControl */ Object
+      IToolbarInteractiveControl
   {
     __implements__sap_ui_core_Label: boolean;
     __implements__sap_ui_core_IShrinkable: boolean;
@@ -48222,6 +49154,7 @@ declare module "sap/m/Link" {
   } from "sap/ui/core/library";
 
   import {
+    IToolbarInteractiveControl,
     LinkAccessibleRole,
     EmptyIndicatorMode,
     ReactiveAreaMode,
@@ -48266,7 +49199,7 @@ declare module "sap/m/Link" {
       ITitleContent,
       IAccessKeySupport,
       ILabelable,
-      /* was: sap.m.IToolbarInteractiveControl */ Object
+      IToolbarInteractiveControl
   {
     __implements__sap_ui_core_IShrinkable: boolean;
     __implements__sap_ui_core_IFormContent: boolean;
@@ -49852,6 +50785,8 @@ declare module "sap/m/ListBase" {
 
   import Event from "sap/ui/base/Event";
 
+  import ListItemAction from "sap/m/ListItemAction";
+
   /**
    * The `sap.m.ListBase` control provides a base functionality of the `sap.m.List` and `sap.m.Table` controls.
    * Selection, deletion, unread states and inset style are also maintained in `sap.m.ListBase`.
@@ -50157,6 +51092,57 @@ declare module "sap/m/ListBase" {
        * The function to be called when the event occurs
        */
       fnFunction: (p1: ListBase$GrowingStartedEvent) => void,
+      /**
+       * Context object to call the event handler with. Defaults to this `sap.m.ListBase` itself
+       */
+      oListener?: object
+    ): this;
+    /**
+     * Attaches event handler `fnFunction` to the {@link #event:itemActionPress itemActionPress} event of this
+     * `sap.m.ListBase`.
+     *
+     * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
+     * otherwise it will be bound to this `sap.m.ListBase` itself.
+     *
+     * Fired when an item action is pressed.
+     *
+     * @since 1.137
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    attachItemActionPress(
+      /**
+       * An application-specific payload object that will be passed to the event handler along with the event
+       * object when firing the event
+       */
+      oData: object,
+      /**
+       * The function to be called when the event occurs
+       */
+      fnFunction: (p1: ListBase$ItemActionPressEvent) => void,
+      /**
+       * Context object to call the event handler with. Defaults to this `sap.m.ListBase` itself
+       */
+      oListener?: object
+    ): this;
+    /**
+     * Attaches event handler `fnFunction` to the {@link #event:itemActionPress itemActionPress} event of this
+     * `sap.m.ListBase`.
+     *
+     * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
+     * otherwise it will be bound to this `sap.m.ListBase` itself.
+     *
+     * Fired when an item action is pressed.
+     *
+     * @since 1.137
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    attachItemActionPress(
+      /**
+       * The function to be called when the event occurs
+       */
+      fnFunction: (p1: ListBase$ItemActionPressEvent) => void,
       /**
        * Context object to call the event handler with. Defaults to this `sap.m.ListBase` itself
        */
@@ -50616,6 +51602,26 @@ declare module "sap/m/ListBase" {
       oListener?: object
     ): this;
     /**
+     * Detaches event handler `fnFunction` from the {@link #event:itemActionPress itemActionPress} event of
+     * this `sap.m.ListBase`.
+     *
+     * The passed function and listener object must match the ones used for event registration.
+     *
+     * @since 1.137
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    detachItemActionPress(
+      /**
+       * The function to be called, when the event occurs
+       */
+      fnFunction: (p1: ListBase$ItemActionPressEvent) => void,
+      /**
+       * Context object on which the given function had to be called
+       */
+      oListener?: object
+    ): this;
+    /**
      * Detaches event handler `fnFunction` from the {@link #event:itemPress itemPress} event of this `sap.m.ListBase`.
      *
      * The passed function and listener object must match the ones used for event registration.
@@ -50790,6 +51796,20 @@ declare module "sap/m/ListBase" {
        * Parameters to pass along with the event
        */
       mParameters?: ListBase$GrowingStartedEventParameters
+    ): this;
+    /**
+     * Fires event {@link #event:itemActionPress itemActionPress} to attached listeners.
+     *
+     * @since 1.137
+     * @ui5-protected Do not call from applications (only from related classes in the framework)
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    fireItemActionPress(
+      /**
+       * Parameters to pass along with the event
+       */
+      mParameters?: ListBase$ItemActionPressEventParameters
     ): this;
     /**
      * Fires event {@link #event:itemPress itemPress} to attached listeners.
@@ -51077,6 +52097,27 @@ declare module "sap/m/ListBase" {
      */
     getInset(): boolean;
     /**
+     * Gets current value of property {@link #getItemActionCount itemActionCount}.
+     *
+     * Defines the maximum number of {@link sap.m.ListItemBase#getActions actions} displayed for the items.
+     *
+     * If the number of item actions exceeds the `itemActionCount` property value, an overflow button will appear,
+     * providing access to the additional actions.
+     *
+     * **Note:** Only values between `0-2` enables the use of the new `actions` aggregation. When enabled, the
+     * {@link sap.m.ListMode Delete} mode and the {@link sap.m.ListType Detail} list item type have no effect.
+     * Instead, dedicated actions of {@link sap.m.ListItemActionType type} `Delete` or `Edit` should be used.
+     *  **Note:** As of version 1.147, items with type {@link sap.m.ListType Navigation} render the navigation
+     * indicator as an action, which is not counted in `itemActionCount`.
+     *
+     * Default value is `-1`.
+     *
+     * @since 1.137
+     *
+     * @returns Value of property `itemActionCount`
+     */
+    getItemActionCount(): int;
+    /**
      * Returns the ItemNavigation delegate of the list
      *
      * @since 1.16.5
@@ -51182,12 +52223,12 @@ declare module "sap/m/ListBase" {
      * for the `selected` property of the item is not used. It also needs to be turned off if the binding context
      * of the item does not always point to the same entry in the model, for example, if the order of the data
      * in the `JSONModel` is changed. **Note:** This feature leverages the built-in selection mechanism of the
-     * corresponding binding context when the OData V4 model is used. Therefore, all binding-relevant limitations
+     * corresponding binding context if the OData V4 model is used. Therefore, all binding-relevant limitations
      * apply in this context as well. For more details, see the {@link sap.ui.model.odata.v4.Context#setSelected setSelected},
      * the {@link sap.ui.model.odata.v4.ODataModel#bindList bindList}, and the {@link sap.ui.model.odata.v4.ODataMetaModel#requestValueListInfo requestValueListInfo }
-     * API documentation. Do not enable this feature when `$$SharedRequests` or `$$clearSelectionOnFilter` is
-     * active. **Note:** If this property is set to `false`, a possible binding context update of items (for
-     * example, filtering or sorting the list binding) would clear the selection of the items.
+     * API documentation. Do not enable this feature if `$$sharedRequest` or `$$clearSelectionOnFilter` is active.
+     * **Note:** If this property is set to `false`, a possible binding context update of items (for example,
+     * filtering or sorting the list binding) would clear the selection of the items.
      *
      * Default value is `true`.
      *
@@ -51267,7 +52308,8 @@ declare module "sap/m/ListBase" {
      *     will let the table scroll to the top.
      * 	 - A transparent toolbar design is not supported for sticky bars. The toolbar will automatically get
      *     an intransparent background color.
-     * 	 - This feature supports only the default height of the toolbar control.
+     * 	 - This feature supports only the default height of the toolbar control and the column headers.
+     * 	 - When sticky group headers are enabled, wrapping in the column headers is not supported.
      *
      * @since 1.58
      *
@@ -51736,6 +52778,34 @@ declare module "sap/m/ListBase" {
       bInset?: boolean
     ): this;
     /**
+     * Sets a new value for property {@link #getItemActionCount itemActionCount}.
+     *
+     * Defines the maximum number of {@link sap.m.ListItemBase#getActions actions} displayed for the items.
+     *
+     * If the number of item actions exceeds the `itemActionCount` property value, an overflow button will appear,
+     * providing access to the additional actions.
+     *
+     * **Note:** Only values between `0-2` enables the use of the new `actions` aggregation. When enabled, the
+     * {@link sap.m.ListMode Delete} mode and the {@link sap.m.ListType Detail} list item type have no effect.
+     * Instead, dedicated actions of {@link sap.m.ListItemActionType type} `Delete` or `Edit` should be used.
+     *  **Note:** As of version 1.147, items with type {@link sap.m.ListType Navigation} render the navigation
+     * indicator as an action, which is not counted in `itemActionCount`.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `-1`.
+     *
+     * @since 1.137
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setItemActionCount(
+      /**
+       * New value for property `itemActionCount`
+       */
+      iItemActionCount?: int
+    ): this;
+    /**
      * Sets a new value for property {@link #getKeyboardMode keyboardMode}.
      *
      * Defines keyboard handling behavior of the control.
@@ -51859,12 +52929,12 @@ declare module "sap/m/ListBase" {
      * for the `selected` property of the item is not used. It also needs to be turned off if the binding context
      * of the item does not always point to the same entry in the model, for example, if the order of the data
      * in the `JSONModel` is changed. **Note:** This feature leverages the built-in selection mechanism of the
-     * corresponding binding context when the OData V4 model is used. Therefore, all binding-relevant limitations
+     * corresponding binding context if the OData V4 model is used. Therefore, all binding-relevant limitations
      * apply in this context as well. For more details, see the {@link sap.ui.model.odata.v4.Context#setSelected setSelected},
      * the {@link sap.ui.model.odata.v4.ODataModel#bindList bindList}, and the {@link sap.ui.model.odata.v4.ODataMetaModel#requestValueListInfo requestValueListInfo }
-     * API documentation. Do not enable this feature when `$$SharedRequests` or `$$clearSelectionOnFilter` is
-     * active. **Note:** If this property is set to `false`, a possible binding context update of items (for
-     * example, filtering or sorting the list binding) would clear the selection of the items.
+     * API documentation. Do not enable this feature if `$$sharedRequest` or `$$clearSelectionOnFilter` is active.
+     * **Note:** If this property is set to `false`, a possible binding context update of items (for example,
+     * filtering or sorting the list binding) would clear the selection of the items.
      *
      * When called with a value of `null` or `undefined`, the default value of the property will be restored.
      *
@@ -51983,7 +53053,8 @@ declare module "sap/m/ListBase" {
      *     will let the table scroll to the top.
      * 	 - A transparent toolbar design is not supported for sticky bars. The toolbar will automatically get
      *     an intransparent background color.
-     * 	 - This feature supports only the default height of the toolbar control.
+     * 	 - This feature supports only the default height of the toolbar control and the column headers.
+     * 	 - When sticky group headers are enabled, wrapping in the column headers is not supported.
      *
      * When called with a value of `null` or `undefined`, the default value of the property will be restored.
      *
@@ -52236,12 +53307,12 @@ declare module "sap/m/ListBase" {
      * for the `selected` property of the item is not used. It also needs to be turned off if the binding context
      * of the item does not always point to the same entry in the model, for example, if the order of the data
      * in the `JSONModel` is changed. **Note:** This feature leverages the built-in selection mechanism of the
-     * corresponding binding context when the OData V4 model is used. Therefore, all binding-relevant limitations
+     * corresponding binding context if the OData V4 model is used. Therefore, all binding-relevant limitations
      * apply in this context as well. For more details, see the {@link sap.ui.model.odata.v4.Context#setSelected setSelected},
      * the {@link sap.ui.model.odata.v4.ODataModel#bindList bindList}, and the {@link sap.ui.model.odata.v4.ODataMetaModel#requestValueListInfo requestValueListInfo }
-     * API documentation. Do not enable this feature when `$$SharedRequests` or `$$clearSelectionOnFilter` is
-     * active. **Note:** If this property is set to `false`, a possible binding context update of items (for
-     * example, filtering or sorting the list binding) would clear the selection of the items.
+     * API documentation. Do not enable this feature if `$$sharedRequest` or `$$clearSelectionOnFilter` is active.
+     * **Note:** If this property is set to `false`, a possible binding context update of items (for example,
+     * filtering or sorting the list binding) would clear the selection of the items.
      *
      * @since 1.16.6
      */
@@ -52271,7 +53342,8 @@ declare module "sap/m/ListBase" {
      *     will let the table scroll to the top.
      * 	 - A transparent toolbar design is not supported for sticky bars. The toolbar will automatically get
      *     an intransparent background color.
-     * 	 - This feature supports only the default height of the toolbar control.
+     * 	 - This feature supports only the default height of the toolbar control and the column headers.
+     * 	 - When sticky group headers are enabled, wrapping in the column headers is not supported.
      *
      * @since 1.58
      */
@@ -52300,6 +53372,22 @@ declare module "sap/m/ListBase" {
       | (MultiSelectMode | keyof typeof MultiSelectMode)
       | PropertyBindingInfo
       | `{${string}}`;
+
+    /**
+     * Defines the maximum number of {@link sap.m.ListItemBase#getActions actions} displayed for the items.
+     *
+     * If the number of item actions exceeds the `itemActionCount` property value, an overflow button will appear,
+     * providing access to the additional actions.
+     *
+     * **Note:** Only values between `0-2` enables the use of the new `actions` aggregation. When enabled, the
+     * {@link sap.m.ListMode Delete} mode and the {@link sap.m.ListType Detail} list item type have no effect.
+     * Instead, dedicated actions of {@link sap.m.ListItemActionType type} `Delete` or `Edit` should be used.
+     *  **Note:** As of version 1.147, items with type {@link sap.m.ListType Navigation} render the navigation
+     * indicator as an action, which is not counted in `itemActionCount`.
+     *
+     * @since 1.137
+     */
+    itemActionCount?: int | PropertyBindingInfo | `{${string}}`;
 
     /**
      * Defines the items contained within this control.
@@ -52434,6 +53522,13 @@ declare module "sap/m/ListBase" {
     beforeOpenContextMenu?: (
       oEvent: ListBase$BeforeOpenContextMenuEvent
     ) => void;
+
+    /**
+     * Fired when an item action is pressed.
+     *
+     * @since 1.137
+     */
+    itemActionPress?: (oEvent: ListBase$ItemActionPressEvent) => void;
   }
 
   /**
@@ -52523,6 +53618,29 @@ declare module "sap/m/ListBase" {
    */
   export type ListBase$GrowingStartedEvent = Event<
     ListBase$GrowingStartedEventParameters,
+    ListBase
+  >;
+
+  /**
+   * Parameters of the ListBase#itemActionPress event.
+   */
+  export interface ListBase$ItemActionPressEventParameters {
+    /**
+     * The list item action that fired the event
+     */
+    action?: ListItemAction;
+
+    /**
+     * The list item in which the action was performed
+     */
+    listItem?: ListItemBase;
+  }
+
+  /**
+   * Event object of the ListBase#itemActionPress event.
+   */
+  export type ListBase$ItemActionPressEvent = Event<
+    ListBase$ItemActionPressEventParameters,
     ListBase
   >;
 
@@ -52697,8 +53815,320 @@ declare module "sap/m/ListBase" {
   >;
 }
 
+declare module "sap/m/ListItemAction" {
+  import {
+    default as ListItemActionBase,
+    $ListItemActionBaseSettings,
+  } from "sap/m/ListItemActionBase";
+
+  import ElementMetadata from "sap/ui/core/ElementMetadata";
+
+  import { ListItemActionType } from "sap/m/library";
+
+  import { PropertyBindingInfo } from "sap/ui/base/ManagedObject";
+
+  /**
+   * The `sap.m.ListItemAction` control provides the option to define actions directly related to list items.
+   *
+   * @since 1.137
+   */
+  export default class ListItemAction extends ListItemActionBase {
+    /**
+     * Constructor for a new action for list items.
+     *
+     * Accepts an object literal `mSettings` that defines initial property values, aggregated and associated
+     * objects as well as event handlers. See {@link sap.ui.base.ManagedObject#constructor} for a general description
+     * of the syntax of the settings object.
+     */
+    constructor(
+      /**
+       * Initial settings for the new control
+       */
+      mSettings?: $ListItemActionSettings
+    );
+    /**
+     * Constructor for a new action for list items.
+     *
+     * Accepts an object literal `mSettings` that defines initial property values, aggregated and associated
+     * objects as well as event handlers. See {@link sap.ui.base.ManagedObject#constructor} for a general description
+     * of the syntax of the settings object.
+     */
+    constructor(
+      /**
+       * id for the new control, generated automatically if no id is given
+       */
+      sId?: string,
+      /**
+       * Initial settings for the new control
+       */
+      mSettings?: $ListItemActionSettings
+    );
+
+    /**
+     * Creates a new subclass of class sap.m.ListItemAction with name `sClassName` and enriches it with the
+     * information contained in `oClassInfo`.
+     *
+     * `oClassInfo` might contain the same kind of information as described in {@link sap.m.ListItemActionBase.extend}.
+     *
+     *
+     * @returns Created class / constructor function
+     */
+    static extend<T extends Record<string, unknown>>(
+      /**
+       * Name of the class being created
+       */
+      sClassName: string,
+      /**
+       * Object literal with information about the class
+       */
+      oClassInfo?: sap.ClassInfo<T, ListItemAction>,
+      /**
+       * Constructor function for the metadata object; if not given, it defaults to the metadata implementation
+       * used by this class
+       */
+      FNMetaImpl?: Function
+    ): Function;
+    /**
+     * Returns a metadata object for class sap.m.ListItemAction.
+     *
+     *
+     * @returns Metadata object describing this class
+     */
+    static getMetadata(): ElementMetadata;
+    /**
+     * Gets current value of property {@link #getType type}.
+     *
+     * Defines the type of the action.
+     *
+     * Default value is `Custom`.
+     *
+     *
+     * @returns Value of property `type`
+     */
+    getType(): ListItemActionType;
+    /**
+     * Sets a new value for property {@link #getType type}.
+     *
+     * Defines the type of the action.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `Custom`.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setType(
+      /**
+       * New value for property `type`
+       */
+      sType?: ListItemActionType | keyof typeof ListItemActionType
+    ): this;
+  }
+  /**
+   * Describes the settings that can be provided to the ListItemAction constructor.
+   */
+  export interface $ListItemActionSettings extends $ListItemActionBaseSettings {
+    /**
+     * Defines the type of the action.
+     */
+    type?:
+      | (ListItemActionType | keyof typeof ListItemActionType)
+      | PropertyBindingInfo
+      | `{${string}}`;
+  }
+}
+
+declare module "sap/m/ListItemActionBase" {
+  import { default as UI5Element, $ElementSettings } from "sap/ui/core/Element";
+
+  import { URI } from "sap/ui/core/library";
+
+  import ElementMetadata from "sap/ui/core/ElementMetadata";
+
+  import { PropertyBindingInfo } from "sap/ui/base/ManagedObject";
+
+  /**
+   * The `sap.m.ListItemActionBase` class serves as a foundation for list item actions.
+   *
+   * @since 1.137
+   */
+  export default abstract class ListItemActionBase extends UI5Element {
+    /**
+     * Constructor for a new action for list items.
+     *
+     * Accepts an object literal `mSettings` that defines initial property values, aggregated and associated
+     * objects as well as event handlers. See {@link sap.ui.base.ManagedObject#constructor} for a general description
+     * of the syntax of the settings object.
+     */
+    constructor(
+      /**
+       * Initial settings for the new action
+       */
+      mSettings?: $ListItemActionBaseSettings
+    );
+    /**
+     * Constructor for a new action for list items.
+     *
+     * Accepts an object literal `mSettings` that defines initial property values, aggregated and associated
+     * objects as well as event handlers. See {@link sap.ui.base.ManagedObject#constructor} for a general description
+     * of the syntax of the settings object.
+     */
+    constructor(
+      /**
+       * id for the new control, generated automatically if no id is given
+       */
+      sId?: string,
+      /**
+       * Initial settings for the new action
+       */
+      mSettings?: $ListItemActionBaseSettings
+    );
+
+    /**
+     * Creates a new subclass of class sap.m.ListItemActionBase with name `sClassName` and enriches it with
+     * the information contained in `oClassInfo`.
+     *
+     * `oClassInfo` might contain the same kind of information as described in {@link sap.ui.core.Element.extend}.
+     *
+     *
+     * @returns Created class / constructor function
+     */
+    static extend<T extends Record<string, unknown>>(
+      /**
+       * Name of the class being created
+       */
+      sClassName: string,
+      /**
+       * Object literal with information about the class
+       */
+      oClassInfo?: sap.ClassInfo<T, ListItemActionBase>,
+      /**
+       * Constructor function for the metadata object; if not given, it defaults to the metadata implementation
+       * used by this class
+       */
+      FNMetaImpl?: Function
+    ): Function;
+    /**
+     * Returns a metadata object for class sap.m.ListItemActionBase.
+     *
+     *
+     * @returns Metadata object describing this class
+     */
+    static getMetadata(): ElementMetadata;
+    /**
+     * Gets current value of property {@link #getIcon icon}.
+     *
+     * Defines the icon of the action.
+     *
+     * Default value is `empty string`.
+     *
+     *
+     * @returns Value of property `icon`
+     */
+    getIcon(): URI;
+    /**
+     * Gets current value of property {@link #getText text}.
+     *
+     * Defines the text of the action.
+     *
+     * Default value is `empty string`.
+     *
+     *
+     * @returns Value of property `text`
+     */
+    getText(): string;
+    /**
+     * Gets current value of property {@link #getVisible visible}.
+     *
+     * Defines the visibility of the action.
+     *
+     * Default value is `true`.
+     *
+     *
+     * @returns Value of property `visible`
+     */
+    getVisible(): boolean;
+    /**
+     * Sets a new value for property {@link #getIcon icon}.
+     *
+     * Defines the icon of the action.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `empty string`.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setIcon(
+      /**
+       * New value for property `icon`
+       */
+      sIcon?: URI
+    ): this;
+    /**
+     * Sets a new value for property {@link #getText text}.
+     *
+     * Defines the text of the action.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `empty string`.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setText(
+      /**
+       * New value for property `text`
+       */
+      sText?: string
+    ): this;
+    /**
+     * Sets a new value for property {@link #getVisible visible}.
+     *
+     * Defines the visibility of the action.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `true`.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setVisible(
+      /**
+       * New value for property `visible`
+       */
+      bVisible?: boolean
+    ): this;
+  }
+  /**
+   * Describes the settings that can be provided to the ListItemActionBase constructor.
+   */
+  export interface $ListItemActionBaseSettings extends $ElementSettings {
+    /**
+     * Defines the icon of the action.
+     */
+    icon?: URI | PropertyBindingInfo | `{${string}}`;
+
+    /**
+     * Defines the text of the action.
+     */
+    text?: string | PropertyBindingInfo;
+
+    /**
+     * Defines the visibility of the action.
+     */
+    visible?: boolean | PropertyBindingInfo | `{${string}}`;
+  }
+}
+
 declare module "sap/m/ListItemBase" {
   import { default as Control, $ControlSettings } from "sap/ui/core/Control";
+
+  import ListItemActionBase from "sap/m/ListItemActionBase";
 
   import { ID } from "sap/ui/core/library";
 
@@ -52708,7 +54138,10 @@ declare module "sap/m/ListItemBase" {
 
   import { ListType } from "sap/m/library";
 
-  import { PropertyBindingInfo } from "sap/ui/base/ManagedObject";
+  import {
+    PropertyBindingInfo,
+    AggregationBindingInfo,
+  } from "sap/ui/base/ManagedObject";
 
   /**
    * ListItemBase contains the base features of all specific list items. **Note:** If not mentioned otherwise
@@ -52778,6 +54211,19 @@ declare module "sap/m/ListItemBase" {
      * @returns Metadata object describing this class
      */
     static getMetadata(): ElementMetadata;
+    /**
+     * Adds some action to the aggregation {@link #getActions actions}.
+     *
+     * @since 1.137
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    addAction(
+      /**
+       * The action to add; if empty, nothing is inserted
+       */
+      oAction: ListItemActionBase
+    ): this;
     /**
      * Adds some ariaLabelledBy into the association {@link #getAriaLabelledBy ariaLabelledBy}.
      *
@@ -52990,6 +54436,14 @@ declare module "sap/m/ListItemBase" {
       oListener?: object
     ): this;
     /**
+     * Destroys all the actions in the aggregation {@link #getActions actions}.
+     *
+     * @since 1.137
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    destroyActions(): this;
+    /**
      * Detaches event handler `fnFunction` from the {@link #event:detailPress detailPress} event of this `sap.m.ListItemBase`.
      *
      * The passed function and listener object must match the ones used for event registration.
@@ -53117,6 +54571,14 @@ declare module "sap/m/ListItemBase" {
        */
       mParameters?: object
     ): this;
+    /**
+     * Gets content of aggregation {@link #getActions actions}.
+     *
+     * Defines the actions contained within this control.
+     *
+     * @since 1.137
+     */
+    getActions(): ListItemActionBase[];
     /**
      * Returns array of IDs of the elements which are the current targets of the association {@link #getAriaLabelledBy ariaLabelledBy}.
      *
@@ -53252,12 +54714,68 @@ declare module "sap/m/ListItemBase" {
      */
     getVisible(): boolean;
     /**
+     * Checks for the provided `sap.m.ListItemActionBase` in the aggregation {@link #getActions actions}. and
+     * returns its index if found or -1 otherwise.
+     *
+     * @since 1.137
+     *
+     * @returns The index of the provided control in the aggregation if found, or -1 otherwise
+     */
+    indexOfAction(
+      /**
+       * The action whose index is looked for
+       */
+      oAction: ListItemActionBase
+    ): int;
+    /**
+     * Inserts a action into the aggregation {@link #getActions actions}.
+     *
+     * @since 1.137
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    insertAction(
+      /**
+       * The action to insert; if empty, nothing is inserted
+       */
+      oAction: ListItemActionBase,
+      /**
+       * The `0`-based index the action should be inserted at; for a negative value of `iIndex`, the action is
+       * inserted at position 0; for a value greater than the current size of the aggregation, the action is inserted
+       * at the last position
+       */
+      iIndex: int
+    ): this;
+    /**
      * Returns the state of the item selection as a boolean
      *
      * @deprecated As of version 1.10.2. API Change makes this method unnecessary. Use the {@link #getSelected }
      * method instead.
      */
     isSelected(): boolean;
+    /**
+     * Removes a action from the aggregation {@link #getActions actions}.
+     *
+     * @since 1.137
+     *
+     * @returns The removed action or `null`
+     */
+    removeAction(
+      /**
+       * The action to remove or its index or id
+       */
+      vAction: int | string | ListItemActionBase
+    ): ListItemActionBase | null;
+    /**
+     * Removes all the controls from the aggregation {@link #getActions actions}.
+     *
+     * Additionally, it unregisters them from the hosting UIArea.
+     *
+     * @since 1.137
+     *
+     * @returns An array of the removed elements (might be empty)
+     */
+    removeAllActions(): ListItemActionBase[];
     /**
      * Removes all the controls in the association named {@link #getAriaLabelledBy ariaLabelledBy}.
      *
@@ -53511,6 +55029,17 @@ declare module "sap/m/ListItemBase" {
      * @since 1.72
      */
     navigated?: boolean | PropertyBindingInfo | `{${string}}`;
+
+    /**
+     * Defines the actions contained within this control.
+     *
+     * @since 1.137
+     */
+    actions?:
+      | ListItemActionBase[]
+      | ListItemActionBase
+      | AggregationBindingInfo
+      | `{${string}}`;
 
     /**
      * Association to controls / ids which label this control (see WAI-ARIA attribute aria-labelledby).
@@ -54321,7 +55850,7 @@ declare module "sap/m/MaskInputRule" {
 declare module "sap/m/Menu" {
   import { default as Control, $ControlSettings } from "sap/ui/core/Control";
 
-  import { IContextMenu, Dock } from "sap/ui/core/library";
+  import { IContextMenu } from "sap/ui/core/library";
 
   import { IMenuItem } from "sap/m/library";
 
@@ -54336,16 +55865,9 @@ declare module "sap/m/Menu" {
 
   import UI5Element from "sap/ui/core/Element";
 
-  import MenuItem from "sap/m/MenuItem";
-
   /**
    * The `sap.m.Menu` control represents a hierarchical menu. When opened on mobile devices it occupies the
    * whole screen.
-   *
-   * **Note:** The application developer should add dependency to `sap.ui.unified` library on application
-   * level to ensure that the library is loaded before the module dependencies will be required. If the `sap.ui.unified`
-   * library is not loaded in advance, this could lead to CSP compliance issues and adds an additional waiting
-   * time. To prevent this, ensure that the `sap.ui.unified` library is loaded in advance.
    */
   export default class Menu extends Control implements IContextMenu {
     __implements__sap_ui_core_IContextMenu: boolean;
@@ -54445,7 +55967,7 @@ declare module "sap/m/Menu" {
       /**
        * The function to be called when the event occurs
        */
-      fnFunction: (p1: Event) => void,
+      fnFunction: (p1: Menu$BeforeCloseEvent) => void,
       /**
        * Context object to call the event handler with. Defaults to this `sap.m.Menu` itself
        */
@@ -54468,7 +55990,7 @@ declare module "sap/m/Menu" {
       /**
        * The function to be called when the event occurs
        */
-      fnFunction: (p1: Event) => void,
+      fnFunction: (p1: Menu$BeforeCloseEvent) => void,
       /**
        * Context object to call the event handler with. Defaults to this `sap.m.Menu` itself
        */
@@ -54563,6 +56085,55 @@ declare module "sap/m/Menu" {
        * The function to be called when the event occurs
        */
       fnFunction: (p1: Menu$ItemSelectedEvent) => void,
+      /**
+       * Context object to call the event handler with. Defaults to this `sap.m.Menu` itself
+       */
+      oListener?: object
+    ): this;
+    /**
+     * Attaches event handler `fnFunction` to the {@link #event:open open} event of this `sap.m.Menu`.
+     *
+     * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
+     * otherwise it will be bound to this `sap.m.Menu` itself.
+     *
+     * Fired when the menu is opened.
+     *
+     * @since 1.146
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    attachOpen(
+      /**
+       * An application-specific payload object that will be passed to the event handler along with the event
+       * object when firing the event
+       */
+      oData: object,
+      /**
+       * The function to be called when the event occurs
+       */
+      fnFunction: (p1: Event) => void,
+      /**
+       * Context object to call the event handler with. Defaults to this `sap.m.Menu` itself
+       */
+      oListener?: object
+    ): this;
+    /**
+     * Attaches event handler `fnFunction` to the {@link #event:open open} event of this `sap.m.Menu`.
+     *
+     * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
+     * otherwise it will be bound to this `sap.m.Menu` itself.
+     *
+     * Fired when the menu is opened.
+     *
+     * @since 1.146
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    attachOpen(
+      /**
+       * The function to be called when the event occurs
+       */
+      fnFunction: (p1: Event) => void,
       /**
        * Context object to call the event handler with. Defaults to this `sap.m.Menu` itself
        */
@@ -54584,9 +56155,17 @@ declare module "sap/m/Menu" {
       oBindingInfo: AggregationBindingInfo
     ): this;
     /**
-     * Closes the `Menu`.
+     * Closes the `Menu` if the `beforeClose` event isn`t prevented.
+     *
+     *
+     * @returns `this` to allow method chaining
      */
-    close(): void;
+    close(
+      /**
+       * closePopover event
+       */
+      oEvent: Event
+    ): this;
     /**
      * Destroys all the items in the aggregation {@link #getItems items}.
      *
@@ -54607,7 +56186,7 @@ declare module "sap/m/Menu" {
       /**
        * The function to be called, when the event occurs
        */
-      fnFunction: (p1: Event) => void,
+      fnFunction: (p1: Menu$BeforeCloseEvent) => void,
       /**
        * Context object on which the given function had to be called
        */
@@ -54650,6 +56229,25 @@ declare module "sap/m/Menu" {
       oListener?: object
     ): this;
     /**
+     * Detaches event handler `fnFunction` from the {@link #event:open open} event of this `sap.m.Menu`.
+     *
+     * The passed function and listener object must match the ones used for event registration.
+     *
+     * @since 1.146
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    detachOpen(
+      /**
+       * The function to be called, when the event occurs
+       */
+      fnFunction: (p1: Event) => void,
+      /**
+       * Context object on which the given function had to be called
+       */
+      oListener?: object
+    ): this;
+    /**
      * Fires event {@link #event:beforeClose beforeClose} to attached listeners.
      *
      * Listeners may prevent the default action of this event by calling the `preventDefault` method on the
@@ -54664,7 +56262,7 @@ declare module "sap/m/Menu" {
       /**
        * Parameters to pass along with the event
        */
-      mParameters?: object
+      mParameters?: Menu$BeforeCloseEventParameters
     ): boolean;
     /**
      * Fires event {@link #event:closed closed} to attached listeners.
@@ -54693,6 +56291,20 @@ declare module "sap/m/Menu" {
       mParameters?: Menu$ItemSelectedEventParameters
     ): this;
     /**
+     * Fires event {@link #event:open open} to attached listeners.
+     *
+     * @since 1.146
+     * @ui5-protected Do not call from applications (only from related classes in the framework)
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    fireOpen(
+      /**
+       * Parameters to pass along with the event
+       */
+      mParameters?: object
+    ): this;
+    /**
      * Gets content of aggregation {@link #getItems items}.
      *
      * Defines the items contained within this control.
@@ -54701,7 +56313,7 @@ declare module "sap/m/Menu" {
     /**
      * Returns an array containing the selected menu items. **Note:** Only items with `selected` property set
      * that are members of `MenuItemGroup` with `ItemSelectionMode` property set to {@link sap.ui.core.ItemSelectionMode.SingleSelect }
-     * or {@link sap.ui.unified.ItemSelectionMode.MultiSelect}> are taken into account.
+     * or {@link sap.ui.core.ItemSelectionMode.MultiSelect}> are taken into account.
      *
      * @since 1.127.0
      *
@@ -54764,7 +56376,7 @@ declare module "sap/m/Menu" {
      */
     openAsContextMenu(
       /**
-       * The event object or an object containing offsetX, offsetY values and left, top values of the element's
+       * The event object or an object containing offsetX, offsetY values and left, top values for the element's
        * position
        */
       oEvent: jQuery.Event | object,
@@ -54775,31 +56387,16 @@ declare module "sap/m/Menu" {
     ): void;
     /**
      * Opens the `Menu` next to the given control.
+     *
+     *
+     * @returns `this` to allow method chaining
      */
     openBy(
       /**
        * The control that defines the position for the menu
        */
-      oControl: Control,
-      /**
-       * Whether the menu is opened with a shortcut or not
-       */
-      bWithKeyboard: boolean,
-      /**
-       * The reference docking location of the `Menu` for positioning the menu on the screen
-       */
-      sDockMy?: Dock,
-      /**
-       * The `oControl` reference docking location for positioning the menu on the screen
-       */
-      sDockAt?: Dock,
-      /**
-       * The offset relative to the docking point, specified as a string with space-separated pixel values (e.g.
-       * "0 10" to move the popup 10 pixels to the right). If the docking of both "my" and "at" is RTL-sensitive
-       * ("begin" or "end"), this offset is automatically mirrored in the RTL case as well.
-       */
-      sOffset?: string
-    ): void;
+      oControl: Control
+    ): this;
     /**
      * Removes all the controls from the aggregation {@link #getItems items}.
      *
@@ -54822,7 +56419,7 @@ declare module "sap/m/Menu" {
       vItem: int | string | IMenuItem
     ): IMenuItem | null;
     /**
-     * Sets the title of the `Menu`.
+     * Sets the title of the `Menu` in mobile view.
      *
      *
      * @returns `this` to allow method chaining
@@ -54866,18 +56463,30 @@ declare module "sap/m/Menu" {
     closed?: (oEvent: Event) => void;
 
     /**
+     * Fired when the menu is opened.
+     *
+     * @since 1.146
+     */
+    open?: (oEvent: Event) => void;
+
+    /**
      * Fired before the menu is closed. This event can be prevented which effectively prevents the menu from
      * closing.
      *
      * @since 1.131
      */
-    beforeClose?: (oEvent: Event) => void;
+    beforeClose?: (oEvent: Menu$BeforeCloseEvent) => void;
   }
 
   /**
    * Parameters of the Menu#beforeClose event.
    */
-  export interface Menu$BeforeCloseEventParameters {}
+  export interface Menu$BeforeCloseEventParameters {
+    /**
+     * The `MenuItem` which was selected (if any).
+     */
+    item?: IMenuItem;
+  }
 
   /**
    * Event object of the Menu#beforeClose event.
@@ -54904,7 +56513,7 @@ declare module "sap/m/Menu" {
     /**
      * The `MenuItem` which was selected.
      */
-    item?: MenuItem;
+    item?: IMenuItem;
   }
 
   /**
@@ -54914,16 +56523,30 @@ declare module "sap/m/Menu" {
     Menu$ItemSelectedEventParameters,
     Menu
   >;
+
+  /**
+   * Parameters of the Menu#open event.
+   */
+  export interface Menu$OpenEventParameters {}
+
+  /**
+   * Event object of the Menu#open event.
+   */
+  export type Menu$OpenEvent = Event<Menu$OpenEventParameters, Menu>;
 }
 
 declare module "sap/m/MenuButton" {
   import { default as Control, $ControlSettings } from "sap/ui/core/Control";
 
+  import {
+    IToolbarInteractiveControl,
+    MenuButtonMode,
+    ButtonType,
+  } from "sap/m/library";
+
   import { ID, URI, TextDirection, CSSSize } from "sap/ui/core/library";
 
   import Event from "sap/ui/base/Event";
-
-  import { MenuButtonMode, ButtonType } from "sap/m/library";
 
   import Menu from "sap/m/Menu";
 
@@ -54940,7 +56563,7 @@ declare module "sap/m/MenuButton" {
    */
   export default class MenuButton
     extends Control
-    implements /* was: sap.m.IToolbarInteractiveControl */ Object
+    implements IToolbarInteractiveControl
   {
     __implements__sap_m_IToolbarInteractiveControl: boolean;
     /**
@@ -55532,7 +57155,7 @@ declare module "sap/m/MenuButton" {
       /**
        * New value for property `menuPosition`
        */
-      sMenuPosition?: typeof Popup.Dock
+      sMenuPosition?: typeof Popup.Dock | keyof typeof Popup.Dock
     ): this;
     /**
      * Sets a new value for property {@link #getText text}.
@@ -55723,7 +57346,10 @@ declare module "sap/m/MenuButton" {
      *
      * @since 1.56.0
      */
-    menuPosition?: typeof Popup.Dock | PropertyBindingInfo | `{${string}}`;
+    menuPosition?:
+      | (typeof Popup.Dock | keyof typeof Popup.Dock)
+      | PropertyBindingInfo
+      | `{${string}}`;
 
     /**
      * Controls whether the default action handler is invoked always or it is invoked only until a menu item
@@ -55789,11 +57415,9 @@ declare module "sap/m/MenuButton" {
 }
 
 declare module "sap/m/MenuItem" {
-  import { default as Item, $ItemSettings } from "sap/ui/core/Item";
+  import { default as Control, $ControlSettings } from "sap/ui/core/Control";
 
-  import { IMenuItem } from "sap/m/library";
-
-  import Control from "sap/ui/core/Control";
+  import { IMenuItem, IMenuItemBehavior } from "sap/m/library";
 
   import Event from "sap/ui/base/Event";
 
@@ -55804,13 +57428,19 @@ declare module "sap/m/MenuItem" {
 
   import ElementMetadata from "sap/ui/core/ElementMetadata";
 
+  import { TextDirection } from "sap/ui/core/library";
+
   /**
-   * The `MenuItem` control is used for creating items for the `sap.m.Menu`. It is derived from a core `sap.ui.core.Item`.
+   * The `MenuItem` control is used for creating items for the `sap.m.Menu`. It is derived from a core `sap.ui.core.Control`.
    *
    * @since 1.38
    */
-  export default class MenuItem extends Item implements IMenuItem {
+  export default class MenuItem
+    extends Control
+    implements IMenuItem, IMenuItemBehavior
+  {
     __implements__sap_m_IMenuItem: boolean;
+    __implements__sap_m_IMenuItemBehavior: boolean;
     /**
      * Constructor for a new `MenuItem`.
      *
@@ -55846,7 +57476,7 @@ declare module "sap/m/MenuItem" {
      * Creates a new subclass of class sap.m.MenuItem with name `sClassName` and enriches it with the information
      * contained in `oClassInfo`.
      *
-     * `oClassInfo` might contain the same kind of information as described in {@link sap.ui.core.Item.extend}.
+     * `oClassInfo` might contain the same kind of information as described in {@link sap.ui.core.Control.extend}.
      *
      *
      * @returns Created class / constructor function
@@ -55899,55 +57529,6 @@ declare module "sap/m/MenuItem" {
       oItem: IMenuItem
     ): this;
     /**
-     * Attaches event handler `fnFunction` to the {@link #event:aggregationChanged aggregationChanged} event
-     * of this `sap.m.MenuItem`.
-     *
-     * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
-     * otherwise it will be bound to this `sap.m.MenuItem` itself.
-     *
-     * Fired when aggregation of the item changes.
-     *
-     *
-     * @returns Reference to `this` in order to allow method chaining
-     */
-    attachAggregationChanged(
-      /**
-       * An application-specific payload object that will be passed to the event handler along with the event
-       * object when firing the event
-       */
-      oData: object,
-      /**
-       * The function to be called when the event occurs
-       */
-      fnFunction: (p1: MenuItem$AggregationChangedEvent) => void,
-      /**
-       * Context object to call the event handler with. Defaults to this `sap.m.MenuItem` itself
-       */
-      oListener?: object
-    ): this;
-    /**
-     * Attaches event handler `fnFunction` to the {@link #event:aggregationChanged aggregationChanged} event
-     * of this `sap.m.MenuItem`.
-     *
-     * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
-     * otherwise it will be bound to this `sap.m.MenuItem` itself.
-     *
-     * Fired when aggregation of the item changes.
-     *
-     *
-     * @returns Reference to `this` in order to allow method chaining
-     */
-    attachAggregationChanged(
-      /**
-       * The function to be called when the event occurs
-       */
-      fnFunction: (p1: MenuItem$AggregationChangedEvent) => void,
-      /**
-       * Context object to call the event handler with. Defaults to this `sap.m.MenuItem` itself
-       */
-      oListener?: object
-    ): this;
-    /**
      * Attaches event handler `fnFunction` to the {@link #event:press press} event of this `sap.m.MenuItem`.
      *
      * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
@@ -55989,55 +57570,6 @@ declare module "sap/m/MenuItem" {
        * The function to be called when the event occurs
        */
       fnFunction: (p1: Event) => void,
-      /**
-       * Context object to call the event handler with. Defaults to this `sap.m.MenuItem` itself
-       */
-      oListener?: object
-    ): this;
-    /**
-     * Attaches event handler `fnFunction` to the {@link #event:propertyChanged propertyChanged} event of this
-     * `sap.m.MenuItem`.
-     *
-     * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
-     * otherwise it will be bound to this `sap.m.MenuItem` itself.
-     *
-     * Fired when a property of the item changes.
-     *
-     *
-     * @returns Reference to `this` in order to allow method chaining
-     */
-    attachPropertyChanged(
-      /**
-       * An application-specific payload object that will be passed to the event handler along with the event
-       * object when firing the event
-       */
-      oData: object,
-      /**
-       * The function to be called when the event occurs
-       */
-      fnFunction: (p1: MenuItem$PropertyChangedEvent) => void,
-      /**
-       * Context object to call the event handler with. Defaults to this `sap.m.MenuItem` itself
-       */
-      oListener?: object
-    ): this;
-    /**
-     * Attaches event handler `fnFunction` to the {@link #event:propertyChanged propertyChanged} event of this
-     * `sap.m.MenuItem`.
-     *
-     * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
-     * otherwise it will be bound to this `sap.m.MenuItem` itself.
-     *
-     * Fired when a property of the item changes.
-     *
-     *
-     * @returns Reference to `this` in order to allow method chaining
-     */
-    attachPropertyChanged(
-      /**
-       * The function to be called when the event occurs
-       */
-      fnFunction: (p1: MenuItem$PropertyChangedEvent) => void,
       /**
        * Context object to call the event handler with. Defaults to this `sap.m.MenuItem` itself
        */
@@ -56074,25 +57606,6 @@ declare module "sap/m/MenuItem" {
      */
     destroyItems(): this;
     /**
-     * Detaches event handler `fnFunction` from the {@link #event:aggregationChanged aggregationChanged} event
-     * of this `sap.m.MenuItem`.
-     *
-     * The passed function and listener object must match the ones used for event registration.
-     *
-     *
-     * @returns Reference to `this` in order to allow method chaining
-     */
-    detachAggregationChanged(
-      /**
-       * The function to be called, when the event occurs
-       */
-      fnFunction: (p1: MenuItem$AggregationChangedEvent) => void,
-      /**
-       * Context object on which the given function had to be called
-       */
-      oListener?: object
-    ): this;
-    /**
      * Detaches event handler `fnFunction` from the {@link #event:press press} event of this `sap.m.MenuItem`.
      *
      * The passed function and listener object must match the ones used for event registration.
@@ -56111,38 +57624,6 @@ declare module "sap/m/MenuItem" {
       oListener?: object
     ): this;
     /**
-     * Detaches event handler `fnFunction` from the {@link #event:propertyChanged propertyChanged} event of
-     * this `sap.m.MenuItem`.
-     *
-     * The passed function and listener object must match the ones used for event registration.
-     *
-     *
-     * @returns Reference to `this` in order to allow method chaining
-     */
-    detachPropertyChanged(
-      /**
-       * The function to be called, when the event occurs
-       */
-      fnFunction: (p1: MenuItem$PropertyChangedEvent) => void,
-      /**
-       * Context object on which the given function had to be called
-       */
-      oListener?: object
-    ): this;
-    /**
-     * Fires event {@link #event:aggregationChanged aggregationChanged} to attached listeners.
-     *
-     * @ui5-protected Do not call from applications (only from related classes in the framework)
-     *
-     * @returns Reference to `this` in order to allow method chaining
-     */
-    fireAggregationChanged(
-      /**
-       * Parameters to pass along with the event
-       */
-      mParameters?: MenuItem$AggregationChangedEventParameters
-    ): this;
-    /**
      * Fires event {@link #event:press press} to attached listeners.
      *
      * @ui5-protected Do not call from applications (only from related classes in the framework)
@@ -56156,23 +57637,25 @@ declare module "sap/m/MenuItem" {
       mParameters?: object
     ): this;
     /**
-     * Fires event {@link #event:propertyChanged propertyChanged} to attached listeners.
+     * Gets current value of property {@link #getEnabled enabled}.
      *
-     * @ui5-protected Do not call from applications (only from related classes in the framework)
+     * Enabled items can be selected.
      *
-     * @returns Reference to `this` in order to allow method chaining
+     * Default value is `true`.
+     *
+     *
+     * @returns Value of property `enabled`
      */
-    firePropertyChanged(
-      /**
-       * Parameters to pass along with the event
-       */
-      mParameters?: MenuItem$PropertyChangedEventParameters
-    ): this;
+    getEnabled(): boolean;
     /**
      * Gets content of aggregation {@link #getEndContent endContent}.
      *
      * Defines the content that is displayed at the end of a menu item. This aggregation allows for the addition
      * of custom elements, such as icons and buttons.
+     *
+     * **Note:** Application developers are responsible for ensuring that interactive `endContent` controls
+     * have the correct accessibility behaviour, including their enabled or disabled states. The Menu
+     * does not manage these aspects when the menu item state changes.
      *
      * @since 1.131
      */
@@ -56189,15 +57672,24 @@ declare module "sap/m/MenuItem" {
     /**
      * Gets content of aggregation {@link #getItems items}.
      *
-     * Defines the sub-items contained within this element.
+     * Defines the subitems contained within this element.
      */
     getItems(): IMenuItem[];
+    /**
+     * Gets current value of property {@link #getKey key}.
+     *
+     * Can be used as input for subsequent actions.
+     *
+     *
+     * @returns Value of property `key`
+     */
+    getKey(): string;
     /**
      * Gets current value of property {@link #getSelected selected}.
      *
      * Determines whether the `MenuItem` is selected. A selected `MenuItem` has a check mark rendered at its
      * end. **Note: ** selection functionality works only if the menu item is a member of `MenuItemGroup` with
-     * `itemSelectionMode` set to {@link sap.ui.core.ItemSelectionMode.SingleSelect} or {@link sap.ui.unified.ItemSelectionMode.MultiSelect}.
+     * `itemSelectionMode` set to {@link sap.ui.core.ItemSelectionMode.SingleSelect} or {@link sap.ui.core.ItemSelectionMode.MultiSelect}.
      *
      * Default value is `false`.
      *
@@ -56230,6 +57722,28 @@ declare module "sap/m/MenuItem" {
      * @returns Value of property `startsSection`
      */
     getStartsSection(): boolean;
+    /**
+     * Gets current value of property {@link #getText text}.
+     *
+     * The text to be displayed for the item.
+     *
+     * Default value is `empty string`.
+     *
+     *
+     * @returns Value of property `text`
+     */
+    getText(): string;
+    /**
+     * Gets current value of property {@link #getTextDirection textDirection}.
+     *
+     * Options are RTL and LTR. Alternatively, an item can inherit its text direction from its parent control.
+     *
+     * Default value is `Inherit`.
+     *
+     *
+     * @returns Value of property `textDirection`
+     */
+    getTextDirection(): TextDirection;
     /**
      * Gets current value of property {@link #getVisible visible}.
      *
@@ -56307,6 +57821,30 @@ declare module "sap/m/MenuItem" {
       iIndex: int
     ): this;
     /**
+     * Returns whether the item can be counted in total items count. **Note:** This method can be overridden
+     * by subclasses to implement custom behavior.
+     *
+     *
+     * @returns Whether the item is counted in total items count
+     */
+    isCountable(): boolean;
+    /**
+     * Returns whether the item can be focused. **Note:** This method can be overridden by subclasses to implement
+     * custom behavior.
+     *
+     *
+     * @returns Whether the item is enabled for focus
+     */
+    isFocusable(): boolean;
+    /**
+     * Returns whether the firing of press event is allowed. **Note:** This method can be overridden by subclasses
+     * to implement custom behavior.
+     *
+     *
+     * @returns Whether the item is enabled for click/press
+     */
+    isInteractive(): boolean;
+    /**
      * Removes all the controls from the aggregation {@link #getEndContent endContent}.
      *
      * Additionally, it unregisters them from the hosting UIArea.
@@ -56351,6 +57889,24 @@ declare module "sap/m/MenuItem" {
       vItem: int | string | IMenuItem
     ): IMenuItem | null;
     /**
+     * Sets a new value for property {@link #getEnabled enabled}.
+     *
+     * Enabled items can be selected.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `true`.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setEnabled(
+      /**
+       * New value for property `enabled`
+       */
+      bEnabled?: boolean
+    ): this;
+    /**
      * Sets a new value for property {@link #getIcon icon}.
      *
      * Defines the icon, which belongs to the item. This can be a URI to an image or an icon font URI.
@@ -56365,6 +57921,22 @@ declare module "sap/m/MenuItem" {
        * New value for property `icon`
        */
       sIcon?: string
+    ): this;
+    /**
+     * Sets a new value for property {@link #getKey key}.
+     *
+     * Can be used as input for subsequent actions.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setKey(
+      /**
+       * New value for property `key`
+       */
+      sKey?: string
     ): this;
     /**
      * Sets a new value for property {@link #getShortcutText shortcutText}.
@@ -56405,6 +57977,42 @@ declare module "sap/m/MenuItem" {
       bStartsSection?: boolean
     ): this;
     /**
+     * Sets a new value for property {@link #getText text}.
+     *
+     * The text to be displayed for the item.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `empty string`.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setText(
+      /**
+       * New value for property `text`
+       */
+      sText?: string
+    ): this;
+    /**
+     * Sets a new value for property {@link #getTextDirection textDirection}.
+     *
+     * Options are RTL and LTR. Alternatively, an item can inherit its text direction from its parent control.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `Inherit`.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setTextDirection(
+      /**
+       * New value for property `textDirection`
+       */
+      sTextDirection?: TextDirection | keyof typeof TextDirection
+    ): this;
+    /**
      * Sets a new value for property {@link #getVisible visible}.
      *
      * Defines whether the item should be visible on the screen. If set to `false`, a placeholder is rendered
@@ -56434,11 +58042,21 @@ declare module "sap/m/MenuItem" {
   /**
    * Describes the settings that can be provided to the MenuItem constructor.
    */
-  export interface $MenuItemSettings extends $ItemSettings {
+  export interface $MenuItemSettings extends $ControlSettings {
+    /**
+     * The text to be displayed for the item.
+     */
+    text?: string | PropertyBindingInfo;
+
     /**
      * Defines the icon, which belongs to the item. This can be a URI to an image or an icon font URI.
      */
     icon?: string | PropertyBindingInfo;
+
+    /**
+     * Enabled items can be selected.
+     */
+    enabled?: boolean | PropertyBindingInfo | `{${string}}`;
 
     /**
      * Defines whether the item should be visible on the screen. If set to `false`, a placeholder is rendered
@@ -56449,7 +58067,7 @@ declare module "sap/m/MenuItem" {
     /**
      * Determines whether the `MenuItem` is selected. A selected `MenuItem` has a check mark rendered at its
      * end. **Note: ** selection functionality works only if the menu item is a member of `MenuItemGroup` with
-     * `itemSelectionMode` set to {@link sap.ui.core.ItemSelectionMode.SingleSelect} or {@link sap.ui.unified.ItemSelectionMode.MultiSelect}.
+     * `itemSelectionMode` set to {@link sap.ui.core.ItemSelectionMode.SingleSelect} or {@link sap.ui.core.ItemSelectionMode.MultiSelect}.
      *
      * @since 1.127.0
      */
@@ -56468,13 +58086,30 @@ declare module "sap/m/MenuItem" {
     startsSection?: boolean | PropertyBindingInfo | `{${string}}`;
 
     /**
-     * Defines the sub-items contained within this element.
+     * Options are RTL and LTR. Alternatively, an item can inherit its text direction from its parent control.
+     */
+    textDirection?:
+      | (TextDirection | keyof typeof TextDirection)
+      | PropertyBindingInfo
+      | `{${string}}`;
+
+    /**
+     * Can be used as input for subsequent actions.
+     */
+    key?: string | PropertyBindingInfo;
+
+    /**
+     * Defines the subitems contained within this element.
      */
     items?: IMenuItem[] | IMenuItem | AggregationBindingInfo | `{${string}}`;
 
     /**
      * Defines the content that is displayed at the end of a menu item. This aggregation allows for the addition
      * of custom elements, such as icons and buttons.
+     *
+     * **Note:** Application developers are responsible for ensuring that interactive `endContent` controls
+     * have the correct accessibility behaviour, including their enabled or disabled states. The Menu
+     * does not manage these aspects when the menu item state changes.
      *
      * @since 1.131
      */
@@ -56484,45 +58119,7 @@ declare module "sap/m/MenuItem" {
      * Fired after the item has been pressed.
      */
     press?: (oEvent: Event) => void;
-
-    /**
-     * Fired when a property of the item changes.
-     */
-    propertyChanged?: (oEvent: MenuItem$PropertyChangedEvent) => void;
-
-    /**
-     * Fired when aggregation of the item changes.
-     */
-    aggregationChanged?: (oEvent: MenuItem$AggregationChangedEvent) => void;
   }
-
-  /**
-   * Parameters of the MenuItem#aggregationChanged event.
-   */
-  export interface MenuItem$AggregationChangedEventParameters {
-    /**
-     * The aggregation name of the changed aggregation.
-     */
-    aggregationName?: string;
-
-    /**
-     * Which method changed the aggregation.
-     */
-    methodName?: string;
-
-    /**
-     * What parameters were used to change the aggregation.
-     */
-    methodParams?: object;
-  }
-
-  /**
-   * Event object of the MenuItem#aggregationChanged event.
-   */
-  export type MenuItem$AggregationChangedEvent = Event<
-    MenuItem$AggregationChangedEventParameters,
-    MenuItem
-  >;
 
   /**
    * Parameters of the MenuItem#press event.
@@ -56534,29 +58131,6 @@ declare module "sap/m/MenuItem" {
    */
   export type MenuItem$PressEvent = Event<
     MenuItem$PressEventParameters,
-    MenuItem
-  >;
-
-  /**
-   * Parameters of the MenuItem#propertyChanged event.
-   */
-  export interface MenuItem$PropertyChangedEventParameters {
-    /**
-     * The property name to be changed.
-     */
-    propertyKey?: string;
-
-    /**
-     * The new property value.
-     */
-    propertyValue?: any;
-  }
-
-  /**
-   * Event object of the MenuItem#propertyChanged event.
-   */
-  export type MenuItem$PropertyChangedEvent = Event<
-    MenuItem$PropertyChangedEventParameters,
     MenuItem
   >;
 }
@@ -56578,7 +58152,7 @@ declare module "sap/m/MenuItemGroup" {
   /**
    * Group item to be used inside a menu. Represents a collection of menu items that can have the same selection
    * mode (e.g. {@link sap.ui.core.ItemSelectionMode.None}, {@link sap.ui.core.ItemSelectionMode.SingleSelect},
-   * or {@link sap.ui.unified.ItemSelectionMode.MultiSelect}).
+   * or {@link sap.ui.core.ItemSelectionMode.MultiSelect}).
    *
    * @since 1.127.0
    */
@@ -56647,33 +58221,24 @@ declare module "sap/m/MenuItemGroup" {
      */
     static getMetadata(): ElementMetadata;
     /**
-     * Adds an item to `items` aggregation.
+     * Adds some item to the aggregation {@link #getItems items}.
      *
      *
-     * @returns `this` to allow method chaining
+     * @returns Reference to `this` in order to allow method chaining
      */
     addItem(
       /**
-       * Menu item to be added
+       * The item to add; if empty, nothing is inserted
        */
-      oItem: IMenuItem,
-      /**
-       * Whether to suppress the invalidation of the control
-       */
-      bSuppressInvalidate: boolean
+      oItem: IMenuItem
     ): this;
     /**
-     * Destroys all items from `items` aggregation.
+     * Destroys all the items in the aggregation {@link #getItems items}.
      *
      *
-     * @returns `this` to allow method chaining
+     * @returns Reference to `this` in order to allow method chaining
      */
-    destroyItems(
-      /**
-       * Whether to suppress the invalidation of the control
-       */
-      bSuppressInvalidate: boolean
-    ): this;
+    destroyItems(): this;
     /**
      * Gets content of aggregation {@link #getItems items}.
      *
@@ -56706,68 +58271,61 @@ declare module "sap/m/MenuItemGroup" {
       oItem: IMenuItem
     ): int;
     /**
-     * Inserts an item to the specified position in `items` aggregation.
+     * Inserts a item into the aggregation {@link #getItems items}.
      *
      *
-     * @returns `this` to allow method chaining
+     * @returns Reference to `this` in order to allow method chaining
      */
     insertItem(
       /**
-       * Menu item to be added
+       * The item to insert; if empty, nothing is inserted
        */
       oItem: IMenuItem,
       /**
-       * Index at which the item should be inserted
+       * The `0`-based index the item should be inserted at; for a negative value of `iIndex`, the item is inserted
+       * at position 0; for a value greater than the current size of the aggregation, the item is inserted at
+       * the last position
        */
-      iIndex: int,
-      /**
-       * Whether to suppress the invalidation of the control
-       */
-      bSuppressInvalidate: boolean
+      iIndex: int
     ): this;
     /**
-     * Removes all items from `items` aggregation.
+     * Removes all the controls from the aggregation {@link #getItems items}.
+     *
+     * Additionally, it unregisters them from the hosting UIArea.
      *
      *
-     * @returns array containing the removed items, or `null` if there are no items to remove
+     * @returns An array of the removed elements (might be empty)
      */
-    removeAllItems(
-      /**
-       * Whether to suppress the invalidation of the control
-       */
-      bSuppressInvalidate: boolean
-    ): any[] | null;
+    removeAllItems(): IMenuItem[];
     /**
-     * Removes an item from `items` aggregation.
+     * Removes a item from the aggregation {@link #getItems items}.
      *
      *
-     * @returns the removed object, or `null` if there are no items to remove
+     * @returns The removed item or `null`
      */
     removeItem(
       /**
-       * Menu item to be removed (as index, ID or object)
+       * The item to remove or its index or id
        */
-      vItem: int | string | IMenuItem,
-      /**
-       * Whether to suppress the invalidation of the control
-       */
-      bSuppressInvalidate: boolean
+      vItem: int | string | IMenuItem
     ): IMenuItem | null;
     /**
-     * Override of the default setter that also ensures single selection if necessary.
+     * Sets a new value for property {@link #getItemSelectionMode itemSelectionMode}.
+     *
+     * Defines the selection mode of the child items (e.g. `None`, `SingleSelect`, `MultiSelect`)
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `None`.
      *
      *
-     * @returns `this` to allow method chaining
+     * @returns Reference to `this` in order to allow method chaining
      */
     setItemSelectionMode(
       /**
-       * item selection mode to be set
+       * New value for property `itemSelectionMode`
        */
-      sSelectionMode: string,
-      /**
-       * Whether to suppress the invalidation of the control
-       */
-      bSuppressInvalidate: boolean
+      sItemSelectionMode?: ItemSelectionMode
     ): this;
   }
   /**
@@ -56891,7 +58449,7 @@ declare module "sap/m/MessageBox" {
      */
     alert(
       /**
-       * Message to be displayed in the alert dialog. The usage of sap.core.Control as vMessage is deprecated
+       * Message to be displayed in the alert dialog. The usage of sap.ui.core.Control as vMessage is deprecated
        * since version 1.30.4.
        */
       vMessage: string,
@@ -56902,7 +58460,7 @@ declare module "sap/m/MessageBox" {
         /**
          * callback function to be called when the user closes the dialog
          */
-        onClose?: Function;
+        onClose?: (p1: (Action | keyof typeof Action) | string | null) => void;
         /**
          * Title to be displayed in the alert dialog
          */
@@ -57020,7 +58578,7 @@ declare module "sap/m/MessageBox" {
      */
     confirm(
       /**
-       * Message to be displayed in the alert dialog. The usage of sap.core.Control as vMessage is deprecated
+       * Message to be displayed in the alert dialog. The usage of sap.ui.core.Control as vMessage is deprecated
        * since version 1.30.4.
        */
       vMessage: string,
@@ -57031,7 +58589,7 @@ declare module "sap/m/MessageBox" {
         /**
          * Callback to be called when the user closes the dialog
          */
-        onClose?: Function;
+        onClose?: (p1: (Action | keyof typeof Action) | string | null) => void;
         /**
          * Title to display in the confirmation dialog
          */
@@ -57146,7 +58704,7 @@ declare module "sap/m/MessageBox" {
      */
     error(
       /**
-       * Message to be displayed in the alert dialog. The usage of sap.core.Control as vMessage is deprecated
+       * Message to be displayed in the alert dialog. The usage of sap.ui.core.Control as vMessage is deprecated
        * since version 1.30.4.
        */
       vMessage: string,
@@ -57157,7 +58715,7 @@ declare module "sap/m/MessageBox" {
         /**
          * Callback when the user closes the dialog
          */
-        onClose?: Function;
+        onClose?: (p1: (Action | keyof typeof Action) | string | null) => void;
         /**
          * Title of the error dialog
          */
@@ -57269,7 +58827,7 @@ declare module "sap/m/MessageBox" {
      */
     information(
       /**
-       * Message to be displayed in the alert dialog. The usage of sap.core.Control as vMessage is deprecated
+       * Message to be displayed in the alert dialog. The usage of sap.ui.core.Control as vMessage is deprecated
        * since version 1.30.4.
        */
       vMessage: string,
@@ -57280,7 +58838,7 @@ declare module "sap/m/MessageBox" {
         /**
          * Callback when the user closes the dialog
          */
-        onClose?: Function;
+        onClose?: (p1: (Action | keyof typeof Action) | string | null) => void;
         /**
          * Title of the information dialog
          */
@@ -57397,7 +58955,7 @@ declare module "sap/m/MessageBox" {
      */
     show(
       /**
-       * Message to be displayed in the alert dialog. The usage of sap.core.Control as vMessage is deprecated
+       * Message to be displayed in the alert dialog. The usage of sap.ui.core.Control as vMessage is deprecated
        * since version 1.30.4.
        */
       vMessage: string,
@@ -57408,7 +58966,7 @@ declare module "sap/m/MessageBox" {
         /**
          * The icon to be displayed.
          */
-        icon?: Icon;
+        icon?: Icon | keyof typeof Icon;
         /**
          * The title of the message box.
          */
@@ -57431,7 +58989,7 @@ declare module "sap/m/MessageBox" {
         /**
          * Function to be called when the user taps a button or closes the message box.
          */
-        onClose?: Function;
+        onClose?: (p1: (Action | keyof typeof Action) | string | null) => void;
         /**
          * ID to be used for the dialog. Intended for test scenarios, not recommended for productive apps
          */
@@ -57524,7 +59082,7 @@ declare module "sap/m/MessageBox" {
      */
     success(
       /**
-       * Message to be displayed in the alert dialog. The usage of sap.core.Control as vMessage is deprecated
+       * Message to be displayed in the alert dialog. The usage of sap.ui.core.Control as vMessage is deprecated
        * since version 1.30.4.
        */
       vMessage: string,
@@ -57535,7 +59093,7 @@ declare module "sap/m/MessageBox" {
         /**
          * Callback when the user closes the dialog
          */
-        onClose?: Function;
+        onClose?: (p1: (Action | keyof typeof Action) | string | null) => void;
         /**
          * Title of the success dialog
          */
@@ -57647,7 +59205,7 @@ declare module "sap/m/MessageBox" {
      */
     warning(
       /**
-       * Message to be displayed in the alert dialog. The usage of sap.core.Control as vMessage is deprecated
+       * Message to be displayed in the alert dialog. The usage of sap.ui.core.Control as vMessage is deprecated
        * since version 1.30.4.
        */
       vMessage: string,
@@ -57658,7 +59216,7 @@ declare module "sap/m/MessageBox" {
         /**
          * Callback when the user closes the dialog
          */
-        onClose?: Function;
+        onClose?: (p1: (Action | keyof typeof Action) | string | null) => void;
         /**
          * Title of the warning dialog
          */
@@ -57795,27 +59353,27 @@ declare module "sap/m/MessageBox" {
     /**
      * Shows the error icon in the message box.
      */
-    ERROR = "undefined",
+    ERROR = "ERROR",
     /**
      * Shows the information icon in the message box.
      */
-    INFORMATION = "undefined",
+    INFORMATION = "INFORMATION",
     /**
      * Shows no icon in the message box.
      */
-    NONE = "undefined",
+    NONE = "NONE",
     /**
      * Shows the question icon in the message box.
      */
-    QUESTION = "undefined",
+    QUESTION = "QUESTION",
     /**
      * Shows the success icon in the message box.
      */
-    SUCCESS = "undefined",
+    SUCCESS = "SUCCESS",
     /**
      * Shows the warning icon in the message box.
      */
-    WARNING = "undefined",
+    WARNING = "WARNING",
   }
 }
 
@@ -60576,6 +62134,8 @@ declare module "sap/m/MessageStrip" {
 
   import Event from "sap/ui/base/Event";
 
+  import { MessageStripColorSet } from "sap/m/library";
+
   import { URI } from "sap/ui/core/library";
 
   import ElementMetadata from "sap/ui/core/ElementMetadata";
@@ -60590,7 +62150,8 @@ declare module "sap/m/MessageStrip" {
   /**
    * MessageStrip is a control that enables the embedding of application-related messages in the application.
    * Overview: The message strip displays 4 types of messages, each with a corresponding semantic color and
-   * icon: Information, Success, Warning and Error.
+   * icon: Information, Success, Warning and Error. Additionally, it supports custom color schemes through
+   * ColorSet1 and ColorSet2 design types, each providing 10 predefined color variations.
    *
    * Each message can have a close button, so that it can be removed from the UI if needed.
    *
@@ -60602,10 +62163,14 @@ declare module "sap/m/MessageStrip" {
    * 	 - <u>  With version 1.85
    * 	 - <br>
    *
+   * Color Schemes: When using ColorSet1 or ColorSet2 as the design type, you can specify a `colorScheme`
+   * from "1" to "10" to apply different color variations. This allows for better visual categorization and
+   * theming flexibility while maintaining accessibility standards.
+   *
    * Dynamically generated Message Strip: To meet the accessibility requirements when using dynamically generated
    * Message Strip you must implement it alongside `sap.ui.core.InvisibleMessage`. This will allow screen
    * readers to announce it in real time. We suggest such dynamically generated message strips to be announced
-   * as Information Bar, as shown in our “Dynamic Message Strip Generator sample.”
+   * as Information Bar, as shown in our "Dynamic Message Strip Generator sample."
    *
    * Usage: When to use:
    * 	 - You want to provide information or status update within the detail area of an object  When not
@@ -60794,6 +62359,41 @@ declare module "sap/m/MessageStrip" {
       mParameters?: object
     ): this;
     /**
+     * Gets current value of property {@link #getColorScheme colorScheme}.
+     *
+     * Determines the color scheme when using ColorSet1 or ColorSet2 colorSet variants. Available values are
+     * 1 through 10, each providing a different color variation. This property is only effective when `colorSet`
+     * is set to "ColorSet1" or "ColorSet2".
+     *
+     * Default value is `1`.
+     *
+     * @since 1.143.0
+     *
+     * @returns Value of property `colorScheme`
+     */
+    getColorScheme(): int;
+    /**
+     * Gets current value of property {@link #getColorSet colorSet}.
+     *
+     * Determines the color set variant of the MessageStrip. Available options:
+     * 	 - **Default** - Uses standard semantic colors based on the type property (Information, Success, Warning,
+     *     Error)
+     * 	 - **ColorSet1** - Uses a custom color palette with 10 predefined color schemes
+     * 	 - **ColorSet2** - Uses an alternative custom color palette with 10 predefined color schemes  When
+     *     ColorSet1 or ColorSet2 is selected, the `colorScheme` property determines which of the 10 color variations
+     *     is applied.
+     *
+     * **Note:** When using ColorSet1 or ColorSet2 designs, the type property is still used for semantic purposes
+     * but will be ignored for visual styling.
+     *
+     * Default value is `Default`.
+     *
+     * @since 1.143.0
+     *
+     * @returns Value of property `colorSet`
+     */
+    getColorSet(): MessageStripColorSet;
+    /**
      * Gets content of aggregation {@link #getControls controls}.
      *
      * List of `sap.m.Link` controls that replace the placeholders in the text. Placeholders are replaced according
@@ -60807,7 +62407,7 @@ declare module "sap/m/MessageStrip" {
      * Gets current value of property {@link #getCustomIcon customIcon}.
      *
      * Determines a custom icon which is displayed. If none is set, the default icon for this message type is
-     * used.
+     * used. **Note**: For ColorSet1 and ColorSet2 designs, no default icon is displayed unless explicitly provided.
      *
      * Default value is `empty string`.
      *
@@ -60946,10 +62546,59 @@ declare module "sap/m/MessageStrip" {
       vControl: int | string | Link
     ): Link | null;
     /**
+     * Sets a new value for property {@link #getColorScheme colorScheme}.
+     *
+     * Determines the color scheme when using ColorSet1 or ColorSet2 colorSet variants. Available values are
+     * 1 through 10, each providing a different color variation. This property is only effective when `colorSet`
+     * is set to "ColorSet1" or "ColorSet2".
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `1`.
+     *
+     * @since 1.143.0
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setColorScheme(
+      /**
+       * New value for property `colorScheme`
+       */
+      iColorScheme?: int
+    ): this;
+    /**
+     * Sets a new value for property {@link #getColorSet colorSet}.
+     *
+     * Determines the color set variant of the MessageStrip. Available options:
+     * 	 - **Default** - Uses standard semantic colors based on the type property (Information, Success, Warning,
+     *     Error)
+     * 	 - **ColorSet1** - Uses a custom color palette with 10 predefined color schemes
+     * 	 - **ColorSet2** - Uses an alternative custom color palette with 10 predefined color schemes  When
+     *     ColorSet1 or ColorSet2 is selected, the `colorScheme` property determines which of the 10 color variations
+     *     is applied.
+     *
+     * **Note:** When using ColorSet1 or ColorSet2 designs, the type property is still used for semantic purposes
+     * but will be ignored for visual styling.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `Default`.
+     *
+     * @since 1.143.0
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setColorSet(
+      /**
+       * New value for property `colorSet`
+       */
+      sColorSet?: MessageStripColorSet | keyof typeof MessageStripColorSet
+    ): this;
+    /**
      * Sets a new value for property {@link #getCustomIcon customIcon}.
      *
      * Determines a custom icon which is displayed. If none is set, the default icon for this message type is
-     * used.
+     * used. **Note**: For ColorSet1 and ColorSet2 designs, no default icon is displayed unless explicitly provided.
      *
      * When called with a value of `null` or `undefined`, the default value of the property will be restored.
      *
@@ -61094,8 +62743,36 @@ declare module "sap/m/MessageStrip" {
       | `{${string}}`;
 
     /**
+     * Determines the color set variant of the MessageStrip. Available options:
+     * 	 - **Default** - Uses standard semantic colors based on the type property (Information, Success, Warning,
+     *     Error)
+     * 	 - **ColorSet1** - Uses a custom color palette with 10 predefined color schemes
+     * 	 - **ColorSet2** - Uses an alternative custom color palette with 10 predefined color schemes  When
+     *     ColorSet1 or ColorSet2 is selected, the `colorScheme` property determines which of the 10 color variations
+     *     is applied.
+     *
+     * **Note:** When using ColorSet1 or ColorSet2 designs, the type property is still used for semantic purposes
+     * but will be ignored for visual styling.
+     *
+     * @since 1.143.0
+     */
+    colorSet?:
+      | (MessageStripColorSet | keyof typeof MessageStripColorSet)
+      | PropertyBindingInfo
+      | `{${string}}`;
+
+    /**
+     * Determines the color scheme when using ColorSet1 or ColorSet2 colorSet variants. Available values are
+     * 1 through 10, each providing a different color variation. This property is only effective when `colorSet`
+     * is set to "ColorSet1" or "ColorSet2".
+     *
+     * @since 1.143.0
+     */
+    colorScheme?: int | PropertyBindingInfo | `{${string}}`;
+
+    /**
      * Determines a custom icon which is displayed. If none is set, the default icon for this message type is
-     * used.
+     * used. **Note**: For ColorSet1 and ColorSet2 designs, no default icon is displayed unless explicitly provided.
      */
     customIcon?: URI | PropertyBindingInfo | `{${string}}`;
 
@@ -61181,8 +62858,8 @@ declare module "sap/m/MessageToast" {
    * sap.m.MessageToast.show("This message should appear in the message toast", {
    *     duration: 3000,                  // default
    *     width: "15em",                   // default
-   *     my: "center bottom",             // default
-   *     at: "center bottom",             // default
+   *     my: "CenterBottom",             // default
+   *     at: "CenterBottom",             // default
    *     of: window,                      // default
    *     offset: "0 0",                   // default
    *     collision: "fit fit",            // default
@@ -61202,7 +62879,8 @@ declare module "sap/m/MessageToast" {
    * 	 - You want to make sure that users read the message before they leave the page.
    * 	 - You want users to be able to copy some part of the message text. (In this case, show a success {@link sap.m.Dialog Message Dialog}.)
    *      Responsive Behavior: The message toast has the same behavior on all devices. However, you can adjust
-   *     the width of the control, for example, for use on a desktop device.
+   *     the width of the control depending on the device you're using, for example desktop. Note that the width
+   *     can be customized up to a maximum of 15rem.
    * See:
    * 	{@link fiori:https://experience.sap.com/fiori-design-web/message-toast/ Message Toast}
    *
@@ -61237,12 +62915,12 @@ declare module "sap/m/MessageToast" {
          * Specifies which point of the message toast should be aligned (e.g. `Dock.LeftTop` To use as align point
          * the left top corner of the message toast).
          */
-        my?: typeof Popup.Dock;
+        my?: typeof Popup.Dock | keyof typeof Popup.Dock;
         /**
          * Specifies the point of the reference element to which the message toast should be aligned (e.g. `Dock.RightBottom`
          * To position the message toast according to the bottom right corner of the reference element).
          */
-        at?: typeof Popup.Dock;
+        at?: typeof Popup.Dock | keyof typeof Popup.Dock;
         /**
          * Specifies the reference element to which the message toast should be aligned, by default it is aligned
          * to the browser visual viewport.
@@ -61374,6 +63052,12 @@ declare module "sap/m/MessageView" {
        */
       mSettings?: $MessageViewSettings
     );
+    /**
+     * Defines whether the custom header of details page will be shown.
+     *
+     * @ui5-protected DO NOT USE IN APPLICATIONS (only for related classes in the framework)
+     */
+    _bShowCustomHeader: boolean;
 
     /**
      * Creates a new subclass of class sap.m.MessageView with name `sClassName` and enriches it with the information
@@ -61682,6 +63366,55 @@ declare module "sap/m/MessageView" {
       oListener?: object
     ): this;
     /**
+     * Attaches event handler `fnFunction` to the {@link #event:onClose onClose} event of this `sap.m.MessageView`.
+     *
+     * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
+     * otherwise it will be bound to this `sap.m.MessageView` itself.
+     *
+     * Event fired when the close button in custom header is clicked.
+     *
+     * @ui5-protected Do not call from applications (only from related classes in the framework)
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    attachOnClose(
+      /**
+       * An application-specific payload object that will be passed to the event handler along with the event
+       * object when firing the event
+       */
+      oData: object,
+      /**
+       * The function to be called when the event occurs
+       */
+      fnFunction: (p1: Event) => void,
+      /**
+       * Context object to call the event handler with. Defaults to this `sap.m.MessageView` itself
+       */
+      oListener?: object
+    ): this;
+    /**
+     * Attaches event handler `fnFunction` to the {@link #event:onClose onClose} event of this `sap.m.MessageView`.
+     *
+     * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
+     * otherwise it will be bound to this `sap.m.MessageView` itself.
+     *
+     * Event fired when the close button in custom header is clicked.
+     *
+     * @ui5-protected Do not call from applications (only from related classes in the framework)
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    attachOnClose(
+      /**
+       * The function to be called when the event occurs
+       */
+      fnFunction: (p1: Event) => void,
+      /**
+       * Context object to call the event handler with. Defaults to this `sap.m.MessageView` itself
+       */
+      oListener?: object
+    ): this;
+    /**
      * Attaches event handler `fnFunction` to the {@link #event:urlValidated urlValidated} event of this `sap.m.MessageView`.
      *
      * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
@@ -61837,6 +63570,25 @@ declare module "sap/m/MessageView" {
       oListener?: object
     ): this;
     /**
+     * Detaches event handler `fnFunction` from the {@link #event:onClose onClose} event of this `sap.m.MessageView`.
+     *
+     * The passed function and listener object must match the ones used for event registration.
+     *
+     * @ui5-protected Do not call from applications (only from related classes in the framework)
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    detachOnClose(
+      /**
+       * The function to be called, when the event occurs
+       */
+      fnFunction: (p1: Event) => void,
+      /**
+       * Context object on which the given function had to be called
+       */
+      oListener?: object
+    ): this;
+    /**
      * Detaches event handler `fnFunction` from the {@link #event:urlValidated urlValidated} event of this `sap.m.MessageView`.
      *
      * The passed function and listener object must match the ones used for event registration.
@@ -61922,6 +63674,19 @@ declare module "sap/m/MessageView" {
       mParameters?: object
     ): this;
     /**
+     * Fires event {@link #event:onClose onClose} to attached listeners.
+     *
+     * @ui5-protected Do not call from applications (only from related classes in the framework)
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    fireOnClose(
+      /**
+       * Parameters to pass along with the event
+       */
+      mParameters?: object
+    ): this;
+    /**
      * Fires event {@link #event:urlValidated urlValidated} to attached listeners.
      *
      * @ui5-protected Do not call from applications (only from related classes in the framework)
@@ -61954,6 +63719,15 @@ declare module "sap/m/MessageView" {
      * @returns Value of property `asyncURLHandler`
      */
     getAsyncURLHandler(): Function;
+    /**
+     * Returns the close button used in the header of the MessageView. The button is only visible on non-phone
+     * devices and triggers the `onClose` event when pressed.
+     *
+     * @ui5-protected Do not call from applications (only from related classes in the framework)
+     *
+     * @returns The close button instance.
+     */
+    getCloseBtn(): Button;
     /**
      * Gets current value of property {@link #getGroupItems groupItems}.
      *
@@ -62020,6 +63794,17 @@ declare module "sap/m/MessageView" {
        */
       iIndex: int
     ): this;
+    /**
+     * Inserts a title into the given title container of the MessageView's header.
+     *
+     * @ui5-protected Do not call from applications (only from related classes in the framework)
+     */
+    insertTitle(
+      /**
+       * The parent control where the title should be inserted.
+       */
+      oTitleParent: Control
+    ): void;
     /**
      * Navigates back to the list page
      */
@@ -62127,6 +63912,13 @@ declare module "sap/m/MessageView" {
        */
       bShowDetailsPageHeader?: boolean
     ): this;
+    /**
+     * Sets up the header for the MessageView's ListPage based on the current configuration. If `showCustomHeader`
+     * is enabled, a custom header and a sub-header are applied. Otherwise, a standard list header is used.
+     *
+     * @ui5-protected Do not call from applications (only from related classes in the framework)
+     */
+    setupCustomHeader(): void;
   }
   /**
    * Describes the settings that can be provided to the MessageView constructor.
@@ -62202,6 +63994,13 @@ declare module "sap/m/MessageView" {
      * @since 1.58
      */
     activeTitlePress?: (oEvent: MessageView$ActiveTitlePressEvent) => void;
+
+    /**
+     * Event fired when the close button in custom header is clicked.
+     *
+     * @ui5-protected DO NOT USE IN APPLICATIONS (only for related classes in the framework)
+     */
+    onClose?: (oEvent: Event) => void;
   }
 
   /**
@@ -62295,6 +64094,19 @@ declare module "sap/m/MessageView" {
    */
   export type MessageView$LongtextLoadedEvent = Event<
     MessageView$LongtextLoadedEventParameters,
+    MessageView
+  >;
+
+  /**
+   * Parameters of the MessageView#onClose event.
+   */
+  export interface MessageView$OnCloseEventParameters {}
+
+  /**
+   * Event object of the MessageView#onClose event.
+   */
+  export type MessageView$OnCloseEvent = Event<
+    MessageView$OnCloseEventParameters,
     MessageView
   >;
 
@@ -62951,15 +64763,18 @@ declare module "sap/m/MultiInput" {
    * 	 -  Provide meaningful labels for all input fields. Do not use the placeholder as a replacement for
    *     the label.
    * 	 -  The `showValueHelp` property is overwritten and after initialization of the control, its value becomes
-   *     `truthy`.  Usage: When to use::
+   *     `truthy`.
+   * 	 -  A mix of read-only and deletable tokens isn't supported.
+   * 	 -  The read-only state of tokens should be controlled using the `editable` property of the MultiInput
+   *     control.  Usage: When to use::
    * 	 -  You need to provide the value help option to help users select or search multiple business objects.
    *
    * 	 -  The dataset to choose from is expected to increase over time (for example, to more than 200 values).
    *      When not to use::
    * 	 -  When you need to select only one value.
    * 	 -  When you want the user to select from a predefined set of options. Use {@link sap.m.MultiComboBox }
-   *     instead.  Responsive Behavior: If there are many tokens, the control shows only the last selected
-   *     tokens that fit and for the others a label N-more is provided. In case the length of the last
+   *     instead.  Responsive Behavior: If there are many tokens, the control shows only the first selected
+   *     tokens that fit and for the others a label N-more is provided. In case the length of the first
    *     selected token is exceeding the width of the control, only a label N-Items is shown. In both cases,
    *     pressing on the label will show the tokens in a popup. On Phones:
    * 	 -  Only the last entered token is displayed.
@@ -67128,8 +68943,6 @@ declare module "sap/m/NumericContent" {
      * Default value is `true`.
      *
      * @since 1.73
-     * @experimental As of version 1.73. Disclaimer: this property is in a beta state - incompatible API changes
-     * may be done before its official public release. Use at your own discretion.
      *
      * @returns Value of property `adaptiveFontSize`
      */
@@ -67296,8 +69109,6 @@ declare module "sap/m/NumericContent" {
      * Default value is `true`.
      *
      * @since 1.73
-     * @experimental As of version 1.73. Disclaimer: this property is in a beta state - incompatible API changes
-     * may be done before its official public release. Use at your own discretion.
      *
      * @returns Reference to `this` in order to allow method chaining
      */
@@ -67655,8 +69466,6 @@ declare module "sap/m/NumericContent" {
      * language. When set to false the font size will always be large
      *
      * @since 1.73
-     * @experimental As of version 1.73. Disclaimer: this property is in a beta state - incompatible API changes
-     * may be done before its official public release. Use at your own discretion.
      */
     adaptiveFontSize?: boolean | PropertyBindingInfo | `{${string}}`;
 
@@ -74019,8 +75828,6 @@ declare module "sap/m/OverflowToolbar" {
 
   import { IBar } from "sap/m/library";
 
-  import Control from "sap/ui/core/Control";
-
   import ElementMetadata from "sap/ui/core/ElementMetadata";
 
   import { PropertyBindingInfo } from "sap/ui/base/ManagedObject";
@@ -74064,6 +75871,7 @@ declare module "sap/m/OverflowToolbar" {
    * 	 - {@link sap.m.SegmentedButton}
    * 	 - {@link sap.m.Select}
    * 	 - {@link sap.m.TimePicker}
+   * 	 - {@link sap.m.OverflowToolbarTokenizer}
    * 	 - {@link sap.m.ToggleButton}
    * 	 - {@link sap.m.ToolbarSeparator}
    * 	 - {@link sap.ui.comp.smartfield.SmartField}
@@ -74177,22 +75985,6 @@ declare module "sap/m/OverflowToolbar" {
      */
     closeOverflow(): void;
     /**
-     * This method is a hook for the RenderManager that gets called during the rendering of child Controls.
-     * It allows to add, remove and update existing accessibility attributes (ARIA) of those controls.
-     *
-     * @ui5-protected Do not call from applications (only from related classes in the framework)
-     */
-    enhanceAccessibilityState(
-      /**
-       * The Control that gets rendered by the RenderManager
-       */
-      oElement: Control,
-      /**
-       * The mapping of "aria-" prefixed attributes
-       */
-      mAriaProps: object
-    ): void;
-    /**
      * Gets current value of property {@link #getAsyncMode asyncMode}.
      *
      * Defines whether the `OverflowToolbar` works in async mode.
@@ -74239,7 +76031,10 @@ declare module "sap/m/OverflowToolbarButton" {
 
   import { IShellBar } from "sap/f/library";
 
-  import { IOverflowToolbarContent } from "sap/m/library";
+  import {
+    IOverflowToolbarContent,
+    IToolbarInteractiveControl,
+  } from "sap/m/library";
 
   import ElementMetadata from "sap/ui/core/ElementMetadata";
 
@@ -74254,10 +76049,7 @@ declare module "sap/m/OverflowToolbarButton" {
    */
   export default class OverflowToolbarButton
     extends Button
-    implements
-      IShellBar,
-      IOverflowToolbarContent,
-      /* was: sap.m.IToolbarInteractiveControl */ Object
+    implements IShellBar, IOverflowToolbarContent, IToolbarInteractiveControl
   {
     __implements__sap_f_IShellBar: boolean;
     __implements__sap_m_IOverflowToolbarContent: boolean;
@@ -74773,6 +76565,207 @@ declare module "sap/m/OverflowToolbarToggleButton" {
     extends $ToggleButtonSettings {}
 }
 
+declare module "sap/m/OverflowToolbarTokenizer" {
+  import { default as Button, $ButtonSettings } from "sap/m/Button";
+
+  import {
+    IOverflowToolbarContent,
+    IToolbarInteractiveControl,
+  } from "sap/m/library";
+
+  import ElementMetadata from "sap/ui/core/ElementMetadata";
+
+  import { PropertyBindingInfo } from "sap/ui/base/ManagedObject";
+
+  /**
+   * Represents an {@link sap.m.Button} that shows its text only when in the overflow area of an {@link sap.m.OverflowToolbar}.
+   *
+   * **Note:** This control is intended to be used exclusively in the context of `sap.m.Toolbar` and `sap.m.OverflowToolbar`.
+   * Using more than one tokenizer in the same toolbar is not recomended, as it may lead to unexpected behavior.
+   * Do not use tokenizers within a toolbar if its active property is set to `true`.
+   *
+   * @experimental As of version 1.139.
+   */
+  export default class OverflowToolbarTokenizer
+    extends Button
+    implements IOverflowToolbarContent, IToolbarInteractiveControl
+  {
+    __implements__sap_m_IOverflowToolbarContent: boolean;
+    __implements__sap_m_IToolbarInteractiveControl: boolean;
+    /**
+     * Constructor for a new `OverflowToolbarTokenizer`.
+     *
+     * Accepts an object literal `mSettings` that defines initial property values, aggregated and associated
+     * objects as well as event handlers. See {@link sap.ui.base.ManagedObject#constructor} for a general description
+     * of the syntax of the settings object.
+     */
+    constructor(
+      /**
+       * Initial settings for the new control
+       */
+      mSettings?: $OverflowToolbarTokenizerSettings
+    );
+    /**
+     * Constructor for a new `OverflowToolbarTokenizer`.
+     *
+     * Accepts an object literal `mSettings` that defines initial property values, aggregated and associated
+     * objects as well as event handlers. See {@link sap.ui.base.ManagedObject#constructor} for a general description
+     * of the syntax of the settings object.
+     */
+    constructor(
+      /**
+       * ID for the new control, generated automatically if no ID is given
+       */
+      sId?: string,
+      /**
+       * Initial settings for the new control
+       */
+      mSettings?: $OverflowToolbarTokenizerSettings
+    );
+
+    /**
+     * Creates a new subclass of class sap.m.OverflowToolbarTokenizer with name `sClassName` and enriches it
+     * with the information contained in `oClassInfo`.
+     *
+     * `oClassInfo` might contain the same kind of information as described in {@link sap.m.Button.extend}.
+     *
+     *
+     * @returns Created class / constructor function
+     */
+    static extend<T extends Record<string, unknown>>(
+      /**
+       * Name of the class being created
+       */
+      sClassName: string,
+      /**
+       * Object literal with information about the class
+       */
+      oClassInfo?: sap.ClassInfo<T, OverflowToolbarTokenizer>,
+      /**
+       * Constructor function for the metadata object; if not given, it defaults to the metadata implementation
+       * used by this class
+       */
+      FNMetaImpl?: Function
+    ): Function;
+    /**
+     * Returns a metadata object for class sap.m.OverflowToolbarTokenizer.
+     *
+     *
+     * @returns Metadata object describing this class
+     */
+    static getMetadata(): ElementMetadata;
+    /**
+     * Gets current value of property {@link #getLabelText labelText}.
+     *
+     * Property for the text of a sap.m.Label displayed with sap.m.OverflowToolbarTokenizer. It is also displayed
+     * as an n-More button text when used inside a `sap.m.OverflowToolbar`.
+     *
+     *
+     * @returns Value of property `labelText`
+     */
+    getLabelText(): string;
+    /**
+     * Gets current value of property {@link #getRenderMode renderMode}.
+     *
+     * Defines the mode that the OverflowToolbarTokenizer will use:
+     * 	 - `sap.m.OverflowToolbarTokenizerRenderMode.Loose` mode shows all tokens, no matter the width of the
+     *     Tokenizer
+     * 	 - `sap.m.OverflowToolbarTokenizerRenderMode.Narrow` mode restricts the tokenizer to display only the
+     *     maximum number of tokens that fit within its width, adding an n-More indicator for the remaining tokens
+     *
+     * 	 - `sap.m.OverflowToolbarTokenizerRenderMode.Overflow` mode forces the tokenizer to show only `sap.m.Button`
+     *     as an n-More indicator without visible tokens. It is used when `sap.m.OverflowToolbarTokenizer` is within
+     *     the `sap.m.OverflowToolbar` overflow area
+     *
+     * **Note**: Have in mind that the `renderMode` property is used internally by the OverflowToolbarTokenizer
+     * and controls that use the OverflowToolbarTokenizer. Therefore, modifying this property may alter the
+     * expected behavior of the control.
+     *
+     * Default value is `RenderMode.Narrow`.
+     *
+     *
+     * @returns Value of property `renderMode`
+     */
+    getRenderMode(): string;
+    /**
+     * Sets a new value for property {@link #getLabelText labelText}.
+     *
+     * Property for the text of a sap.m.Label displayed with sap.m.OverflowToolbarTokenizer. It is also displayed
+     * as an n-More button text when used inside a `sap.m.OverflowToolbar`.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setLabelText(
+      /**
+       * New value for property `labelText`
+       */
+      sLabelText?: string
+    ): this;
+    /**
+     * Sets a new value for property {@link #getRenderMode renderMode}.
+     *
+     * Defines the mode that the OverflowToolbarTokenizer will use:
+     * 	 - `sap.m.OverflowToolbarTokenizerRenderMode.Loose` mode shows all tokens, no matter the width of the
+     *     Tokenizer
+     * 	 - `sap.m.OverflowToolbarTokenizerRenderMode.Narrow` mode restricts the tokenizer to display only the
+     *     maximum number of tokens that fit within its width, adding an n-More indicator for the remaining tokens
+     *
+     * 	 - `sap.m.OverflowToolbarTokenizerRenderMode.Overflow` mode forces the tokenizer to show only `sap.m.Button`
+     *     as an n-More indicator without visible tokens. It is used when `sap.m.OverflowToolbarTokenizer` is within
+     *     the `sap.m.OverflowToolbar` overflow area
+     *
+     * **Note**: Have in mind that the `renderMode` property is used internally by the OverflowToolbarTokenizer
+     * and controls that use the OverflowToolbarTokenizer. Therefore, modifying this property may alter the
+     * expected behavior of the control.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `RenderMode.Narrow`.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setRenderMode(
+      /**
+       * New value for property `renderMode`
+       */
+      sRenderMode?: string
+    ): this;
+  }
+  /**
+   * Describes the settings that can be provided to the OverflowToolbarTokenizer constructor.
+   *
+   * @experimental As of version 1.139.
+   */
+  export interface $OverflowToolbarTokenizerSettings extends $ButtonSettings {
+    /**
+     * Property for the text of a sap.m.Label displayed with sap.m.OverflowToolbarTokenizer. It is also displayed
+     * as an n-More button text when used inside a `sap.m.OverflowToolbar`.
+     */
+    labelText?: string | PropertyBindingInfo;
+
+    /**
+     * Defines the mode that the OverflowToolbarTokenizer will use:
+     * 	 - `sap.m.OverflowToolbarTokenizerRenderMode.Loose` mode shows all tokens, no matter the width of the
+     *     Tokenizer
+     * 	 - `sap.m.OverflowToolbarTokenizerRenderMode.Narrow` mode restricts the tokenizer to display only the
+     *     maximum number of tokens that fit within its width, adding an n-More indicator for the remaining tokens
+     *
+     * 	 - `sap.m.OverflowToolbarTokenizerRenderMode.Overflow` mode forces the tokenizer to show only `sap.m.Button`
+     *     as an n-More indicator without visible tokens. It is used when `sap.m.OverflowToolbarTokenizer` is within
+     *     the `sap.m.OverflowToolbar` overflow area
+     *
+     * **Note**: Have in mind that the `renderMode` property is used internally by the OverflowToolbarTokenizer
+     * and controls that use the OverflowToolbarTokenizer. Therefore, modifying this property may alter the
+     * expected behavior of the control.
+     */
+    renderMode?: string | PropertyBindingInfo;
+  }
+}
+
 declare module "sap/m/p13n/BasePanel" {
   import { default as Control, $ControlSettings } from "sap/ui/core/Control";
 
@@ -75117,255 +77110,6 @@ declare module "sap/m/p13n/BasePanel" {
     BasePanel$ChangeEventParameters,
     BasePanel
   >;
-}
-
-declare module "sap/m/p13n/Engine" {
-  import Control from "sap/ui/core/Control";
-
-  import Event from "sap/ui/base/Event";
-
-  import Metadata from "sap/ui/base/Metadata";
-
-  import Popup from "sap/m/p13n/Popup";
-
-  import MetadataHelper from "sap/m/p13n/MetadataHelper";
-
-  import SelectionController from "sap/m/p13n/SelectionController";
-
-  /**
-   * The `Engine` entity offers personalization capabilities by registering a control instance for modification,
-   * such as:
-   *
-   *
-   * 	 - `sap.m.p13n.Popup` initialization
-   * 	 - Storing personalization states by choosing the desired persistence layer
-   * 	 - State appliance considering the persistence layer
-   *
-   * The Engine must be used whenever personalization should be enabled by taking a certain persistence layer
-   * into account. Available controller implementations for the registration process are:
-   *
-   *
-   * 	 - {@link sap.m.p13n.SelectionController SelectionController}: Used to define a list of selectable entries
-   *
-   * 	 - {@link sap.m.p13n.SortController SortController}: Used to define a list of sortable properties
-   * 	 - {@link sap.m.p13n.GroupController GroupController}: Used to define a list of groupable properties
-   *
-   *
-   * Can be used in combination with `sap.ui.fl.variants.VariantManagement` to persist a state in variants
-   * using `sap.ui.fl` capabilities.
-   *
-   * @since 1.104
-   */
-  export default class Engine
-    extends /* was: sap.m.p13n.modules.AdaptationProvider */ Object
-  {
-    /**
-     * See:
-     * 	{@link https://ui5.sap.com/#/topic/75c08fdebf784575947927e052712bab Personalization}
-     */
-    constructor();
-
-    /**
-     * Creates a new subclass of class sap.m.p13n.Engine with name `sClassName` and enriches it with the information
-     * contained in `oClassInfo`.
-     *
-     * `oClassInfo` might contain the same kind of information as described in {@link sap.m.p13n.modules.AdaptationProvider.extend}.
-     *
-     *
-     * @returns Created class / constructor function
-     */
-    static extend<T extends Record<string, unknown>>(
-      /**
-       * Name of the class being created
-       */
-      sClassName: string,
-      /**
-       * Object literal with information about the class
-       */
-      oClassInfo?: sap.ClassInfo<T, Engine>,
-      /**
-       * Constructor function for the metadata object; if not given, it defaults to the metadata implementation
-       * used by this class
-       */
-      FNMetaImpl?: Function
-    ): Function;
-    /**
-     * This method is the central point of access to the Engine Singleton.
-     *
-     *
-     * @returns The Engine instance
-     */
-    static getInstance(): Engine;
-    /**
-     * Returns a metadata object for class sap.m.p13n.Engine.
-     *
-     *
-     * @returns Metadata object describing this class
-     */
-    static getMetadata(): Metadata;
-    /**
-     * Applies a state to a control by passing an object that contains the registered controller key and an
-     * object matching the inner subcontroller logic.
-     *
-     *
-     * @returns A Promise resolving after the state has been applied
-     */
-    applyState(
-      /**
-       * The registered control instance
-       */
-      oControl: Control,
-      /**
-       * The state object
-       */
-      oState: State
-    ): Promise<State>;
-    /**
-     * Attaches an event handler to the `StateHandlerRegistry` class. The event handler is fired every time
-     * a user triggers a personalization change for a control instance during runtime.
-     *
-     *
-     * @returns Returns `this` to allow method chaining
-     */
-    attachStateChange(
-      /**
-       * The handler function to call when the event occurs
-       */
-      fnStateEventHandler: (p1: Event) => void
-    ): this;
-    /**
-     * Unregisters a registered control. By unregistering a control the control is removed from the `Engine`
-     * registry, and all instance-specific submodules, such as the registered controllers, are destroyed.
-     */
-    deregister(
-      /**
-       * The registered control instance
-       */
-      oControl: Control
-    ): void;
-    /**
-     * Removes a previously attached state change event handler from the `StateHandlerRegistry` class. The passed
-     * parameters must match those used for registration with {@link sap.m.p13n.Engine#attachStateChange} beforehand.
-     *
-     *
-     * @returns Returns `this` to allow method chaining
-     */
-    detachStateChange(
-      /**
-       * The handler function to detach from the event
-       */
-      fnStateEventHandler: (p1: Event) => void
-    ): this;
-
-    register(
-      /**
-       * The control instance to be registered for adaptation
-       */
-      oControl: Control,
-      /**
-       * The Engine registration configuration
-       */
-      oConfig: EngineRegistrationConfig
-    ): void;
-    /**
-     * This method can be used to trigger a reset to the provided control instance.
-     *
-     *
-     * @returns A Promise resolving once the reset is completed
-     */
-    reset(
-      /**
-       * The related control instance
-       */
-      oControl: Control,
-      /**
-       * The key for the affected configuration
-       */
-      aKeys: string
-    ): Promise<null>;
-    /**
-     * Retrieves the state for a given control instance after all necessary changes have been applied (e.g.
-     * modification handler appliance). After the returned `Promise` has been resolved, the returned state is
-     * in sync with the related state object of the control.
-     *
-     *
-     * @returns A Promise resolving in the current control state
-     */
-    retrieveState(
-      /**
-       * The control instance implementing IxState to retrieve the externalized state
-       */
-      oControl: Control
-    ): Promise<State>;
-    /**
-     * Opens the personalization dialog.
-     *
-     *
-     * @returns Promise resolving in the `sap.m.p13n.Popup` instance
-     */
-    show(
-      /**
-       * The control instance that is personalized
-       */
-      oControl: Control,
-      /**
-       * The affected panels that are added to the `sap.m.p13n.Popup`
-       */
-      vPanelKeys: string | string[],
-      /**
-       * The settings object for the personalization
-       */
-      mSettings: {
-        /**
-         * The title for the `sap.m.p13n.Popup` control
-         */
-        title?: string;
-        /**
-         * The source control to be used by the `sap.m.p13n.Popup` control (only necessary if the mode is set to
-         * `ResponsivePopover`)
-         */
-        source?: Control;
-        /**
-         * The mode is used by the `sap.m.p13n.Popup` control
-         */
-        mode?: object;
-        /**
-         * Height configuration for the related popup container
-         */
-        contentHeight?: object;
-        /**
-         * Width configuration for the related popup container
-         */
-        contentWidth?: object;
-      }
-    ): Promise<Popup>;
-  }
-  /**
-   * The central registration for personalization functionality. The registration is a precondition for using
-   * `Engine` functionality for a control instance. Once the control instance has been registered, it can
-   * be passed to the related `Engine` methods that always expect a control instance as parameter. Only registered
-   * control instances can be used for personalization through the `Engine`.
-   */
-  export type EngineRegistrationConfig = {
-    /**
-     * The `{@link sap.m.p13n.MetadataHelper MetadataHelper}` to provide metadata-specific information. It may
-     * be used to define more granular information for the selection of items.
-     */
-    helper: MetadataHelper;
-    /**
-     * A map of arbitrary keys that contain a controller instance as value. The key must be unique and needs
-     * to be provided for later access when using `Engine` functionality specific for one controller type.
-     */
-    controller: Record<string, SelectionController>;
-  };
-
-  export type State = {
-    /**
-     * A map of arbitrary keys that contain a controller instance as value. The key must be unique and needs
-     * to be provided for later access when using `Engine` functionality specific for one controller type.
-     */
-    controller: Record<string, Object[]>;
-  };
 }
 
 declare module "sap/m/p13n/FilterController" {
@@ -75780,6 +77524,15 @@ declare module "sap/m/p13n/MetadataHelper" {
        */
       sKey: string
     ): MetadataObject | undefined;
+    /**
+     * Gets a list of properties that are redundant and should be filtered out in the {@link sap.ui.mdc.p13n.SelectionController }
+     * for personalization.
+     *
+     * @ui5-protected Do not call from applications (only from related classes in the framework)
+     *
+     * @returns A list of properties
+     */
+    getRedundantProperties(): object[];
   }
   /**
    * Personalization `MetadataObject` type.
@@ -75819,6 +77572,8 @@ declare module "sap/m/p13n/Popup" {
 
   import { p13n, P13nPopupMode } from "sap/m/library";
 
+  import Event from "sap/ui/base/Event";
+
   import ElementMetadata from "sap/ui/core/ElementMetadata";
 
   import { CSSSize } from "sap/ui/core/library";
@@ -75827,8 +77582,6 @@ declare module "sap/m/p13n/Popup" {
     PropertyBindingInfo,
     AggregationBindingInfo,
   } from "sap/ui/base/ManagedObject";
-
-  import Event from "sap/ui/base/Event";
 
   /**
    * This control can be used to show personalization-related content in different popup controls.
@@ -75974,6 +77727,53 @@ declare module "sap/m/p13n/Popup" {
       oListener?: object
     ): this;
     /**
+     * Attaches event handler `fnFunction` to the {@link #event:open open} event of this `sap.m.p13n.Popup`.
+     *
+     * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
+     * otherwise it will be bound to this `sap.m.p13n.Popup` itself.
+     *
+     * This event is fired after the dialog has been opened.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    attachOpen(
+      /**
+       * An application-specific payload object that will be passed to the event handler along with the event
+       * object when firing the event
+       */
+      oData: object,
+      /**
+       * The function to be called when the event occurs
+       */
+      fnFunction: (p1: Event) => void,
+      /**
+       * Context object to call the event handler with. Defaults to this `sap.m.p13n.Popup` itself
+       */
+      oListener?: object
+    ): this;
+    /**
+     * Attaches event handler `fnFunction` to the {@link #event:open open} event of this `sap.m.p13n.Popup`.
+     *
+     * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
+     * otherwise it will be bound to this `sap.m.p13n.Popup` itself.
+     *
+     * This event is fired after the dialog has been opened.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    attachOpen(
+      /**
+       * The function to be called when the event occurs
+       */
+      fnFunction: (p1: Event) => void,
+      /**
+       * Context object to call the event handler with. Defaults to this `sap.m.p13n.Popup` itself
+       */
+      oListener?: object
+    ): this;
+    /**
      * Destroys all the additionalButtons in the aggregation {@link #getAdditionalButtons additionalButtons}.
      *
      *
@@ -76006,6 +77806,24 @@ declare module "sap/m/p13n/Popup" {
       oListener?: object
     ): this;
     /**
+     * Detaches event handler `fnFunction` from the {@link #event:open open} event of this `sap.m.p13n.Popup`.
+     *
+     * The passed function and listener object must match the ones used for event registration.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    detachOpen(
+      /**
+       * The function to be called, when the event occurs
+       */
+      fnFunction: (p1: Event) => void,
+      /**
+       * Context object on which the given function had to be called
+       */
+      oListener?: object
+    ): this;
+    /**
      * Fires event {@link #event:close close} to attached listeners.
      *
      * @ui5-protected Do not call from applications (only from related classes in the framework)
@@ -76017,6 +77835,19 @@ declare module "sap/m/p13n/Popup" {
        * Parameters to pass along with the event
        */
       mParameters?: Popup$CloseEventParameters
+    ): this;
+    /**
+     * Fires event {@link #event:open open} to attached listeners.
+     *
+     * @ui5-protected Do not call from applications (only from related classes in the framework)
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    fireOpen(
+      /**
+       * Parameters to pass along with the event
+       */
+      mParameters?: object
     ): this;
     /**
      * Gets content of aggregation {@link #getAdditionalButtons additionalButtons}.
@@ -76160,6 +77991,10 @@ declare module "sap/m/p13n/Popup" {
          * Width configuration for the related popup container
          */
         contentWidth?: CSSSize;
+        /**
+         * Key of active panel that is opened initially
+         */
+        activePanel?: string;
       }
     ): void;
     /**
@@ -76289,6 +78124,11 @@ declare module "sap/m/p13n/Popup" {
       | `{${string}}`;
 
     /**
+     * This event is fired after the dialog has been opened.
+     */
+    open?: (oEvent: Event) => void;
+
+    /**
      * This event is fired after the dialog has been closed.
      */
     close?: (oEvent: Popup$CloseEvent) => void;
@@ -76308,6 +78148,16 @@ declare module "sap/m/p13n/Popup" {
    * Event object of the Popup#close event.
    */
   export type Popup$CloseEvent = Event<Popup$CloseEventParameters, Popup>;
+
+  /**
+   * Parameters of the Popup#open event.
+   */
+  export interface Popup$OpenEventParameters {}
+
+  /**
+   * Event object of the Popup#open event.
+   */
+  export type Popup$OpenEvent = Event<Popup$OpenEventParameters, Popup>;
 }
 
 declare module "sap/m/p13n/QueryPanel" {
@@ -84606,7 +86456,7 @@ declare module "sap/m/Page" {
      *
      * The (optional) custom header of this page. Use this aggregation only when a custom header is constructed
      * where the default header consisting of title text + nav button is not sufficient. If this aggregation
-     * is set, the simple properties "title", "showNavButton", "NavButtonText" and "icon" are not used.
+     * is set, the simple properties "title", "showNavButton", "navButtonText" and "icon" are not used.
      */
     getCustomHeader(): IBar;
     /**
@@ -85433,7 +87283,7 @@ declare module "sap/m/Page" {
     /**
      * The (optional) custom header of this page. Use this aggregation only when a custom header is constructed
      * where the default header consisting of title text + nav button is not sufficient. If this aggregation
-     * is set, the simple properties "title", "showNavButton", "NavButtonText" and "icon" are not used.
+     * is set, the simple properties "title", "showNavButton", "navButtonText" and "icon" are not used.
      */
     customHeader?: IBar;
 
@@ -87323,6 +89173,11 @@ declare module "sap/m/PDFViewer" {
      * happen when the source PDF file is stored in a different domain. If you want no error message to be displayed
      * when this event is fired, call the preventDefault() method inside the event handler.
      *
+     * Modern browsers implement strict policies for validating external resources loaded within an iframe.
+     * PDFViewer cannot determine whether the resource inside the iframe is a valid PDF by itself. As the validation
+     * cannot be performed the sourceValidationFailed event cannot be triggered.
+     *
+     * @deprecated As of version 1.141.0. with no replacement.
      *
      * @returns Reference to `this` in order to allow method chaining
      */
@@ -87353,6 +89208,11 @@ declare module "sap/m/PDFViewer" {
      * happen when the source PDF file is stored in a different domain. If you want no error message to be displayed
      * when this event is fired, call the preventDefault() method inside the event handler.
      *
+     * Modern browsers implement strict policies for validating external resources loaded within an iframe.
+     * PDFViewer cannot determine whether the resource inside the iframe is a valid PDF by itself. As the validation
+     * cannot be performed the sourceValidationFailed event cannot be triggered.
+     *
+     * @deprecated As of version 1.141.0. with no replacement.
      *
      * @returns Reference to `this` in order to allow method chaining
      */
@@ -87422,6 +89282,7 @@ declare module "sap/m/PDFViewer" {
      *
      * The passed function and listener object must match the ones used for event registration.
      *
+     * @deprecated As of version 1.141.0. with no replacement.
      *
      * @returns Reference to `this` in order to allow method chaining
      */
@@ -87468,6 +89329,7 @@ declare module "sap/m/PDFViewer" {
     /**
      * Fires event {@link #event:sourceValidationFailed sourceValidationFailed} to attached listeners.
      *
+     * @deprecated As of version 1.141.0. with no replacement.
      * @ui5-protected Do not call from applications (only from related classes in the framework)
      *
      * @returns Reference to `this` in order to allow method chaining
@@ -87587,9 +89449,13 @@ declare module "sap/m/PDFViewer" {
      * Gets current value of property {@link #getSource source}.
      *
      * Specifies the path to the PDF file to display. Can be set to a relative or an absolute path.
-     *  Optionally, this property can also be set to a data URI path or a blob URL in all major web browsers
-     * except Internet Explorer and Microsoft Edge, provided that this data URI or blob URL is allowed in advance.
-     * For more information about URL filtering, see {@link https://ui5.sap.com/#/topic/91f3768f6f4d1014b6dd926db0e91070 URLList Validator Filtering}.
+     *  Optionally, this property can also be set to a data URI path or a blob URL, provided that this data
+     * URI or blob URL is allowed in advance. For more information about URL filtering, see {@link https://ui5.sap.com/#/topic/91f3768f6f4d1014b6dd926db0e91070 URLList Validator Filtering}.
+     *
+     * Source Validation: When the source is set, the PDFViewer automatically validates the resource using a
+     * GET request to ensure it exists and is accessible. This validation:
+     * 	 - Prevents loading invalid or non-existent PDF files
+     * 	 - If validation fails, error content is displayed instead of attempting PDF load
      *
      *
      * @returns Value of property `source`
@@ -87837,9 +89703,13 @@ declare module "sap/m/PDFViewer" {
      * Sets a new value for property {@link #getSource source}.
      *
      * Specifies the path to the PDF file to display. Can be set to a relative or an absolute path.
-     *  Optionally, this property can also be set to a data URI path or a blob URL in all major web browsers
-     * except Internet Explorer and Microsoft Edge, provided that this data URI or blob URL is allowed in advance.
-     * For more information about URL filtering, see {@link https://ui5.sap.com/#/topic/91f3768f6f4d1014b6dd926db0e91070 URLList Validator Filtering}.
+     *  Optionally, this property can also be set to a data URI path or a blob URL, provided that this data
+     * URI or blob URL is allowed in advance. For more information about URL filtering, see {@link https://ui5.sap.com/#/topic/91f3768f6f4d1014b6dd926db0e91070 URLList Validator Filtering}.
+     *
+     * Source Validation: When the source is set, the PDFViewer automatically validates the resource using a
+     * GET request to ensure it exists and is accessible. This validation:
+     * 	 - Prevents loading invalid or non-existent PDF files
+     * 	 - If validation fails, error content is displayed instead of attempting PDF load
      *
      * When called with a value of `null` or `undefined`, the default value of the property will be restored.
      *
@@ -87906,9 +89776,13 @@ declare module "sap/m/PDFViewer" {
 
     /**
      * Specifies the path to the PDF file to display. Can be set to a relative or an absolute path.
-     *  Optionally, this property can also be set to a data URI path or a blob URL in all major web browsers
-     * except Internet Explorer and Microsoft Edge, provided that this data URI or blob URL is allowed in advance.
-     * For more information about URL filtering, see {@link https://ui5.sap.com/#/topic/91f3768f6f4d1014b6dd926db0e91070 URLList Validator Filtering}.
+     *  Optionally, this property can also be set to a data URI path or a blob URL, provided that this data
+     * URI or blob URL is allowed in advance. For more information about URL filtering, see {@link https://ui5.sap.com/#/topic/91f3768f6f4d1014b6dd926db0e91070 URLList Validator Filtering}.
+     *
+     * Source Validation: When the source is set, the PDFViewer automatically validates the resource using a
+     * GET request to ensure it exists and is accessible. This validation:
+     * 	 - Prevents loading invalid or non-existent PDF files
+     * 	 - If validation fails, error content is displayed instead of attempting PDF load
      */
     source?: URI | PropertyBindingInfo | `{${string}}`;
 
@@ -87999,6 +89873,12 @@ declare module "sap/m/PDFViewer" {
      * configuration of the Mozilla Firefox browser may not allow checking the loaded content. This may also
      * happen when the source PDF file is stored in a different domain. If you want no error message to be displayed
      * when this event is fired, call the preventDefault() method inside the event handler.
+     *
+     * Modern browsers implement strict policies for validating external resources loaded within an iframe.
+     * PDFViewer cannot determine whether the resource inside the iframe is a valid PDF by itself. As the validation
+     * cannot be performed the sourceValidationFailed event cannot be triggered.
+     *
+     * @deprecated As of version 1.141.0. with no replacement.
      */
     sourceValidationFailed?: (oEvent: Event) => void;
   }
@@ -88036,11 +89916,15 @@ declare module "sap/m/PDFViewer" {
 
   /**
    * Parameters of the PDFViewer#sourceValidationFailed event.
+   *
+   * @deprecated As of version 1.141.0. with no replacement.
    */
   export interface PDFViewer$SourceValidationFailedEventParameters {}
 
   /**
    * Event object of the PDFViewer#sourceValidationFailed event.
+   *
+   * @deprecated As of version 1.141.0. with no replacement.
    */
   export type PDFViewer$SourceValidationFailedEvent = Event<
     PDFViewer$SourceValidationFailedEventParameters,
@@ -89274,7 +91158,7 @@ declare module "sap/m/PlanningCalendar" {
      * of the content.
      *
      * **Note:** There is limited browser support, hence the API is in experimental state. Browsers that currently
-     * support this feature are Chrome (desktop and mobile), Safari (desktop and mobile) and Edge 41.
+     * support this feature are Chrome (desktop and mobile), Safari (desktop and mobile) and Edge.
      *
      * There are also some known issues with respect to the scrolling behavior and focus handling. A few are
      * given below:
@@ -89902,26 +91786,39 @@ declare module "sap/m/PlanningCalendar" {
       sNoDataText?: string
     ): this;
     /**
-     * Sets the primaryCalendarType. If not set, the calendar type of the global configuration is used.
+     * Sets a new value for property {@link #getPrimaryCalendarType primaryCalendarType}.
      *
+     * If set, the calendar type is used for display. If not set, the calendar type of the global configuration
+     * is used.
      *
-     * @returns `this` to allow method chaining
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * @since 1.108.0
+     *
+     * @returns Reference to `this` in order to allow method chaining
      */
     setPrimaryCalendarType(
       /**
-       * the `CalendarType` to set as `sap.m.PlanningCalendar` `primaryCalendarType`.
+       * New value for property `primaryCalendarType`
        */
       sPrimaryCalendarType: CalendarType | keyof typeof CalendarType
     ): this;
     /**
-     * Sets the secondaryCalendarType.
+     * Sets a new value for property {@link #getSecondaryCalendarType secondaryCalendarType}.
      *
+     * If set, the days are also represented in this calendar type. If not set, the dates are only represented
+     * in the primary calendar type. Note: The second calendar type won't be represented in the DOM when this
+     * property is not set explicitly.
      *
-     * @returns `this` to allow method chaining
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * @since 1.109.0
+     *
+     * @returns Reference to `this` in order to allow method chaining
      */
     setSecondaryCalendarType(
       /**
-       * the `CalendarType` to set as `sap.m.PlanningCalendar` `secondaryCalendarType`.
+       * New value for property `secondaryCalendarType`
        */
       sSecondaryCalendarType: CalendarType | keyof typeof CalendarType
     ): this;
@@ -90062,16 +91959,42 @@ declare module "sap/m/PlanningCalendar" {
       oDate: Date
     ): this;
     /**
-     * Sets the stickyHeader property.
+     * Sets a new value for property {@link #getStickyHeader stickyHeader}.
      *
+     * Determines whether the header area will remain visible (fixed on top) when the rest of the content is
+     * scrolled out of view.
      *
-     * @returns this pointer for chaining
+     * The sticky header behavior is automatically disabled on phones in landscape mode for better visibility
+     * of the content.
+     *
+     * **Note:** There is limited browser support, hence the API is in experimental state. Browsers that currently
+     * support this feature are Chrome (desktop and mobile), Safari (desktop and mobile) and Edge.
+     *
+     * There are also some known issues with respect to the scrolling behavior and focus handling. A few are
+     * given below:
+     *
+     * When the PlanningCalendar is placed in certain layout containers, for example the `GridLayout` control,
+     * the column headers do not fix at the top of the viewport. Similar behavior is also observed with the
+     * `ObjectPage` control.
+     *
+     * This API should not be used in production environment.
+     *
+     * **Note:** The `stickyHeader` of the `PlanningCalendar` uses the `sticky` property of `sap.m.Table`. Therefore,
+     * all features and restrictions of the property in `sap.m.Table` apply to the `PlanningCalendar` as well.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `false`.
+     *
+     * @since 1.54
+     *
+     * @returns Reference to `this` in order to allow method chaining
      */
     setStickyHeader(
       /**
-       * Whether the header area will remain visible (fixed on top)
+       * New value for property `stickyHeader`
        */
-      bStick: boolean
+      bStickyHeader?: boolean
     ): this;
     /**
      * Sets a new value for property {@link #getViewKey viewKey}.
@@ -90095,16 +92018,20 @@ declare module "sap/m/PlanningCalendar" {
       sViewKey?: string
     ): this;
     /**
-     * Sets the width property and ensures that the start date is in sync with each row timeline.
+     * Sets a new value for property {@link #getWidth width}.
+     *
+     * Specifies the width of the `PlanningCalendar`.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
      *
      *
-     * @returns this for method chaining
+     * @returns Reference to `this` in order to allow method chaining
      */
     setWidth(
       /**
-       * the width to be set to the PlanningCalendar
+       * New value for property `width`
        */
-      sWidth: CSSSize
+      sWidth?: CSSSize
     ): this;
   }
   /**
@@ -90305,7 +92232,7 @@ declare module "sap/m/PlanningCalendar" {
      * of the content.
      *
      * **Note:** There is limited browser support, hence the API is in experimental state. Browsers that currently
-     * support this feature are Chrome (desktop and mobile), Safari (desktop and mobile) and Edge 41.
+     * support this feature are Chrome (desktop and mobile), Safari (desktop and mobile) and Edge.
      *
      * There are also some known issues with respect to the scrolling behavior and focus handling. A few are
      * given below:
@@ -93653,6 +95580,206 @@ declare module "sap/m/plugins/CellSelector" {
   >;
 }
 
+declare module "sap/m/plugins/ColumnAIAction" {
+  import { default as UI5Element, $ElementSettings } from "sap/ui/core/Element";
+
+  import ElementMetadata from "sap/ui/core/ElementMetadata";
+
+  import Control from "sap/ui/core/Control";
+
+  import Event from "sap/ui/base/Event";
+
+  /**
+   * This plugin adds an AI related action to a table column.
+   *
+   * @since 1.136
+   */
+  export default class ColumnAIAction extends UI5Element {
+    /**
+     * Constructor for a new `ColumnAIAction` plugin that can be used to add an AI related action for table
+     * columns.
+     *
+     * Accepts an object literal `mSettings` that defines initial property values, aggregated and associated
+     * objects as well as event handlers. See {@link sap.ui.base.ManagedObject#constructor} for a general description
+     * of the syntax of the settings object.
+     */
+    constructor(
+      /**
+       * Initial settings for the `ColumnAIAction`
+       */
+      mSettings?: $ColumnAIActionSettings
+    );
+    /**
+     * Constructor for a new `ColumnAIAction` plugin that can be used to add an AI related action for table
+     * columns.
+     *
+     * Accepts an object literal `mSettings` that defines initial property values, aggregated and associated
+     * objects as well as event handlers. See {@link sap.ui.base.ManagedObject#constructor} for a general description
+     * of the syntax of the settings object.
+     */
+    constructor(
+      /**
+       * ID for the new `ColumnAIAction`, generated automatically if no ID is given
+       */
+      sId?: string,
+      /**
+       * Initial settings for the `ColumnAIAction`
+       */
+      mSettings?: $ColumnAIActionSettings
+    );
+
+    /**
+     * Creates a new subclass of class sap.m.plugins.ColumnAIAction with name `sClassName` and enriches it with
+     * the information contained in `oClassInfo`.
+     *
+     * `oClassInfo` might contain the same kind of information as described in {@link sap.ui.core.Element.extend}.
+     *
+     *
+     * @returns Created class / constructor function
+     */
+    static extend<T extends Record<string, unknown>>(
+      /**
+       * Name of the class being created
+       */
+      sClassName: string,
+      /**
+       * Object literal with information about the class
+       */
+      oClassInfo?: sap.ClassInfo<T, ColumnAIAction>,
+      /**
+       * Constructor function for the metadata object; if not given, it defaults to the metadata implementation
+       * used by this class
+       */
+      FNMetaImpl?: Function
+    ): Function;
+    /**
+     * Searches a plugin of the corresponding type in the aggregations of the given `Element` instance. The
+     * first plugin that is found is returned.
+     *
+     *
+     * @returns The found plugin instance or `undefined` if not found
+     */
+    static findOn(
+      /**
+       * The `Element` instance to check for
+       */
+      oElement: UI5Element
+    ): UI5Element | undefined;
+    /**
+     * Returns a metadata object for class sap.m.plugins.ColumnAIAction.
+     *
+     *
+     * @returns Metadata object describing this class
+     */
+    static getMetadata(): ElementMetadata;
+    /**
+     * Attaches event handler `fnFunction` to the {@link #event:press press} event of this `sap.m.plugins.ColumnAIAction`.
+     *
+     * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
+     * otherwise it will be bound to this `sap.m.plugins.ColumnAIAction` itself.
+     *
+     * Fired when the AI action is pressed.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    attachPress(
+      /**
+       * An application-specific payload object that will be passed to the event handler along with the event
+       * object when firing the event
+       */
+      oData: object,
+      /**
+       * The function to be called when the event occurs
+       */
+      fnFunction: (p1: ColumnAIAction$PressEvent) => void,
+      /**
+       * Context object to call the event handler with. Defaults to this `sap.m.plugins.ColumnAIAction` itself
+       */
+      oListener?: object
+    ): this;
+    /**
+     * Attaches event handler `fnFunction` to the {@link #event:press press} event of this `sap.m.plugins.ColumnAIAction`.
+     *
+     * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
+     * otherwise it will be bound to this `sap.m.plugins.ColumnAIAction` itself.
+     *
+     * Fired when the AI action is pressed.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    attachPress(
+      /**
+       * The function to be called when the event occurs
+       */
+      fnFunction: (p1: ColumnAIAction$PressEvent) => void,
+      /**
+       * Context object to call the event handler with. Defaults to this `sap.m.plugins.ColumnAIAction` itself
+       */
+      oListener?: object
+    ): this;
+    /**
+     * Detaches event handler `fnFunction` from the {@link #event:press press} event of this `sap.m.plugins.ColumnAIAction`.
+     *
+     * The passed function and listener object must match the ones used for event registration.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    detachPress(
+      /**
+       * The function to be called, when the event occurs
+       */
+      fnFunction: (p1: ColumnAIAction$PressEvent) => void,
+      /**
+       * Context object on which the given function had to be called
+       */
+      oListener?: object
+    ): this;
+    /**
+     * Fires event {@link #event:press press} to attached listeners.
+     *
+     * @ui5-protected Do not call from applications (only from related classes in the framework)
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    firePress(
+      /**
+       * Parameters to pass along with the event
+       */
+      mParameters?: ColumnAIAction$PressEventParameters
+    ): this;
+  }
+  /**
+   * Describes the settings that can be provided to the ColumnAIAction constructor.
+   */
+  export interface $ColumnAIActionSettings extends $ElementSettings {
+    /**
+     * Fired when the AI action is pressed.
+     */
+    press?: (oEvent: ColumnAIAction$PressEvent) => void;
+  }
+
+  /**
+   * Parameters of the ColumnAIAction#press event.
+   */
+  export interface ColumnAIAction$PressEventParameters {
+    /**
+     * The column action that triggered the event.
+     */
+    action?: Control;
+  }
+
+  /**
+   * Event object of the ColumnAIAction#press event.
+   */
+  export type ColumnAIAction$PressEvent = Event<
+    ColumnAIAction$PressEventParameters,
+    ColumnAIAction
+  >;
+}
+
 declare module "sap/m/plugins/ColumnResizer" {
   import { default as UI5Element, $ElementSettings } from "sap/ui/core/Element";
 
@@ -94259,6 +96386,9 @@ declare module "sap/m/plugins/CopyProvider" {
      * This can be useful for maintaining the original structure of the data when it is pasted into a new location
      * (e.g. spreadsheets).
      *
+     * **Note:** Sparse copying must not be enabled in combination with `sap.ui.table.plugins.ODataV4MultiSelection`
+     * or the `sap.ui.mdc.Table` with the `sap.ui.mdc.odata.v4.TableDelegate`.
+     *
      * Default value is `false`.
      *
      *
@@ -94372,6 +96502,9 @@ declare module "sap/m/plugins/CopyProvider" {
      *
      * This can be useful for maintaining the original structure of the data when it is pasted into a new location
      * (e.g. spreadsheets).
+     *
+     * **Note:** Sparse copying must not be enabled in combination with `sap.ui.table.plugins.ODataV4MultiSelection`
+     * or the `sap.ui.mdc.Table` with the `sap.ui.mdc.odata.v4.TableDelegate`.
      *
      * When called with a value of `null` or `undefined`, the default value of the property will be restored.
      *
@@ -94545,6 +96678,9 @@ declare module "sap/m/plugins/CopyProvider" {
      *
      * This can be useful for maintaining the original structure of the data when it is pasted into a new location
      * (e.g. spreadsheets).
+     *
+     * **Note:** Sparse copying must not be enabled in combination with `sap.ui.table.plugins.ODataV4MultiSelection`
+     * or the `sap.ui.mdc.Table` with the `sap.ui.mdc.odata.v4.TableDelegate`.
      */
     copySparse?: boolean | PropertyBindingInfo | `{${string}}`;
 
@@ -95560,7 +97696,8 @@ declare module "sap/m/plugins/UploadSetwithTable" {
    *  The following controls support this plugin:
    * 	 - {@link sap.ui.mdc.Table MDC Table}
    * 	 - {@link sap.m.Table Responsive Table}
-   * 	 - {@link sap.m.GridTable Grid Table}
+   * 	 - {@link sap.ui.table.Table Grid Table}
+   * 	 - {@link sap.ui.table.TreeTable Tree Table}
    *
    * Consider the following before using the plugin:
    * 	 - It gets activated when it is added as a dependent to the table control. It gets deactivated when
@@ -95569,6 +97706,9 @@ declare module "sap/m/plugins/UploadSetwithTable" {
    *
    * 	 - Configuring the rowConfiguration aggregation (type {@link sap.m.upload.UploadItemConfiguration UploadItemConfiguration})
    *     of this plugin is mandatory to use the features such as file preview, download etc.
+   * 	 - For the plugin to work with the tree table control, the isDirectoryPath property of the rowConfiguration
+   *     aggregation must be set. This indicates if the context of the row is a directory or a file. It helps
+   *     the plugin with the file preview feature.
    * 	 - It works only with the table control when the table is bound to the model to perform the operations
    *     such as rename, download etc.
    *
@@ -95978,6 +98118,57 @@ declare module "sap/m/plugins/UploadSetwithTable" {
       oListener?: object
     ): this;
     /**
+     * Attaches event handler `fnFunction` to the {@link #event:itemRenameCanceled itemRenameCanceled} event
+     * of this `sap.m.plugins.UploadSetwithTable`.
+     *
+     * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
+     * otherwise it will be bound to this `sap.m.plugins.UploadSetwithTable` itself.
+     *
+     * The event is triggered when the file renaming process is canceled.
+     *
+     * @since 1.142
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    attachItemRenameCanceled(
+      /**
+       * An application-specific payload object that will be passed to the event handler along with the event
+       * object when firing the event
+       */
+      oData: object,
+      /**
+       * The function to be called when the event occurs
+       */
+      fnFunction: (p1: UploadSetwithTable$ItemRenameCanceledEvent) => void,
+      /**
+       * Context object to call the event handler with. Defaults to this `sap.m.plugins.UploadSetwithTable` itself
+       */
+      oListener?: object
+    ): this;
+    /**
+     * Attaches event handler `fnFunction` to the {@link #event:itemRenameCanceled itemRenameCanceled} event
+     * of this `sap.m.plugins.UploadSetwithTable`.
+     *
+     * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
+     * otherwise it will be bound to this `sap.m.plugins.UploadSetwithTable` itself.
+     *
+     * The event is triggered when the file renaming process is canceled.
+     *
+     * @since 1.142
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    attachItemRenameCanceled(
+      /**
+       * The function to be called when the event occurs
+       */
+      fnFunction: (p1: UploadSetwithTable$ItemRenameCanceledEvent) => void,
+      /**
+       * Context object to call the event handler with. Defaults to this `sap.m.plugins.UploadSetwithTable` itself
+       */
+      oListener?: object
+    ): this;
+    /**
      * Attaches event handler `fnFunction` to the {@link #event:itemRenamed itemRenamed} event of this `sap.m.plugins.UploadSetwithTable`.
      *
      * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
@@ -96354,6 +98545,26 @@ declare module "sap/m/plugins/UploadSetwithTable" {
       oListener?: object
     ): this;
     /**
+     * Detaches event handler `fnFunction` from the {@link #event:itemRenameCanceled itemRenameCanceled} event
+     * of this `sap.m.plugins.UploadSetwithTable`.
+     *
+     * The passed function and listener object must match the ones used for event registration.
+     *
+     * @since 1.142
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    detachItemRenameCanceled(
+      /**
+       * The function to be called, when the event occurs
+       */
+      fnFunction: (p1: UploadSetwithTable$ItemRenameCanceledEvent) => void,
+      /**
+       * Context object on which the given function had to be called
+       */
+      oListener?: object
+    ): this;
+    /**
      * Detaches event handler `fnFunction` from the {@link #event:itemRenamed itemRenamed} event of this `sap.m.plugins.UploadSetwithTable`.
      *
      * The passed function and listener object must match the ones used for event registration.
@@ -96532,6 +98743,20 @@ declare module "sap/m/plugins/UploadSetwithTable" {
       mParameters?: UploadSetwithTable$FileTypeMismatchEventParameters
     ): this;
     /**
+     * Fires event {@link #event:itemRenameCanceled itemRenameCanceled} to attached listeners.
+     *
+     * @since 1.142
+     * @ui5-protected Do not call from applications (only from related classes in the framework)
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    fireItemRenameCanceled(
+      /**
+       * Parameters to pass along with the event
+       */
+      mParameters?: UploadSetwithTable$ItemRenameCanceledEventParameters
+    ): this;
+    /**
      * Fires event {@link #event:itemRenamed itemRenamed} to attached listeners.
      *
      * @ui5-protected Do not call from applications (only from related classes in the framework)
@@ -96654,6 +98879,24 @@ declare module "sap/m/plugins/UploadSetwithTable" {
      * @returns Value of property `directory`
      */
     getDirectory(): boolean;
+    /**
+     * Gets current value of property {@link #getFileNameValidationConfig fileNameValidationConfig}.
+     *
+     * File name validation configuration.
+     *  Set this property to configure the file name validation characters and the validation mode.
+     *  This configuration is used to validate the file name when a file is selected for renaming.
+     *  For the plugin to pick up this configuration, mode and characters of the property must be set to validate
+     * the file name.
+     *  see {@link sap.m.plugins.UploadSetwithTable.FilenameValidationConfigMode mode} to configure the file
+     * name validation mode.
+     *
+     *  The default restricted filename character set is: \:/*?"<>|[]{}@#$
+     *
+     * @since 1.136
+     *
+     * @returns Value of property `fileNameValidationConfig`
+     */
+    getFileNameValidationConfig(): FilenameValidationConfig;
     /**
      * Gets current value of property {@link #getFileTypes fileTypes}.
      *
@@ -96966,6 +99209,31 @@ declare module "sap/m/plugins/UploadSetwithTable" {
       bDirectory?: boolean
     ): this;
     /**
+     * Sets a new value for property {@link #getFileNameValidationConfig fileNameValidationConfig}.
+     *
+     * File name validation configuration.
+     *  Set this property to configure the file name validation characters and the validation mode.
+     *  This configuration is used to validate the file name when a file is selected for renaming.
+     *  For the plugin to pick up this configuration, mode and characters of the property must be set to validate
+     * the file name.
+     *  see {@link sap.m.plugins.UploadSetwithTable.FilenameValidationConfigMode mode} to configure the file
+     * name validation mode.
+     *
+     *  The default restricted filename character set is: \:/*?"<>|[]{}@#$
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * @since 1.136
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setFileNameValidationConfig(
+      /**
+       * New value for property `fileNameValidationConfig`
+       */
+      sFileNameValidationConfig?: FilenameValidationConfig
+    ): this;
+    /**
      * Sets a new value for property {@link #getFileTypes fileTypes}.
      *
      * File types that are allowed to be uploaded.
@@ -96998,7 +99266,9 @@ declare module "sap/m/plugins/UploadSetwithTable" {
       /**
        * New value for property `httpRequestMethod`
        */
-      sHttpRequestMethod?: UploaderHttpRequestMethod
+      sHttpRequestMethod?:
+        | UploaderHttpRequestMethod
+        | keyof typeof UploaderHttpRequestMethod
     ): this;
     /**
      * Sets a new value for property {@link #getItemValidationHandler itemValidationHandler}.
@@ -97228,6 +99498,45 @@ declare module "sap/m/plugins/UploadSetwithTable" {
     ): UploadItem;
   }
   /**
+   * This property type is used to define the file name validation configuration. Object is passed to {@link sap.m.plugins.UploadSetwithTable fileNameValidationConfig property}
+   *
+   * @since 1.136
+   */
+  export type FilenameValidationConfig = {
+    /**
+     * The file name validation config mode.
+     */
+    mode: FilenameValidationConfigMode;
+    /**
+     * The file name validation configuration characters.
+     *
+     *  The default restricted filename character set is: \:/*?"<>|[]{}@#$
+     */
+    characters: string;
+  };
+
+  /**
+   * Key property of {@link sap.m.plugins.UploadSetwithTable.FilenameValidationConfig FileNameValidationConfig}.
+   * Used to determine the mode for file name validation.
+   *
+   * @since 1.136
+   */
+  export type FilenameValidationConfigMode = {
+    /**
+     * The file name validation mode. The allowed values are 'include', 'exclude', or 'override'.
+     *
+     *  If the mode is 'include', the specified characters are added to the default restricted character set.
+     *
+     *  If the mode is 'exclude', the specified characters are excluded from the default resrtricted character
+     * set.
+     *  If the mode is 'override', the specified characters replace the entire default restricted character
+     * set.
+     *  If the mode is not set, the default restricted file name character set is used.
+     */
+    mode: string;
+  };
+
+  /**
    * Item info object sent as paramter to {@link sap.m.plugins.UploadSetwithTable.itemValidationHandler itemValidationHandler callback}
    */
   export type ItemInfo = {
@@ -97290,7 +99599,7 @@ declare module "sap/m/plugins/UploadSetwithTable" {
      * HTTP request method chosen for file upload.
      */
     httpRequestMethod?:
-      | UploaderHttpRequestMethod
+      | (UploaderHttpRequestMethod | keyof typeof UploaderHttpRequestMethod)
       | PropertyBindingInfo
       | `{${string}}`;
 
@@ -97344,6 +99653,24 @@ declare module "sap/m/plugins/UploadSetwithTable" {
     cloudFilePickerButtonText?: string | PropertyBindingInfo;
 
     /**
+     * File name validation configuration.
+     *  Set this property to configure the file name validation characters and the validation mode.
+     *  This configuration is used to validate the file name when a file is selected for renaming.
+     *  For the plugin to pick up this configuration, mode and characters of the property must be set to validate
+     * the file name.
+     *  see {@link sap.m.plugins.UploadSetwithTable.FilenameValidationConfigMode mode} to configure the file
+     * name validation mode.
+     *
+     *  The default restricted filename character set is: \:/*?"<>|[]{}@#$
+     *
+     * @since 1.136
+     */
+    fileNameValidationConfig?:
+      | FilenameValidationConfig
+      | PropertyBindingInfo
+      | `{${string}}`;
+
+    /**
      * Defines the uploader to be used. If not specified, the default implementation is used.
      */
     uploader?: UploaderTableItem;
@@ -97384,6 +99711,15 @@ declare module "sap/m/plugins/UploadSetwithTable" {
      * The event is triggered when the file name is changed.
      */
     itemRenamed?: (oEvent: UploadSetwithTable$ItemRenamedEvent) => void;
+
+    /**
+     * The event is triggered when the file renaming process is canceled.
+     *
+     * @since 1.142
+     */
+    itemRenameCanceled?: (
+      oEvent: UploadSetwithTable$ItemRenameCanceledEvent
+    ) => void;
 
     /**
      * This event is fired right before the upload process begins.
@@ -97546,6 +99882,24 @@ declare module "sap/m/plugins/UploadSetwithTable" {
    */
   export type UploadSetwithTable$FileTypeMismatchEvent = Event<
     UploadSetwithTable$FileTypeMismatchEventParameters,
+    UploadSetwithTable
+  >;
+
+  /**
+   * Parameters of the UploadSetwithTable#itemRenameCanceled event.
+   */
+  export interface UploadSetwithTable$ItemRenameCanceledEventParameters {
+    /**
+     * The renamed UI element is of UploadItem type.
+     */
+    item?: UploadItem;
+  }
+
+  /**
+   * Event object of the UploadSetwithTable#itemRenameCanceled event.
+   */
+  export type UploadSetwithTable$ItemRenameCanceledEvent = Event<
+    UploadSetwithTable$ItemRenameCanceledEventParameters,
     UploadSetwithTable
   >;
 
@@ -98338,6 +100692,7 @@ declare module "sap/m/Popover" {
      *
      * Any control that needed to be displayed in the header area. When this is set, the showHeader property
      * is ignored, and only this customHeader is shown on the top of popover.
+     * **Note:** To improve accessibility, titles with heading level `H1` should be used inside the custom header.
      */
     getCustomHeader(): Control;
     /**
@@ -99248,6 +101603,7 @@ declare module "sap/m/Popover" {
     /**
      * Any control that needed to be displayed in the header area. When this is set, the showHeader property
      * is ignored, and only this customHeader is shown on the top of popover.
+     * **Note:** To improve accessibility, titles with heading level `H1` should be used inside the custom header.
      */
     customHeader?: Control;
 
@@ -102235,7 +104591,8 @@ declare module "sap/m/QuickViewPage" {
 
   /**
    * QuickViewPage consists of a page header, an avatar, an object name with short description, and an object
-   * information divided in groups. The control uses the sap.m.SimpleForm control to display information.
+   * information divided in groups. The control uses the sap.ui.layout.form.SimpleForm control to display
+   * information.
    *
    * @since 1.28.11
    */
@@ -102796,9 +105153,9 @@ declare module "sap/m/RadioButton" {
     CSSSize,
   } from "sap/ui/core/library";
 
-  import ElementMetadata from "sap/ui/core/ElementMetadata";
+  import { IToolbarInteractiveControl, WrappingType } from "sap/m/library";
 
-  import { WrappingType } from "sap/m/library";
+  import ElementMetadata from "sap/ui/core/ElementMetadata";
 
   import { PropertyBindingInfo } from "sap/ui/base/ManagedObject";
 
@@ -102828,18 +105185,16 @@ declare module "sap/m/RadioButton" {
    * 	 - When the options are mutually exclusive e.g. ON/OFF. Use a {@link sap.m.Switch switch} instead.
    * 	 - Avoid using horizontally aligned radio buttons as they will be cut off on phones.
    *
-   * **Note:** The order in which the RadioButtons will be selected one after another is determined upon instantiation
-   * of the control. This order is consistent with the ARIA attributes for position, which the same button
-   * will receive when added to specific group.
+   * **Note:** The order in which the RadioButtons will be traversed with keyboard arrow keys is determined
+   * based on their order in the document.
    *
-   * **Example:** If three buttons are created (`button1, button2, button3`) in consecutive order, initially
-   * they will have the same positions and TAB order. However if after that `button1` and `button3` are moved
-   * to a new group and then `button2` is added to the same group, their TAB order and position in this group
-   * will be `button1, button3, button2`.
+   * **Example:** If there are three buttons of the same group (`button1, button2, button3`) initially and
+   * then a new button `button4` is added on the second position, the order will be `button1, button4, button2,
+   * button3`.
    */
   export default class RadioButton
     extends Control
-    implements IFormContent, /* was: sap.m.IToolbarInteractiveControl */ Object
+    implements IFormContent, IToolbarInteractiveControl
   {
     __implements__sap_ui_core_IFormContent: boolean;
     __implements__sap_m_IToolbarInteractiveControl: boolean;
@@ -102948,7 +105303,7 @@ declare module "sap/m/RadioButton" {
      * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
      * otherwise it will be bound to this `sap.m.RadioButton` itself.
      *
-     * Event is triggered when the user makes a change on the radio button (selecting or unselecting it).
+     * The event is triggered when the user selects or deselects the radio button.
      *
      *
      * @returns Reference to `this` in order to allow method chaining
@@ -102974,7 +105329,7 @@ declare module "sap/m/RadioButton" {
      * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
      * otherwise it will be bound to this `sap.m.RadioButton` itself.
      *
-     * Event is triggered when the user makes a change on the radio button (selecting or unselecting it).
+     * The event is triggered when the user selects or deselects the radio button.
      *
      *
      * @returns Reference to `this` in order to allow method chaining
@@ -103611,7 +105966,7 @@ declare module "sap/m/RadioButton" {
     ariaLabelledBy?: Array<Control | string>;
 
     /**
-     * Event is triggered when the user makes a change on the radio button (selecting or unselecting it).
+     * The event is triggered when the user selects or deselects the radio button.
      */
     select?: (oEvent: RadioButton$SelectEvent) => void;
   }
@@ -103621,7 +105976,10 @@ declare module "sap/m/RadioButton" {
    */
   export interface RadioButton$SelectEventParameters {
     /**
-     * Checks whether the RadioButton is active or not.
+     * Indicates whether the RadioButton is selected.
+     *
+     * **Note:** A single RadioButton cannot be deselected by user interaction. Deselection only occurs when
+     * another RadioButton in the same group receives a selection.
      */
     selected?: boolean;
   }
@@ -107056,15 +109414,26 @@ declare module "sap/m/routing/Router" {
   import TargetHandler from "sap/m/routing/TargetHandler";
 
   /**
-   * SAPUI5 mobile `Router`. The difference to the {@link sap.ui.core.routing.Router} are the `level`, `transition`,
-   * and `transitionParameters` properties that you can specify in every Route or Target created by this router.
+   * The `sap.m.routing.Router` is a specialized extension of `{@link sap.ui.core.routing.Router}`, designed
+   * specifically for the following containers in the `sap.m` library: `sap.m.App`, `sap.m.SplitApp`, or `sap.m.NavContainer`.
+   *
+   * It provides additional target and route configuration options that are optimized for the containers,
+   * including support for animated transitions and navigation hierarchy levels.
+   *
+   * Compared to `{@link sap.ui.core.routing.Router}`, it adds support for additional Target properties:
+   *
+   * 	 - `level`: Defines the hierarchical level of the target view for proper history and back navigation
+   *     handling
+   * 	 - `transition`: Specifies the type of transition animation between views (e.g., `slide`, `fade`)
+   * 	 - `transitionParameters`: Custom parameters for transitions
+   *
+   * For constructor parameters, see `{@link sap.ui.core.routing.Router#constructor}`.
    *
    * @since 1.28.1
    */
   export default class Router extends Router1 {
     /**
-     * Constructor for a new `sap.m.routing.Router`. See `{@link sap.ui.core.routing.Router}` for the constructor
-     * arguments.
+     * Constructor for a new `sap.m.routing.Router`.
      */
     constructor(
       /**
@@ -108243,6 +110612,12 @@ declare module "sap/m/SearchField" {
 
   import { IShellBar } from "sap/f/library";
 
+  import {
+    IToolbarInteractiveControl,
+    IOverflowToolbarContent,
+    OverflowToolbarConfig,
+  } from "sap/m/library";
+
   import SuggestionItem from "sap/m/SuggestionItem";
 
   import {
@@ -108275,11 +110650,13 @@ declare module "sap/m/SearchField" {
     implements
       IFormContent,
       IShellBar,
-      /* was: sap.m.IToolbarInteractiveControl */ Object
+      IToolbarInteractiveControl,
+      IOverflowToolbarContent
   {
     __implements__sap_ui_core_IFormContent: boolean;
     __implements__sap_f_IShellBar: boolean;
     __implements__sap_m_IToolbarInteractiveControl: boolean;
+    __implements__sap_m_IOverflowToolbarContent: boolean;
     /**
      * Constructor for a new SearchField.
      *
@@ -108782,6 +111159,14 @@ declare module "sap/m/SearchField" {
      * @returns Value of property `maxLength`
      */
     getMaxLength(): int;
+    /**
+     * Enables the `sap.m.SearchField` to be used inside sap.m.OverflowToolbar. Required by the {@link sap.m.IOverflowToolbarContent }
+     * interface.
+     *
+     *
+     * @returns Configuration information for the `sap.m.IOverflowToolbarContent` interface.
+     */
+    getOverflowToolbarConfig(): OverflowToolbarConfig;
     /**
      * Gets current value of property {@link #getPlaceholder placeholder}.
      *
@@ -109518,7 +111903,11 @@ declare module "sap/m/SegmentedButton" {
     CSSSize,
   } from "sap/ui/core/library";
 
-  import { IOverflowToolbarContent } from "sap/m/library";
+  import {
+    IOverflowToolbarContent,
+    IToolbarInteractiveControl,
+    SegmentedButtonContentMode,
+  } from "sap/m/library";
 
   import Button from "sap/m/Button";
 
@@ -109544,10 +111933,7 @@ declare module "sap/m/SegmentedButton" {
    */
   export default class SegmentedButton
     extends Control
-    implements
-      IFormContent,
-      IOverflowToolbarContent,
-      /* was: sap.m.IToolbarInteractiveControl */ Object
+    implements IFormContent, IOverflowToolbarContent, IToolbarInteractiveControl
   {
     __implements__sap_ui_core_IFormContent: boolean;
     __implements__sap_m_IOverflowToolbarContent: boolean;
@@ -109938,6 +112324,20 @@ declare module "sap/m/SegmentedButton" {
      */
     getButtons(): Button[];
     /**
+     * Gets current value of property {@link #getContentMode contentMode}.
+     *
+     * Defines how the content of the SegmentedButton is sized. Possible values:
+     * 	 - **ContentFit**: Each button is sized according to its content.
+     * 	 - **EqualSized**: All buttons have equal width, regardless of their content.
+     *
+     * Default value is `EqualSized`.
+     *
+     * @since 1.142.0
+     *
+     * @returns Value of property `contentMode`
+     */
+    getContentMode(): SegmentedButtonContentMode;
+    /**
      * Gets current value of property {@link #getEnabled enabled}.
      *
      * Disables all the buttons in the SegmentedButton control. When disabled all the buttons look grey and
@@ -109996,7 +112396,8 @@ declare module "sap/m/SegmentedButton" {
      * Gets current value of property {@link #getWidth width}.
      *
      * Defines the width of the SegmentedButton control. If not set, it uses the minimum required width to make
-     * all buttons inside of the same size (based on the biggest button).
+     * all buttons inside of the same size (based on the biggest button). **Note:** This property functions
+     * only when the {@link sap.m.SegmentedButton#getContentMode contentMode} is set to EqualSized.
      *
      *
      * @returns Value of property `width`
@@ -110145,6 +112546,29 @@ declare module "sap/m/SegmentedButton" {
       oItem: SegmentedButtonItem
     ): void;
     /**
+     * Sets a new value for property {@link #getContentMode contentMode}.
+     *
+     * Defines how the content of the SegmentedButton is sized. Possible values:
+     * 	 - **ContentFit**: Each button is sized according to its content.
+     * 	 - **EqualSized**: All buttons have equal width, regardless of their content.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `EqualSized`.
+     *
+     * @since 1.142.0
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setContentMode(
+      /**
+       * New value for property `contentMode`
+       */
+      sContentMode?:
+        | SegmentedButtonContentMode
+        | keyof typeof SegmentedButtonContentMode
+    ): this;
+    /**
      * Sets a new value for property {@link #getEnabled enabled}.
      *
      * Disables all the buttons in the SegmentedButton control. When disabled all the buttons look grey and
@@ -110209,7 +112633,8 @@ declare module "sap/m/SegmentedButton" {
      * Sets a new value for property {@link #getWidth width}.
      *
      * Defines the width of the SegmentedButton control. If not set, it uses the minimum required width to make
-     * all buttons inside of the same size (based on the biggest button).
+     * all buttons inside of the same size (based on the biggest button). **Note:** This property functions
+     * only when the {@link sap.m.SegmentedButton#getContentMode contentMode} is set to EqualSized.
      *
      * When called with a value of `null` or `undefined`, the default value of the property will be restored.
      *
@@ -110245,7 +112670,8 @@ declare module "sap/m/SegmentedButton" {
   export interface $SegmentedButtonSettings extends $ControlSettings {
     /**
      * Defines the width of the SegmentedButton control. If not set, it uses the minimum required width to make
-     * all buttons inside of the same size (based on the biggest button).
+     * all buttons inside of the same size (based on the biggest button). **Note:** This property functions
+     * only when the {@link sap.m.SegmentedButton#getContentMode contentMode} is set to EqualSized.
      */
     width?: CSSSize | PropertyBindingInfo | `{${string}}`;
 
@@ -110262,6 +112688,18 @@ declare module "sap/m/SegmentedButton" {
      * @since 1.28.0
      */
     selectedKey?: string | PropertyBindingInfo;
+
+    /**
+     * Defines how the content of the SegmentedButton is sized. Possible values:
+     * 	 - **ContentFit**: Each button is sized according to its content.
+     * 	 - **EqualSized**: All buttons have equal width, regardless of their content.
+     *
+     * @since 1.142.0
+     */
+    contentMode?:
+      | (SegmentedButtonContentMode | keyof typeof SegmentedButtonContentMode)
+      | PropertyBindingInfo
+      | `{${string}}`;
 
     /**
      * The buttons of the SegmentedButton control. The items set in this aggregation are used as an interface
@@ -110371,6 +112809,21 @@ declare module "sap/m/SegmentedButton" {
      * Reference to the item, that has been selected.
      */
     item?: SegmentedButtonItem;
+
+    /**
+     * Reference to the previously selected item (if any).
+     */
+    previousItem?: SegmentedButtonItem;
+
+    /**
+     * Key of the selected item (if any).
+     */
+    selectedKey?: string;
+
+    /**
+     * Key of the previously selected item (if any).
+     */
+    previousKey?: string;
   }
 
   /**
@@ -110569,7 +113022,8 @@ declare module "sap/m/SegmentedButtonItem" {
     /**
      * Gets current value of property {@link #getWidth width}.
      *
-     * Sets the width of the buttons.
+     * Sets the width of the buttons **Note:** This property functions only when the {@link sap.m.SegmentedButton#getContentMode contentMode }
+     * is set to EqualSized.
      *
      *
      * @returns Value of property `width`
@@ -110619,7 +113073,8 @@ declare module "sap/m/SegmentedButtonItem" {
     /**
      * Sets a new value for property {@link #getWidth width}.
      *
-     * Sets the width of the buttons.
+     * Sets the width of the buttons **Note:** This property functions only when the {@link sap.m.SegmentedButton#getContentMode contentMode }
+     * is set to EqualSized.
      *
      * When called with a value of `null` or `undefined`, the default value of the property will be restored.
      *
@@ -110649,7 +113104,8 @@ declare module "sap/m/SegmentedButtonItem" {
     visible?: boolean | PropertyBindingInfo | `{${string}}`;
 
     /**
-     * Sets the width of the buttons.
+     * Sets the width of the buttons **Note:** This property functions only when the {@link sap.m.SegmentedButton#getContentMode contentMode }
+     * is set to EqualSized.
      */
     width?: CSSSize | PropertyBindingInfo | `{${string}}`;
 
@@ -110691,8 +113147,10 @@ declare module "sap/m/Select" {
 
   import {
     IOverflowToolbarContent,
+    IToolbarInteractiveControl,
     SelectColumnRatio,
     OverflowToolbarConfig,
+    SelectTwoColumnSeparator,
     SelectType,
   } from "sap/m/library";
 
@@ -110719,7 +113177,7 @@ declare module "sap/m/Select" {
       ISemanticFormContent,
       ILabelable,
       IOverflowToolbarContent,
-      /* was: sap.m.IToolbarInteractiveControl */ Object,
+      IToolbarInteractiveControl,
       IShellBar
   {
     __implements__sap_ui_core_IFormContent: boolean;
@@ -111432,6 +113890,18 @@ declare module "sap/m/Select" {
      */
     getTextDirection(): TextDirection;
     /**
+     * Gets current value of property {@link #getTwoColumnSeparator twoColumnSeparator}.
+     *
+     * Defines the separator type for the two columns layout when Select is in read-only mode.
+     *
+     * Default value is `Dash`.
+     *
+     * @since 1.140
+     *
+     * @returns Value of property `twoColumnSeparator`
+     */
+    getTwoColumnSeparator(): SelectTwoColumnSeparator;
+    /**
      * Gets current value of property {@link #getType type}.
      *
      * Type of a select. Possible values `Default`, `IconOnly`.
@@ -111920,6 +114390,27 @@ declare module "sap/m/Select" {
       sTextDirection?: TextDirection | keyof typeof TextDirection
     ): this;
     /**
+     * Sets a new value for property {@link #getTwoColumnSeparator twoColumnSeparator}.
+     *
+     * Defines the separator type for the two columns layout when Select is in read-only mode.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `Dash`.
+     *
+     * @since 1.140
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setTwoColumnSeparator(
+      /**
+       * New value for property `twoColumnSeparator`
+       */
+      sTwoColumnSeparator?:
+        | SelectTwoColumnSeparator
+        | keyof typeof SelectTwoColumnSeparator
+    ): this;
+    /**
      * Sets a new value for property {@link #getType type}.
      *
      * Type of a select. Possible values `Default`, `IconOnly`.
@@ -112202,6 +114693,16 @@ declare module "sap/m/Select" {
      * @since 1.74
      */
     required?: boolean | PropertyBindingInfo | `{${string}}`;
+
+    /**
+     * Defines the separator type for the two columns layout when Select is in read-only mode.
+     *
+     * @since 1.140
+     */
+    twoColumnSeparator?:
+      | (SelectTwoColumnSeparator | keyof typeof SelectTwoColumnSeparator)
+      | PropertyBindingInfo
+      | `{${string}}`;
 
     /**
      * Defines the items contained within this control.
@@ -127087,13 +129588,13 @@ declare module "sap/m/SinglePlanningCalendar" {
      */
     getEndHour(): int;
     /**
-     * Finds the start and end dates in the visible range.
+     * Returns an object containing the start and end dates in the currently visible range.
      *
      * @since 1.133
      *
-     * @returns returns an object that stores both the start and end date within the currently visible range.
+     * @returns An object containing the start and end date in the currently visible range.
      */
-    getFirstAndLastVisibleDates(): Object;
+    getFirstAndLastVisibleDates(): VisibleDates;
     /**
      * Gets current value of property {@link #getFirstDayOfWeek firstDayOfWeek}.
      *
@@ -127239,11 +129740,6 @@ declare module "sap/m/SinglePlanningCalendar" {
      *
      * Determines which part of the control will remain fixed at the top of the page during vertical scrolling
      * as long as the control is in the viewport.
-     *
-     * **Note:** Limited browser support. Browsers which do not support this feature:
-     * 	 - Microsoft Internet Explorer
-     * 	 - Microsoft Edge lower than version 41 (EdgeHTML 16)
-     * 	 - Mozilla Firefox lower than version 59
      *
      * Default value is `None`.
      *
@@ -127882,11 +130378,6 @@ declare module "sap/m/SinglePlanningCalendar" {
      * Determines which part of the control will remain fixed at the top of the page during vertical scrolling
      * as long as the control is in the viewport.
      *
-     * **Note:** Limited browser support. Browsers which do not support this feature:
-     * 	 - Microsoft Internet Explorer
-     * 	 - Microsoft Edge lower than version 41 (EdgeHTML 16)
-     * 	 - Mozilla Firefox lower than version 59
-     *
      * When called with a value of `null` or `undefined`, the default value of the property will be restored.
      *
      * Default value is `None`.
@@ -127923,6 +130414,20 @@ declare module "sap/m/SinglePlanningCalendar" {
     ): this;
   }
   /**
+   * Object which contains the start and end dates in the currently visible range.
+   */
+  export type VisibleDates = {
+    /**
+     * The start date in the currently visible range.
+     */
+    oStartDate?: Date | UI5Date;
+    /**
+     * The end date in the currently visible range.
+     */
+    oEndDate?: Date | UI5Date;
+  };
+
+  /**
    * Describes the settings that can be provided to the SinglePlanningCalendar constructor.
    */
   export interface $SinglePlanningCalendarSettings extends $ControlSettings {
@@ -127958,11 +130463,6 @@ declare module "sap/m/SinglePlanningCalendar" {
     /**
      * Determines which part of the control will remain fixed at the top of the page during vertical scrolling
      * as long as the control is in the viewport.
-     *
-     * **Note:** Limited browser support. Browsers which do not support this feature:
-     * 	 - Microsoft Internet Explorer
-     * 	 - Microsoft Edge lower than version 41 (EdgeHTML 16)
-     * 	 - Mozilla Firefox lower than version 59
      *
      * @since 1.62
      */
@@ -128375,6 +130875,11 @@ declare module "sap/m/SinglePlanningCalendar" {
      * All appointments with changed selected state.
      */
     appointments?: CalendarAppointment[];
+
+    /**
+     * The original browser event.
+     */
+    originalEvent?: object;
   }
 
   /**
@@ -128398,6 +130903,11 @@ declare module "sap/m/SinglePlanningCalendar" {
      * The end date as a UI5Date or JavaScript Date object of the focused grid cell.
      */
     endDate?: object;
+
+    /**
+     * The original browser event.
+     */
+    originalEvent?: object;
   }
 
   /**
@@ -129161,13 +131671,13 @@ declare module "sap/m/Slider" {
     CSSSize,
   } from "sap/ui/core/library";
 
+  import { IToolbarInteractiveControl, IScale } from "sap/m/library";
+
   import SliderTooltipBase from "sap/m/SliderTooltipBase";
 
   import UI5Element from "sap/ui/core/Element";
 
   import ElementMetadata from "sap/ui/core/ElementMetadata";
-
-  import { IScale } from "sap/m/library";
 
   import {
     PropertyBindingInfo,
@@ -129218,10 +131728,7 @@ declare module "sap/m/Slider" {
    */
   export default class Slider
     extends Control
-    implements
-      IFormContent,
-      ISemanticFormContent,
-      /* was: sap.m.IToolbarInteractiveControl */ Object
+    implements IFormContent, ISemanticFormContent, IToolbarInteractiveControl
   {
     __implements__sap_ui_core_IFormContent: boolean;
     __implements__sap_ui_core_ISemanticFormContent: boolean;
@@ -130647,7 +133154,8 @@ declare module "sap/m/SlideTile" {
     /**
      * Gets current value of property {@link #getWidth width}.
      *
-     * Width of the control.
+     * Width of the control. If the tiles within the SlideTile are in ArticleMode and have a frameType of Stretch,
+     * and if the SlideTile's width exceeds 799px, the image in the tile appears on the right side
      *
      * @since 1.72
      *
@@ -130802,7 +133310,8 @@ declare module "sap/m/SlideTile" {
     /**
      * Sets a new value for property {@link #getWidth width}.
      *
-     * Width of the control.
+     * Width of the control. If the tiles within the SlideTile are in ArticleMode and have a frameType of Stretch,
+     * and if the SlideTile's width exceeds 799px, the image in the tile appears on the right side
      *
      * When called with a value of `null` or `undefined`, the default value of the property will be restored.
      *
@@ -130860,7 +133369,8 @@ declare module "sap/m/SlideTile" {
       | `{${string}}`;
 
     /**
-     * Width of the control.
+     * Width of the control. If the tiles within the SlideTile are in ArticleMode and have a frameType of Stretch,
+     * and if the SlideTile's width exceeds 799px, the image in the tile appears on the right side
      *
      * @since 1.72
      */
@@ -130939,8 +133449,12 @@ declare module "sap/m/SplitApp" {
    * header tags to the HTML page which are considered useful for mobile applications and allows the configuration
    * of the application's home icon via the `homeIcon` property.
    *
-   * Usage: SplitApp should take the full width of the page and be used as the root of the application, not
-   * as child of another container.
+   * Usage:
+   * 	 - Use SplitApp as the root control of your application. It should not be nested inside or alongside
+   *     other controls.
+   * 	 - SplitApp requires its parent elements (including `body` and `html`) to have a height set to 100%
+   *     for proper layout. If this is not set, `SplitApp` will attempt to set the height itself. SplitApp
+   *     requires 100% of the page width for proper layout.
    */
   export default class SplitApp extends SplitContainer {
     /**
@@ -133675,7 +136189,8 @@ declare module "sap/m/StandardListItem" {
     /**
      * Gets current value of property {@link #getIcon icon}.
      *
-     * Defines the list item icon.
+     * Defines the list item icon. **Note:** The icon is decorative. For more advanced use cases and configuration
+     * options, use the `avatar` aggregation.
      *
      *
      * @returns Value of property `icon`
@@ -133886,7 +136401,8 @@ declare module "sap/m/StandardListItem" {
     /**
      * Sets a new value for property {@link #getIcon icon}.
      *
-     * Defines the list item icon.
+     * Defines the list item icon. **Note:** The icon is decorative. For more advanced use cases and configuration
+     * options, use the `avatar` aggregation.
      *
      * When called with a value of `null` or `undefined`, the default value of the property will be restored.
      *
@@ -134121,7 +136637,8 @@ declare module "sap/m/StandardListItem" {
     description?: string | PropertyBindingInfo;
 
     /**
-     * Defines the list item icon.
+     * Defines the list item icon. **Note:** The icon is decorative. For more advanced use cases and configuration
+     * options, use the `avatar` aggregation.
      */
     icon?: URI | PropertyBindingInfo | `{${string}}`;
 
@@ -136057,7 +138574,11 @@ declare module "sap/m/Switch" {
 
   import { IFormContent, ID } from "sap/ui/core/library";
 
-  import { IOverflowToolbarContent, SwitchType } from "sap/m/library";
+  import {
+    IOverflowToolbarContent,
+    IToolbarInteractiveControl,
+    SwitchType,
+  } from "sap/m/library";
 
   import ElementMetadata from "sap/ui/core/ElementMetadata";
 
@@ -136071,10 +138592,7 @@ declare module "sap/m/Switch" {
    */
   export default class Switch
     extends Control
-    implements
-      IFormContent,
-      IOverflowToolbarContent,
-      /* was: sap.m.IToolbarInteractiveControl */ Object
+    implements IFormContent, IOverflowToolbarContent, IToolbarInteractiveControl
   {
     __implements__sap_ui_core_IFormContent: boolean;
     __implements__sap_m_IOverflowToolbarContent: boolean;
@@ -136271,6 +138789,19 @@ declare module "sap/m/Switch" {
      */
     getCustomTextOn(): string;
     /**
+     * Gets current value of property {@link #getEditable editable}.
+     *
+     * Specifies whether the user shall be allowed to change the state of the switch. When set to `false`, the
+     * switch is in read-only mode and can still be focused and the user can copy the text from it.
+     *
+     * Default value is `true`.
+     *
+     * @since 1.147.0
+     *
+     * @returns Value of property `editable`
+     */
+    getEditable(): boolean;
+    /**
      * Gets current value of property {@link #getEnabled enabled}.
      *
      * Whether the switch is enabled.
@@ -136377,6 +138908,26 @@ declare module "sap/m/Switch" {
        * New value for property `customTextOn`
        */
       sCustomTextOn?: string
+    ): this;
+    /**
+     * Sets a new value for property {@link #getEditable editable}.
+     *
+     * Specifies whether the user shall be allowed to change the state of the switch. When set to `false`, the
+     * switch is in read-only mode and can still be focused and the user can copy the text from it.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `true`.
+     *
+     * @since 1.147.0
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setEditable(
+      /**
+       * New value for property `editable`
+       */
+      bEditable?: boolean
     ): this;
     /**
      * Sets a new value for property {@link #getEnabled enabled}.
@@ -136495,6 +139046,14 @@ declare module "sap/m/Switch" {
       | (SwitchType | keyof typeof SwitchType)
       | PropertyBindingInfo
       | `{${string}}`;
+
+    /**
+     * Specifies whether the user shall be allowed to change the state of the switch. When set to `false`, the
+     * switch is in read-only mode and can still be focused and the user can copy the text from it.
+     *
+     * @since 1.147.0
+     */
+    editable?: boolean | PropertyBindingInfo | `{${string}}`;
 
     /**
      * Association to controls / ids which label this control (see WAI-ARIA attribute aria-labelledby).
@@ -137189,6 +139748,8 @@ declare module "sap/m/TabContainerItem" {
 
   import ElementMetadata from "sap/ui/core/ElementMetadata";
 
+  import TooltipBase from "sap/ui/core/TooltipBase";
+
   import {
     PropertyBindingInfo,
     AggregationBindingInfo,
@@ -137526,6 +140087,18 @@ declare module "sap/m/TabContainerItem" {
        * Whether invalidation to be suppressed
        */
       bSuppressInvalidation: boolean
+    ): this;
+    /**
+     * Property setter for the icon
+     *
+     *
+     * @returns `this` to allow method chaining
+     */
+    setTooltip(
+      /**
+       * new value of the tooltip aggregation
+       */
+      sTooltip: string | TooltipBase
     ): this;
   }
   /**
@@ -138020,8 +140593,7 @@ declare module "sap/m/Table" {
     /**
      * Gets current value of property {@link #getAlternateRowColors alternateRowColors}.
      *
-     * Enables alternating table row colors. **Note:** This property can only be used with the Belize and Belize
-     * Deep themes. Alternate row coloring is not available for the High Contrast Black/White themes.
+     * Enables alternating table row colors.
      *
      * Default value is `false`.
      *
@@ -138244,8 +140816,7 @@ declare module "sap/m/Table" {
     /**
      * Sets a new value for property {@link #getAlternateRowColors alternateRowColors}.
      *
-     * Enables alternating table row colors. **Note:** This property can only be used with the Belize and Belize
-     * Deep themes. Alternate row coloring is not available for the High Contrast Black/White themes.
+     * Enables alternating table row colors.
      *
      * When called with a value of `null` or `undefined`, the default value of the property will be restored.
      *
@@ -138521,8 +141092,7 @@ declare module "sap/m/Table" {
     showOverlay?: boolean | PropertyBindingInfo | `{${string}}`;
 
     /**
-     * Enables alternating table row colors. **Note:** This property can only be used with the Belize and Belize
-     * Deep themes. Alternate row coloring is not available for the High Contrast Black/White themes.
+     * Enables alternating table row colors.
      *
      * @since 1.52
      */
@@ -141551,6 +144121,240 @@ declare module "sap/m/table/columnmenu/QuickGroupItem" {
   }
 }
 
+declare module "sap/m/table/columnmenu/QuickResize" {
+  import {
+    default as QuickActionBase,
+    $QuickActionBaseSettings,
+  } from "sap/m/table/columnmenu/QuickActionBase";
+
+  import ElementMetadata from "sap/ui/core/ElementMetadata";
+
+  import { PropertyBindingInfo } from "sap/ui/base/ManagedObject";
+
+  import Event from "sap/ui/base/Event";
+
+  /**
+   * The `QuickResize` class is used for quick resizing of columns via the `sap.m.table.columnmenu.Menu`.
+   * It can be used to specify quick actions for accessible column resizing.
+   *
+   * @since 1.137
+   */
+  export default class QuickResize extends QuickActionBase {
+    /**
+     * Constructor for a new `QuickResize`.
+     *
+     * Accepts an object literal `mSettings` that defines initial property values, aggregated and associated
+     * objects as well as event handlers. See {@link sap.ui.base.ManagedObject#constructor} for a general description
+     * of the syntax of the settings object.
+     */
+    constructor(
+      /**
+       * Initial settings for the new `QuickResize`
+       */
+      mSettings?: $QuickResizeSettings
+    );
+    /**
+     * Constructor for a new `QuickResize`.
+     *
+     * Accepts an object literal `mSettings` that defines initial property values, aggregated and associated
+     * objects as well as event handlers. See {@link sap.ui.base.ManagedObject#constructor} for a general description
+     * of the syntax of the settings object.
+     */
+    constructor(
+      /**
+       * ID for the new `QuickResize`, generated automatically if no ID is given
+       */
+      sId?: string,
+      /**
+       * Initial settings for the new `QuickResize`
+       */
+      mSettings?: $QuickResizeSettings
+    );
+
+    /**
+     * Creates a new subclass of class sap.m.table.columnmenu.QuickResize with name `sClassName` and enriches
+     * it with the information contained in `oClassInfo`.
+     *
+     * `oClassInfo` might contain the same kind of information as described in {@link sap.m.table.columnmenu.QuickActionBase.extend}.
+     *
+     *
+     * @returns Created class / constructor function
+     */
+    static extend<T extends Record<string, unknown>>(
+      /**
+       * Name of the class being created
+       */
+      sClassName: string,
+      /**
+       * Object literal with information about the class
+       */
+      oClassInfo?: sap.ClassInfo<T, QuickResize>,
+      /**
+       * Constructor function for the metadata object; if not given, it defaults to the metadata implementation
+       * used by this class
+       */
+      FNMetaImpl?: Function
+    ): Function;
+    /**
+     * Returns a metadata object for class sap.m.table.columnmenu.QuickResize.
+     *
+     *
+     * @returns Metadata object describing this class
+     */
+    static getMetadata(): ElementMetadata;
+    /**
+     * Attaches event handler `fnFunction` to the {@link #event:change change} event of this `sap.m.table.columnmenu.QuickResize`.
+     *
+     * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
+     * otherwise it will be bound to this `sap.m.table.columnmenu.QuickResize` itself.
+     *
+     * Fires the change event.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    attachChange(
+      /**
+       * An application-specific payload object that will be passed to the event handler along with the event
+       * object when firing the event
+       */
+      oData: object,
+      /**
+       * The function to be called when the event occurs
+       */
+      fnFunction: (p1: QuickResize$ChangeEvent) => void,
+      /**
+       * Context object to call the event handler with. Defaults to this `sap.m.table.columnmenu.QuickResize`
+       * itself
+       */
+      oListener?: object
+    ): this;
+    /**
+     * Attaches event handler `fnFunction` to the {@link #event:change change} event of this `sap.m.table.columnmenu.QuickResize`.
+     *
+     * When called, the context of the event handler (its `this`) will be bound to `oListener` if specified,
+     * otherwise it will be bound to this `sap.m.table.columnmenu.QuickResize` itself.
+     *
+     * Fires the change event.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    attachChange(
+      /**
+       * The function to be called when the event occurs
+       */
+      fnFunction: (p1: QuickResize$ChangeEvent) => void,
+      /**
+       * Context object to call the event handler with. Defaults to this `sap.m.table.columnmenu.QuickResize`
+       * itself
+       */
+      oListener?: object
+    ): this;
+    /**
+     * Detaches event handler `fnFunction` from the {@link #event:change change} event of this `sap.m.table.columnmenu.QuickResize`.
+     *
+     * The passed function and listener object must match the ones used for event registration.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    detachChange(
+      /**
+       * The function to be called, when the event occurs
+       */
+      fnFunction: (p1: QuickResize$ChangeEvent) => void,
+      /**
+       * Context object on which the given function had to be called
+       */
+      oListener?: object
+    ): this;
+    /**
+     * Fires event {@link #event:change change} to attached listeners.
+     *
+     * @ui5-protected Do not call from applications (only from related classes in the framework)
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    fireChange(
+      /**
+       * Parameters to pass along with the event
+       */
+      mParameters?: QuickResize$ChangeEventParameters
+    ): this;
+    /**
+     * Gets current value of property {@link #getWidth width}.
+     *
+     * The width of the column.
+     *
+     * **Note**: This property is used to set the initial value of the input control. The `QuickResize` doesn't
+     * have a built-in mechanism to automatically determine the value from the actual column width.
+     *
+     * Default value is `200`.
+     *
+     *
+     * @returns Value of property `width`
+     */
+    getWidth(): int;
+    /**
+     * Sets a new value for property {@link #getWidth width}.
+     *
+     * The width of the column.
+     *
+     * **Note**: This property is used to set the initial value of the input control. The `QuickResize` doesn't
+     * have a built-in mechanism to automatically determine the value from the actual column width.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `200`.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setWidth(
+      /**
+       * New value for property `width`
+       */
+      iWidth?: int
+    ): this;
+  }
+  /**
+   * Describes the settings that can be provided to the QuickResize constructor.
+   */
+  export interface $QuickResizeSettings extends $QuickActionBaseSettings {
+    /**
+     * The width of the column.
+     *
+     * **Note**: This property is used to set the initial value of the input control. The `QuickResize` doesn't
+     * have a built-in mechanism to automatically determine the value from the actual column width.
+     */
+    width?: int | PropertyBindingInfo | `{${string}}`;
+
+    /**
+     * Fires the change event.
+     */
+    change?: (oEvent: QuickResize$ChangeEvent) => void;
+  }
+
+  /**
+   * Parameters of the QuickResize#change event.
+   */
+  export interface QuickResize$ChangeEventParameters {
+    /**
+     * The new width.
+     */
+    width?: int;
+  }
+
+  /**
+   * Event object of the QuickResize#change event.
+   */
+  export type QuickResize$ChangeEvent = Event<
+    QuickResize$ChangeEventParameters,
+    QuickResize
+  >;
+}
+
 declare module "sap/m/table/columnmenu/QuickSort" {
   import {
     default as QuickActionBase,
@@ -142421,6 +145225,310 @@ declare module "sap/m/table/ColumnWidthController" {
      * @returns Metadata object describing this class
      */
     static getMetadata(): Metadata;
+  }
+}
+
+declare module "sap/m/table/Title" {
+  import { default as Control, $ControlSettings } from "sap/ui/core/Control";
+
+  import { ITitle, IShrinkable } from "sap/ui/core/library";
+
+  import ElementMetadata from "sap/ui/core/ElementMetadata";
+
+  import Title1 from "sap/m/Title";
+
+  import { PropertyBindingInfo } from "sap/ui/base/ManagedObject";
+
+  /**
+   * A composite title control intended to display a table title along with optional total and selected row
+   * counts.
+   *
+   * Overview: The `sap.m.table.Title` control renders the provided `sap.m.Title` control and optionally displays
+   * the table's total row count, the selected row count, or both independently.
+   *
+   * @since 1.147
+   */
+  export default class Title extends Control implements ITitle, IShrinkable {
+    __implements__sap_ui_core_ITitle: boolean;
+    __implements__sap_ui_core_IShrinkable: boolean;
+    /**
+     * Constructor for a new `sap.m.table.Title`.
+     *
+     * Accepts an object literal `mSettings` that defines initial property values, aggregated and associated
+     * objects as well as event handlers. See {@link sap.ui.base.ManagedObject#constructor} for a general description
+     * of the syntax of the settings object.
+     */
+    constructor(
+      /**
+       * Initial settings for the new control
+       */
+      mSettings?: $TitleSettings
+    );
+    /**
+     * Constructor for a new `sap.m.table.Title`.
+     *
+     * Accepts an object literal `mSettings` that defines initial property values, aggregated and associated
+     * objects as well as event handlers. See {@link sap.ui.base.ManagedObject#constructor} for a general description
+     * of the syntax of the settings object.
+     */
+    constructor(
+      /**
+       * ID for the new control, generated automatically if no ID is given
+       */
+      sId?: string,
+      /**
+       * Initial settings for the new control
+       */
+      mSettings?: $TitleSettings
+    );
+
+    /**
+     * Creates a new subclass of class sap.m.table.Title with name `sClassName` and enriches it with the information
+     * contained in `oClassInfo`.
+     *
+     * `oClassInfo` might contain the same kind of information as described in {@link sap.ui.core.Control.extend}.
+     *
+     *
+     * @returns Created class / constructor function
+     */
+    static extend<T extends Record<string, unknown>>(
+      /**
+       * Name of the class being created
+       */
+      sClassName: string,
+      /**
+       * Object literal with information about the class
+       */
+      oClassInfo?: sap.ClassInfo<T, Title>,
+      /**
+       * Constructor function for the metadata object; if not given, it defaults to the metadata implementation
+       * used by this class
+       */
+      FNMetaImpl?: Function
+    ): Function;
+    /**
+     * Returns a metadata object for class sap.m.table.Title.
+     *
+     *
+     * @returns Metadata object describing this class
+     */
+    static getMetadata(): ElementMetadata;
+    /**
+     * Destroys the title in the aggregation {@link #getTitle title}.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    destroyTitle(): this;
+    /**
+     * Gets current value of property {@link #getSelectedCount selectedCount}.
+     *
+     * Defines the value that is displayed as the selected row count.
+     *
+     * **Note:** A value of 0 indicates that no rows are selected, while a negative value indicates that the
+     * selected count is unknown. Although these cases are not displayed to the user, they are handled differently
+     * for accessibility reasons.
+     *
+     * Default value is `0`.
+     *
+     *
+     * @returns Value of property `selectedCount`
+     */
+    getSelectedCount(): int;
+    /**
+     * Gets current value of property {@link #getShowExtendedView showExtendedView}.
+     *
+     * Toggles between compact and extended display modes for the `selectedCount` and `totalCount`.
+     *
+     *
+     * 	 - **Compact mode (`false`)**: Displays counts in a condensed format.
+     * 	 - **Extended mode (`true`)**: Displays counts with separate descriptive labels.
+     *
+     * Default value is `false`.
+     *
+     *
+     * @returns Value of property `showExtendedView`
+     */
+    getShowExtendedView(): boolean;
+    /**
+     * Gets content of aggregation {@link #getTitle title}.
+     *
+     * Sets the title control, which is displayed in the toolbar as usual.
+     *
+     * **Note:** You must set a `title` to use this control.
+     */
+    getTitle(): Title1;
+    /**
+     * Gets current value of property {@link #getTotalCount totalCount}.
+     *
+     * Defines the value that is displayed as the total row count.
+     *
+     * **Note:** A value of 0 represents an empty table, while a negative value indicates that the total count
+     * is unknown. Although both cases are not displayed to the user, they are handled differently for accessibility
+     * reasons.
+     *
+     * Default value is `0`.
+     *
+     *
+     * @returns Value of property `totalCount`
+     */
+    getTotalCount(): int;
+    /**
+     * Gets current value of property {@link #getVisible visible}.
+     *
+     * Determines whether the control is visible.
+     *
+     * **Note:** If set to `false`, the control is hidden but still rendered for accessibility reasons.
+     *
+     * Default value is `true`.
+     *
+     *
+     * @returns Value of property `visible`
+     */
+    getVisible(): boolean;
+    /**
+     * Sets a new value for property {@link #getSelectedCount selectedCount}.
+     *
+     * Defines the value that is displayed as the selected row count.
+     *
+     * **Note:** A value of 0 indicates that no rows are selected, while a negative value indicates that the
+     * selected count is unknown. Although these cases are not displayed to the user, they are handled differently
+     * for accessibility reasons.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `0`.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setSelectedCount(
+      /**
+       * New value for property `selectedCount`
+       */
+      iSelectedCount?: int
+    ): this;
+    /**
+     * Sets a new value for property {@link #getShowExtendedView showExtendedView}.
+     *
+     * Toggles between compact and extended display modes for the `selectedCount` and `totalCount`.
+     *
+     *
+     * 	 - **Compact mode (`false`)**: Displays counts in a condensed format.
+     * 	 - **Extended mode (`true`)**: Displays counts with separate descriptive labels.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `false`.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setShowExtendedView(
+      /**
+       * New value for property `showExtendedView`
+       */
+      bShowExtendedView?: boolean
+    ): this;
+    /**
+     * Sets the aggregated {@link #getTitle title}.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setTitle(
+      /**
+       * The title to set
+       */
+      oTitle: Title1
+    ): this;
+    /**
+     * Sets a new value for property {@link #getTotalCount totalCount}.
+     *
+     * Defines the value that is displayed as the total row count.
+     *
+     * **Note:** A value of 0 represents an empty table, while a negative value indicates that the total count
+     * is unknown. Although both cases are not displayed to the user, they are handled differently for accessibility
+     * reasons.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `0`.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setTotalCount(
+      /**
+       * New value for property `totalCount`
+       */
+      iTotalCount?: int
+    ): this;
+    /**
+     * Sets a new value for property {@link #getVisible visible}.
+     *
+     * Determines whether the control is visible.
+     *
+     * **Note:** If set to `false`, the control is hidden but still rendered for accessibility reasons.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `true`.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setVisible(
+      /**
+       * New value for property `visible`
+       */
+      bVisible?: boolean
+    ): this;
+  }
+  /**
+   * Describes the settings that can be provided to the Title constructor.
+   */
+  export interface $TitleSettings extends $ControlSettings {
+    /**
+     * Defines the value that is displayed as the total row count.
+     *
+     * **Note:** A value of 0 represents an empty table, while a negative value indicates that the total count
+     * is unknown. Although both cases are not displayed to the user, they are handled differently for accessibility
+     * reasons.
+     */
+    totalCount?: int | PropertyBindingInfo | `{${string}}`;
+
+    /**
+     * Defines the value that is displayed as the selected row count.
+     *
+     * **Note:** A value of 0 indicates that no rows are selected, while a negative value indicates that the
+     * selected count is unknown. Although these cases are not displayed to the user, they are handled differently
+     * for accessibility reasons.
+     */
+    selectedCount?: int | PropertyBindingInfo | `{${string}}`;
+
+    /**
+     * Toggles between compact and extended display modes for the `selectedCount` and `totalCount`.
+     *
+     *
+     * 	 - **Compact mode (`false`)**: Displays counts in a condensed format.
+     * 	 - **Extended mode (`true`)**: Displays counts with separate descriptive labels.
+     */
+    showExtendedView?: boolean | PropertyBindingInfo | `{${string}}`;
+
+    /**
+     * Determines whether the control is visible.
+     *
+     * **Note:** If set to `false`, the control is hidden but still rendered for accessibility reasons.
+     */
+    visible?: boolean | PropertyBindingInfo | `{${string}}`;
+
+    /**
+     * Sets the title control, which is displayed in the toolbar as usual.
+     *
+     * **Note:** You must set a `title` to use this control.
+     */
+    title?: Title1;
   }
 }
 
@@ -145108,9 +148216,13 @@ declare module "sap/m/Text" {
     CSSSize,
   } from "sap/ui/core/library";
 
-  import { PropertyBindingInfo } from "sap/ui/base/ManagedObject";
+  import {
+    IToolbarInteractiveControl,
+    EmptyIndicatorMode,
+    WrappingType,
+  } from "sap/m/library";
 
-  import { EmptyIndicatorMode, WrappingType } from "sap/m/library";
+  import { PropertyBindingInfo } from "sap/ui/base/ManagedObject";
 
   import ElementMetadata from "sap/ui/core/ElementMetadata";
 
@@ -145131,7 +148243,7 @@ declare module "sap/m/Text" {
       IFormContent,
       ISemanticFormContent,
       ILabelable,
-      /* was: sap.m.IToolbarInteractiveControl */ Object
+      IToolbarInteractiveControl
   {
     __implements__sap_ui_core_IShrinkable: boolean;
     __implements__sap_ui_core_IFormContent: boolean;
@@ -146559,7 +149671,6 @@ declare module "sap/m/TileAttribute" {
    * Holds detail of an attribute used in the ActionTile.
    *
    * @since 1.122
-   * @experimental As of version 1.122.
    */
   export default class TileAttribute extends Control {
     /**
@@ -146728,8 +149839,6 @@ declare module "sap/m/TileAttribute" {
   }
   /**
    * Describes the settings that can be provided to the TileAttribute constructor.
-   *
-   * @experimental As of version 1.122.
    */
   export interface $TileAttributeSettings extends $ControlSettings {
     /**
@@ -147574,7 +150683,8 @@ declare module "sap/m/TileContent" {
     /**
      * Gets current value of property {@link #getPriority priority}.
      *
-     * Adds a priority badge before the content. Works only in Generic Tile ActionMode.
+     * Adds a priority badge before the content. Works only in Generic Tiles in ActionMode or Article Mode containing
+     * FrameType Stretch.
      *
      * Default value is `None`.
      *
@@ -147586,7 +150696,8 @@ declare module "sap/m/TileContent" {
     /**
      * Gets current value of property {@link #getPriorityText priorityText}.
      *
-     * Sets the Text inside the Priority badge in Generic Tile ActionMode.
+     * Sets the Text inside the Priority badge in Generic Tile. Works only in Generic Tiles in ActionMode or
+     * Article Mode containing FrameType Stretch.
      *
      * @since 1.103
      *
@@ -147712,40 +150823,28 @@ declare module "sap/m/TileContent" {
       sFrameType?: FrameType | keyof typeof FrameType
     ): this;
     /**
-     * Sets a new value for property {@link #getPriority priority}.
+     * Sets the priority of the tile content.
      *
-     * Adds a priority badge before the content. Works only in Generic Tile ActionMode.
      *
-     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
-     *
-     * Default value is `None`.
-     *
-     * @since 1.96
-     *
-     * @returns Reference to `this` in order to allow method chaining
+     * @returns Reference to the current instance for method chaining.
      */
     setPriority(
       /**
-       * New value for property `priority`
+       * The priority level.
        */
-      sPriority?: Priority | keyof typeof Priority
+      sPriority: Priority | keyof typeof Priority
     ): this;
     /**
-     * Sets a new value for property {@link #getPriorityText priorityText}.
+     * Sets the text for the priority badge.
      *
-     * Sets the Text inside the Priority badge in Generic Tile ActionMode.
      *
-     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
-     *
-     * @since 1.103
-     *
-     * @returns Reference to `this` in order to allow method chaining
+     * @returns Reference to the current instance for method chaining.
      */
     setPriorityText(
       /**
-       * New value for property `priorityText`
+       * The text to be displayed on the badge.
        */
-      sPriorityText?: string
+      sPriorityText: string
     ): this;
     /**
      * Setter for protected property to enable or disable content rendering. This function does not invalidate
@@ -147886,7 +150985,8 @@ declare module "sap/m/TileContent" {
       | `{${string}}`;
 
     /**
-     * Adds a priority badge before the content. Works only in Generic Tile ActionMode.
+     * Adds a priority badge before the content. Works only in Generic Tiles in ActionMode or Article Mode containing
+     * FrameType Stretch.
      *
      * @since 1.96
      */
@@ -147896,7 +150996,8 @@ declare module "sap/m/TileContent" {
       | `{${string}}`;
 
     /**
-     * Sets the Text inside the Priority badge in Generic Tile ActionMode.
+     * Sets the Text inside the Priority badge in Generic Tile. Works only in Generic Tiles in ActionMode or
+     * Article Mode containing FrameType Stretch.
      *
      * @since 1.103
      */
@@ -148266,7 +151367,8 @@ declare module "sap/m/TimePicker" {
    *      binding the `value` property by using types
    * ```javascript
    *
-   * new sap.ui.model.json.JSONModel({date: sap.ui.core.date.UI5Date.getInstance(2022,10,10,10,15,10)});
+   * // UI5Date imported from sap/ui/core/date/UI5Date
+   * new sap.ui.model.json.JSONModel({date: UI5Date.getInstance(2022,10,10,10,15,10)});
    *
    * new sap.m.TimePicker({
    *     value: {
@@ -149171,6 +152273,22 @@ declare module "sap/m/TimePicker" {
      * @returns Reference to `this` for method chaining
      */
     setSupport2400(bSupport2400: boolean): this;
+    /**
+     * Sets a new value for property {@link #getTitle title}.
+     *
+     * Displays the text of the general picker label and is read by screen readers. It is visible only on phone.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setTitle(
+      /**
+       * New value for property `title`
+       */
+      sTitle?: string
+    ): this;
   }
   /**
    * Describes the settings that can be provided to the TimePicker constructor.
@@ -149377,7 +152495,8 @@ declare module "sap/m/TimePickerClocks" {
   import { PropertyBindingInfo } from "sap/ui/base/ManagedObject";
 
   /**
-   * A picker clocks container control used inside the {@link sap.m.TimePicker}.
+   * A picker clocks container control used inside the {@link sap.m.TimePicker}. If you use the control standalone,
+   * please call the {@link #prepareForOpen} method before opening or displaying it.
    *
    * @since 1.90
    */
@@ -150139,6 +153258,7 @@ declare module "sap/m/Title" {
   import { default as Control, $ControlSettings } from "sap/ui/core/Control";
 
   import {
+    ITitle,
     IShrinkable,
     AccessibilityInfo,
     ITitleContent,
@@ -150149,9 +153269,9 @@ declare module "sap/m/Title" {
     CSSSize,
   } from "sap/ui/core/library";
 
-  import ElementMetadata from "sap/ui/core/ElementMetadata";
+  import { IToolbarInteractiveControl, WrappingType } from "sap/m/library";
 
-  import { WrappingType } from "sap/m/library";
+  import ElementMetadata from "sap/ui/core/ElementMetadata";
 
   import Title1 from "sap/ui/core/Title";
 
@@ -150187,8 +153307,9 @@ declare module "sap/m/Title" {
    */
   export default class Title
     extends Control
-    implements IShrinkable, /* was: sap.m.IToolbarInteractiveControl */ Object
+    implements ITitle, IShrinkable, IToolbarInteractiveControl
   {
+    __implements__sap_ui_core_ITitle: boolean;
     __implements__sap_ui_core_IShrinkable: boolean;
     __implements__sap_m_IToolbarInteractiveControl: boolean;
     /**
@@ -150714,6 +153835,8 @@ declare module "sap/m/ToggleButton" {
     Button$PressEventParameters,
   } from "sap/m/Button";
 
+  import { IToolbarInteractiveControl } from "sap/m/library";
+
   import { AccessibilityInfo } from "sap/ui/core/library";
 
   import ElementMetadata from "sap/ui/core/ElementMetadata";
@@ -150730,7 +153853,7 @@ declare module "sap/m/ToggleButton" {
    */
   export default class ToggleButton
     extends Button
-    implements /* was: sap.m.IToolbarInteractiveControl */ Object
+    implements IToolbarInteractiveControl
   {
     __implements__sap_m_IToolbarInteractiveControl: boolean;
     /**
@@ -151679,7 +154802,12 @@ declare module "sap/m/Token" {
 declare module "sap/m/Tokenizer" {
   import { default as Control, $ControlSettings } from "sap/ui/core/Control";
 
-  import { ID, CSSSize } from "sap/ui/core/library";
+  import {
+    ISemanticFormContent,
+    IFormContent,
+    ID,
+    CSSSize,
+  } from "sap/ui/core/library";
 
   import Token from "sap/m/Token";
 
@@ -151705,7 +154833,12 @@ declare module "sap/m/Tokenizer" {
    *
    * @since 1.22
    */
-  export default class Tokenizer extends Control {
+  export default class Tokenizer
+    extends Control
+    implements ISemanticFormContent, IFormContent
+  {
+    __implements__sap_ui_core_ISemanticFormContent: boolean;
+    __implements__sap_ui_core_IFormContent: boolean;
     /**
      * Constructor for a new Tokenizer.
      *
@@ -151847,6 +154980,12 @@ declare module "sap/m/Tokenizer" {
        */
       fValidator: Function
     ): void;
+    /**
+     * Function to execute after the n-more popover is closed.
+     *
+     * @ui5-protected Do not call from applications (only from related classes in the framework)
+     */
+    afterPopupClose(): void;
     /**
      * Attaches event handler `fnFunction` to the {@link #event:renderModeChange renderModeChange} event of
      * this `sap.m.Tokenizer`.
@@ -152211,6 +155350,20 @@ declare module "sap/m/Tokenizer" {
      */
     getAriaLabelledBy(): ID[];
     /**
+     * Gets current value of property {@link #getDisplayOnly displayOnly}.
+     *
+     * Determines whether the `Tokenizer` is in display only state.
+     *
+     * When set to `true`, the `Tokenizer` is not editable. This setting is used for forms in review mode.
+     *
+     * Default value is `false`.
+     *
+     * @since 1.142.0
+     *
+     * @returns Value of property `displayOnly`
+     */
+    getDisplayOnly(): boolean;
+    /**
      * Gets current value of property {@link #getEditable editable}.
      *
      * true if tokens shall be editable otherwise false
@@ -152261,6 +155414,31 @@ declare module "sap/m/Tokenizer" {
      */
     getMaxWidth(): CSSSize;
     /**
+     * Gets current value of property {@link #getMultiLine multiLine}.
+     *
+     * Defines whether tokens are displayed on multiple lines.
+     *
+     * Default value is `false`.
+     *
+     * @experimental As of version 1.142.
+     *
+     * @returns Value of property `multiLine`
+     */
+    getMultiLine(): boolean;
+    /**
+     * Gets current value of property {@link #getName name}.
+     *
+     * The name property to be used in the HTML code for the tokenizer (e.g. for HTML forms that send data to
+     * the server via submit).
+     *
+     * Default value is `empty string`.
+     *
+     * @since 1.142.0
+     *
+     * @returns Value of property `name`
+     */
+    getName(): string;
+    /**
      * Gets current value of property {@link #getRenderMode renderMode}.
      *
      * Defines the mode that the Tokenizer will use:
@@ -152298,6 +155476,19 @@ declare module "sap/m/Tokenizer" {
      * @returns Array of selected tokens or empty array
      */
     getSelectedTokens(): Token[];
+    /**
+     * Gets current value of property {@link #getShowClearAll showClearAll}.
+     *
+     * Defines whether "Clear All" button is present. Ensure `multiLine` is enabled, otherwise `showClearAll`
+     * will have no effect.
+     *
+     * Default value is `false`.
+     *
+     * @experimental As of version 1.142.
+     *
+     * @returns Value of property `showClearAll`
+     */
+    getShowClearAll(): boolean;
     /**
      * Gets content of aggregation {@link #getTokens tokens}.
      *
@@ -152466,6 +155657,27 @@ declare module "sap/m/Tokenizer" {
       bSelect: boolean
     ): this;
     /**
+     * Sets a new value for property {@link #getDisplayOnly displayOnly}.
+     *
+     * Determines whether the `Tokenizer` is in display only state.
+     *
+     * When set to `true`, the `Tokenizer` is not editable. This setting is used for forms in review mode.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `false`.
+     *
+     * @since 1.142.0
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setDisplayOnly(
+      /**
+       * New value for property `displayOnly`
+       */
+      bDisplayOnly?: boolean
+    ): this;
+    /**
      * Sets a new value for property {@link #getEditable editable}.
      *
      * true if tokens shall be editable otherwise false
@@ -152533,6 +155745,45 @@ declare module "sap/m/Tokenizer" {
       sMaxWidth?: CSSSize
     ): this;
     /**
+     * Sets a new value for property {@link #getMultiLine multiLine}.
+     *
+     * Defines whether tokens are displayed on multiple lines.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `false`.
+     *
+     * @experimental As of version 1.142.
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setMultiLine(
+      /**
+       * New value for property `multiLine`
+       */
+      bMultiLine?: boolean
+    ): this;
+    /**
+     * Sets a new value for property {@link #getName name}.
+     *
+     * The name property to be used in the HTML code for the tokenizer (e.g. for HTML forms that send data to
+     * the server via submit).
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `empty string`.
+     *
+     * @since 1.142.0
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setName(
+      /**
+       * New value for property `name`
+       */
+      sName?: string
+    ): this;
+    /**
      * Function sets the tokenizer's width in pixels.
      */
     setPixelWidth(
@@ -152576,6 +155827,26 @@ declare module "sap/m/Tokenizer" {
        */
       bShouldRenderTabIndex: boolean
     ): void;
+    /**
+     * Sets a new value for property {@link #getShowClearAll showClearAll}.
+     *
+     * Defines whether "Clear All" button is present. Ensure `multiLine` is enabled, otherwise `showClearAll`
+     * will have no effect.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `false`.
+     *
+     * @experimental As of version 1.142.
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setShowClearAll(
+      /**
+       * New value for property `showClearAll`
+       */
+      bShowClearAll?: boolean
+    ): this;
     /**
      * Sets a new value for property {@link #getWidth width}.
      *
@@ -152627,6 +155898,38 @@ declare module "sap/m/Tokenizer" {
      * that use the Tokenizer. Therefore, modifying this property may alter the expected behavior of the control.
      */
     renderMode?: string | PropertyBindingInfo;
+
+    /**
+     * The name property to be used in the HTML code for the tokenizer (e.g. for HTML forms that send data to
+     * the server via submit).
+     *
+     * @since 1.142.0
+     */
+    name?: string | PropertyBindingInfo;
+
+    /**
+     * Determines whether the `Tokenizer` is in display only state.
+     *
+     * When set to `true`, the `Tokenizer` is not editable. This setting is used for forms in review mode.
+     *
+     * @since 1.142.0
+     */
+    displayOnly?: boolean | PropertyBindingInfo | `{${string}}`;
+
+    /**
+     * Defines whether tokens are displayed on multiple lines.
+     *
+     * @experimental As of version 1.142.
+     */
+    multiLine?: boolean | PropertyBindingInfo | `{${string}}`;
+
+    /**
+     * Defines whether "Clear All" button is present. Ensure `multiLine` is enabled, otherwise `showClearAll`
+     * will have no effect.
+     *
+     * @experimental As of version 1.142.
+     */
+    showClearAll?: boolean | PropertyBindingInfo | `{${string}}`;
 
     /**
      * the currently displayed tokens
@@ -152797,13 +156100,16 @@ declare module "sap/m/Tokenizer" {
 declare module "sap/m/Toolbar" {
   import { default as Control, $ControlSettings } from "sap/ui/core/Control";
 
-  import { Toolbar as Toolbar1, ID, CSSSize } from "sap/ui/core/library";
+  import {
+    Toolbar as Toolbar1,
+    ID,
+    CSSSize,
+    ITitle,
+  } from "sap/ui/core/library";
 
   import { IBar, ToolbarDesign, ToolbarStyle } from "sap/m/library";
 
   import ElementMetadata from "sap/ui/core/ElementMetadata";
-
-  import Title from "sap/m/Title";
 
   import {
     PropertyBindingInfo,
@@ -153147,21 +156453,23 @@ declare module "sap/m/Toolbar" {
      */
     getStyle(): ToolbarStyle;
     /**
-     * Returns the first sap.m.Title control instance inside the toolbar for the accessibility
+     * Returns the first visible control inside the toolbar that implements the {@link sap.ui.core.ITitle} interface.
      *
      * @since 1.44
      * @ui5-protected Do not call from applications (only from related classes in the framework)
      *
-     * @returns The `sap.m.Title` instance or undefined
+     * @returns The visible control implementing {@link sap.ui.core.ITitle}, or `undefined` if none exists.
      */
-    getTitleControl(): Title | undefined;
+    getTitleControl(): ITitle | undefined;
     /**
-     * Returns the first sap.m.Title control id inside the toolbar for the accessibility
+     * Returns the ID of the first visible control inside the toolbar that implements the {@link sap.ui.core.ITitle }
+     * interface.
      *
      * @since 1.28
      * @ui5-protected Do not call from applications (only from related classes in the framework)
      *
-     * @returns The `sap.m.Title` ID
+     * @returns The ID of the visible control implementing {@link sap.ui.core.ITitle}, or an empty string if
+     * none exists.
      */
     getTitleId(): ID;
     /**
@@ -154550,7 +157858,6 @@ declare module "sap/m/upload/Column" {
    * control.
    *
    * @since 1.120
-   * @experimental As of version 1.120.
    */
   export default class Column extends Column1 {
     /**
@@ -154763,8 +158070,6 @@ declare module "sap/m/upload/Column" {
   }
   /**
    * Describes the settings that can be provided to the Column constructor.
-   *
-   * @experimental As of version 1.120.
    */
   export interface $ColumnSettings extends $ColumnSettings1 {
     /**
@@ -154810,8 +158115,7 @@ declare module "sap/m/upload/FilePreviewDialog" {
    * Overview:
    *
    * Dialog with a carousel to preview files uploaded using the UploadSetwithTable control. This Element should
-   * only be used within the {@link sap.m.upload.UploadSetwithTable UploadSetwithTable} control or {@link sap.m.plugins.UploadSetwithTable UploadSetwithTable }
-   * Plugin as an association.
+   * only be used within the {@link sap.m.plugins.UploadSetwithTable UploadSetwithTable} Plugin as an association.
    *
    * Supported File Types for Preview:
    *
@@ -154916,6 +158220,64 @@ declare module "sap/m/upload/FilePreviewDialog" {
      */
     getAdditionalFooterButtons(): Button[];
     /**
+     * Gets current value of property {@link #getCustomPageContentHandler customPageContentHandler}.
+     *
+     * Callback function to insert custom content into the preview dialog using a control to display the preview
+     * of unsupported file types.
+     * Use this property as callback function to insert a control with the content into the preview dialog.
+     *
+     * Callback function returns a promise that resolves with a control that is displayed in the preview dialog.
+     * Reject the promise to display the default illustrated message.
+     * Callback function is invoked with {@link sap.m.upload.UploadItem item} for each unsupported file type.
+     *
+     *
+     * Example: There is a file with an xml extension and you want to display the content inside a codeeditor
+     * control for the file type.
+     *
+     *
+     * ```javascript
+     *
+     * 	<UploadSetwithTable>
+     * 		<upload:FilePreviewDialog customPageContentHandler="{onCustomContentHandler}"></upload:FilePreviewDialog>
+     * 	</UploadSetwithTable>
+     * ```
+     *
+     *
+     *
+     * ```javascript
+     *
+     * 	onCustomContentHandler: function(oItem) {
+     *
+     * 			return new Promise(function(resolve, reject) {
+     *
+     * 				switch (oItem.getMediaType().toLowerCase()) {
+     *
+     * 					case "application/xml":
+     *
+     * 						var oCodeEditor = new CodeEditor({
+     * 							value: "XML content",
+     * 							width: "100%",
+     * 							height: "100%"
+     * 						});
+     *
+     * 						resolve(oCodeEditor);
+     * 						break;
+     *
+     * 					default:
+     * 						reject(); // reject the promise to display the default illustrated message.
+     * 						break;
+     * 				}
+     * 			});
+     * 	}
+     * ```
+     *
+     *
+     * @since 1.136
+     *
+     * @returns Value of property `customPageContentHandler`
+     */
+    getCustomPageContentHandler(): Function;
+    /**
      * Gets current value of property {@link #getMaxFileSizeforPreview maxFileSizeforPreview}.
      *
      * Size limit of the file in megabytes that is allowed to be previewed.
@@ -154989,6 +158351,71 @@ declare module "sap/m/upload/FilePreviewDialog" {
      */
     removeAllAdditionalFooterButtons(): Button[];
     /**
+     * Sets a new value for property {@link #getCustomPageContentHandler customPageContentHandler}.
+     *
+     * Callback function to insert custom content into the preview dialog using a control to display the preview
+     * of unsupported file types.
+     * Use this property as callback function to insert a control with the content into the preview dialog.
+     *
+     * Callback function returns a promise that resolves with a control that is displayed in the preview dialog.
+     * Reject the promise to display the default illustrated message.
+     * Callback function is invoked with {@link sap.m.upload.UploadItem item} for each unsupported file type.
+     *
+     *
+     * Example: There is a file with an xml extension and you want to display the content inside a codeeditor
+     * control for the file type.
+     *
+     *
+     * ```javascript
+     *
+     * 	<UploadSetwithTable>
+     * 		<upload:FilePreviewDialog customPageContentHandler="{onCustomContentHandler}"></upload:FilePreviewDialog>
+     * 	</UploadSetwithTable>
+     * ```
+     *
+     *
+     *
+     * ```javascript
+     *
+     * 	onCustomContentHandler: function(oItem) {
+     *
+     * 			return new Promise(function(resolve, reject) {
+     *
+     * 				switch (oItem.getMediaType().toLowerCase()) {
+     *
+     * 					case "application/xml":
+     *
+     * 						var oCodeEditor = new CodeEditor({
+     * 							value: "XML content",
+     * 							width: "100%",
+     * 							height: "100%"
+     * 						});
+     *
+     * 						resolve(oCodeEditor);
+     * 						break;
+     *
+     * 					default:
+     * 						reject(); // reject the promise to display the default illustrated message.
+     * 						break;
+     * 				}
+     * 			});
+     * 	}
+     * ```
+     *
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * @since 1.136
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setCustomPageContentHandler(
+      /**
+       * New value for property `customPageContentHandler`
+       */
+      fnCustomPageContentHandler?: Function
+    ): this;
+    /**
      * Sets a new value for property {@link #getMaxFileSizeforPreview maxFileSizeforPreview}.
      *
      * Size limit of the file in megabytes that is allowed to be previewed.
@@ -155038,6 +158465,61 @@ declare module "sap/m/upload/FilePreviewDialog" {
      * If not set, files of any size can be previewed.
      */
     maxFileSizeforPreview?: float | PropertyBindingInfo | `{${string}}`;
+
+    /**
+     * Callback function to insert custom content into the preview dialog using a control to display the preview
+     * of unsupported file types.
+     * Use this property as callback function to insert a control with the content into the preview dialog.
+     *
+     * Callback function returns a promise that resolves with a control that is displayed in the preview dialog.
+     * Reject the promise to display the default illustrated message.
+     * Callback function is invoked with {@link sap.m.upload.UploadItem item} for each unsupported file type.
+     *
+     *
+     * Example: There is a file with an xml extension and you want to display the content inside a codeeditor
+     * control for the file type.
+     *
+     *
+     * ```javascript
+     *
+     * 	<UploadSetwithTable>
+     * 		<upload:FilePreviewDialog customPageContentHandler="{onCustomContentHandler}"></upload:FilePreviewDialog>
+     * 	</UploadSetwithTable>
+     * ```
+     *
+     *
+     *
+     * ```javascript
+     *
+     * 	onCustomContentHandler: function(oItem) {
+     *
+     * 			return new Promise(function(resolve, reject) {
+     *
+     * 				switch (oItem.getMediaType().toLowerCase()) {
+     *
+     * 					case "application/xml":
+     *
+     * 						var oCodeEditor = new CodeEditor({
+     * 							value: "XML content",
+     * 							width: "100%",
+     * 							height: "100%"
+     * 						});
+     *
+     * 						resolve(oCodeEditor);
+     * 						break;
+     *
+     * 					default:
+     * 						reject(); // reject the promise to display the default illustrated message.
+     * 						break;
+     * 				}
+     * 			});
+     * 	}
+     * ```
+     *
+     *
+     * @since 1.136
+     */
+    customPageContentHandler?: Function | PropertyBindingInfo | `{${string}}`;
 
     /**
      * Custom buttons, to be displayed in the preview dialog footer.
@@ -155572,7 +159054,9 @@ declare module "sap/m/upload/Uploader" {
       /**
        * New value for property `httpRequestMethod`
        */
-      sHttpRequestMethod?: UploaderHttpRequestMethod
+      sHttpRequestMethod?:
+        | UploaderHttpRequestMethod
+        | keyof typeof UploaderHttpRequestMethod
     ): this;
     /**
      * Sets a new value for property {@link #getUploadUrl uploadUrl}.
@@ -155655,7 +159139,7 @@ declare module "sap/m/upload/Uploader" {
      * @since 1.90
      */
     httpRequestMethod?:
-      | UploaderHttpRequestMethod
+      | (UploaderHttpRequestMethod | keyof typeof UploaderHttpRequestMethod)
       | PropertyBindingInfo
       | `{${string}}`;
 
@@ -155799,11 +159283,11 @@ declare module "sap/m/upload/UploaderHttpRequestMethod" {
     /**
      * HTTP request POST method.
      */
-    Post = "POST",
+    Post = "Post",
     /**
      * HTTP request PUT method.
      */
-    Put = "PUT",
+    Put = "Put",
   }
   export default UploaderHttpRequestMethod;
 }
@@ -156161,7 +159645,9 @@ declare module "sap/m/upload/UploaderTableItem" {
       oListener?: object
     ): this;
     /**
-     * Starts the process of downloading a file.
+     * Starts the process of downloading a file. Plugin uses the URL set in the item or the downloadUrl set
+     * in the uploader class to download the file. If the URL is not set, a warning is logged. API downloads
+     * the file with xhr response of blob type or string type.
      *
      *
      * @returns It returns true if the download is processed successfully
@@ -156305,7 +159791,9 @@ declare module "sap/m/upload/UploaderTableItem" {
       /**
        * New value for property `httpRequestMethod`
        */
-      sHttpRequestMethod?: UploaderHttpRequestMethod
+      sHttpRequestMethod?:
+        | UploaderHttpRequestMethod
+        | keyof typeof UploaderHttpRequestMethod
     ): this;
     /**
      * Sets a new value for property {@link #getUploadUrl uploadUrl}.
@@ -156383,7 +159871,7 @@ declare module "sap/m/upload/UploaderTableItem" {
      * HTTP request method chosen for file upload.
      */
     httpRequestMethod?:
-      | UploaderHttpRequestMethod
+      | (UploaderHttpRequestMethod | keyof typeof UploaderHttpRequestMethod)
       | PropertyBindingInfo
       | `{${string}}`;
 
@@ -156840,6 +160328,18 @@ declare module "sap/m/upload/UploadItem" {
      */
     getHeaderFields(): Item[];
     /**
+     * Gets current value of property {@link #getIsDirectory isDirectory}.
+     *
+     * Specifies whether the item is a file or a directory. Used mainly for plugin with the tree table structure.
+     *
+     * Default value is `false`.
+     *
+     * @since 1.139
+     *
+     * @returns Value of property `isDirectory`
+     */
+    getIsDirectory(): boolean;
+    /**
      * Gets current value of property {@link #getIsTrustedSource isTrustedSource}.
      *
      * This property is used in the {@link sap.m.upload.FilePreviewDialog FilePreviewDialog} to determine if
@@ -156993,6 +160493,25 @@ declare module "sap/m/upload/UploadItem" {
        * New value for property `fileSize`
        */
       fFileSize?: float
+    ): this;
+    /**
+     * Sets a new value for property {@link #getIsDirectory isDirectory}.
+     *
+     * Specifies whether the item is a file or a directory. Used mainly for plugin with the tree table structure.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * Default value is `false`.
+     *
+     * @since 1.139
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setIsDirectory(
+      /**
+       * New value for property `isDirectory`
+       */
+      bIsDirectory?: boolean
     ): this;
     /**
      * Sets a new value for property {@link #getIsTrustedSource isTrustedSource}.
@@ -157158,6 +160677,13 @@ declare module "sap/m/upload/UploadItem" {
     isTrustedSource?: boolean | PropertyBindingInfo | `{${string}}`;
 
     /**
+     * Specifies whether the item is a file or a directory. Used mainly for plugin with the tree table structure.
+     *
+     * @since 1.139
+     */
+    isDirectory?: boolean | PropertyBindingInfo | `{${string}}`;
+
+    /**
      * Header fields to be included in the header section of an XMLHttpRequest (XHR) request
      */
     headerFields?: Item[] | Item | AggregationBindingInfo | `{${string}}`;
@@ -157319,6 +160845,19 @@ declare module "sap/m/upload/UploadItemConfiguration" {
      */
     getFileSizePath(): string;
     /**
+     * Gets current value of property {@link #getIsDirectoryPath isDirectoryPath}.
+     *
+     * Specifies the path in the model to confirm if it is a file or a directory. This is used to determine
+     * if the context is file or a directory. If it is a directory, it cannot be previewed. Set this property
+     * to the path in the model to determine if it is a file or a directory. The value of this path evaluated
+     * should be boolean.
+     *
+     * @since 1.139
+     *
+     * @returns Value of property `isDirectoryPath`
+     */
+    getIsDirectoryPath(): string;
+    /**
      * Gets current value of property {@link #getIsTrustedSourcePath isTrustedSourcePath}.
      *
      * Specifies the path in the model to confirm if the file is from a trusted source. This is used to determine
@@ -157398,6 +160937,26 @@ declare module "sap/m/upload/UploadItemConfiguration" {
        * New value for property `fileSizePath`
        */
       sFileSizePath?: string
+    ): this;
+    /**
+     * Sets a new value for property {@link #getIsDirectoryPath isDirectoryPath}.
+     *
+     * Specifies the path in the model to confirm if it is a file or a directory. This is used to determine
+     * if the context is file or a directory. If it is a directory, it cannot be previewed. Set this property
+     * to the path in the model to determine if it is a file or a directory. The value of this path evaluated
+     * should be boolean.
+     *
+     * When called with a value of `null` or `undefined`, the default value of the property will be restored.
+     *
+     * @since 1.139
+     *
+     * @returns Reference to `this` in order to allow method chaining
+     */
+    setIsDirectoryPath(
+      /**
+       * New value for property `isDirectoryPath`
+       */
+      sIsDirectoryPath?: string
     ): this;
     /**
      * Sets a new value for property {@link #getIsTrustedSourcePath isTrustedSourcePath}.
@@ -157527,6 +161086,16 @@ declare module "sap/m/upload/UploadItemConfiguration" {
      * @since 1.125
      */
     isTrustedSourcePath?: string | PropertyBindingInfo;
+
+    /**
+     * Specifies the path in the model to confirm if it is a file or a directory. This is used to determine
+     * if the context is file or a directory. If it is a directory, it cannot be previewed. Set this property
+     * to the path in the model to determine if it is a file or a directory. The value of this path evaluated
+     * should be boolean.
+     *
+     * @since 1.139
+     */
+    isDirectoryPath?: string | PropertyBindingInfo;
   }
 }
 
@@ -159909,7 +163478,9 @@ declare module "sap/m/upload/UploadSet" {
       /**
        * New value for property `httpRequestMethod`
        */
-      sHttpRequestMethod?: UploaderHttpRequestMethod
+      sHttpRequestMethod?:
+        | UploaderHttpRequestMethod
+        | keyof typeof UploaderHttpRequestMethod
     ): this;
     /**
      * Sets the aggregated {@link #getIllustratedMessage illustratedMessage}.
@@ -160390,7 +163961,7 @@ declare module "sap/m/upload/UploadSet" {
      * @since 1.90
      */
     httpRequestMethod?:
-      | UploaderHttpRequestMethod
+      | (UploaderHttpRequestMethod | keyof typeof UploaderHttpRequestMethod)
       | PropertyBindingInfo
       | `{${string}}`;
 
@@ -166395,7 +169966,7 @@ declare module "sap/m/VariantItem" {
       /**
        * New value for property `sharing`
        */
-      sSharing?: SharingMode
+      sSharing?: SharingMode | keyof typeof SharingMode
     ): this;
     /**
      * Sets a new value for property {@link #getTitle title}.
@@ -166444,7 +170015,10 @@ declare module "sap/m/VariantItem" {
     /**
      * Contains the information is the item is public or private.
      */
-    sharing?: SharingMode | PropertyBindingInfo | `{${string}}`;
+    sharing?:
+      | (SharingMode | keyof typeof SharingMode)
+      | PropertyBindingInfo
+      | `{${string}}`;
 
     /**
      * Indicates if the item is removable.
@@ -166506,6 +170080,7 @@ declare module "sap/m/VariantManagement" {
 
   import {
     IOverflowToolbarContent,
+    IToolbarInteractiveControl,
     VariantManagementRename,
     VariantManagementExe,
     VariantManagementFav,
@@ -166533,10 +170108,7 @@ declare module "sap/m/VariantManagement" {
    */
   export default class VariantManagement
     extends Control
-    implements
-      IShrinkable,
-      IOverflowToolbarContent,
-      /* was: sap.m.IToolbarInteractiveControl */ Object
+    implements IShrinkable, IOverflowToolbarContent, IToolbarInteractiveControl
   {
     __implements__sap_ui_core_IShrinkable: boolean;
     __implements__sap_m_IOverflowToolbarContent: boolean;
@@ -167158,7 +170730,7 @@ declare module "sap/m/VariantManagement" {
      */
     getShowSaveAs(): boolean;
     /**
-     * Retrieves for the controls {@link sap.ui.comp.SmartVariantManagement} and {@link sap.ui.fl.variants.VariantManagement }
+     * Retrieves for the controls {@link sap.ui.comp.smartvariants.SmartVariantManagement} and {@link sap.ui.fl.variants.VariantManagement }
      * the Standard variant. For all other scenarios the first visible variant will be returned, or `null`
      * if there are none.
      *
@@ -167314,6 +170886,8 @@ declare module "sap/m/VariantManagement" {
     ): this;
     /**
      * Enables the programmatic selection of a variant.
+     *
+     * @since 1.121
      */
     setCurrentVariantKey(
       /**
@@ -171237,6 +174811,53 @@ declare namespace sap {
    */
   namespace m {
     /**
+     * Helper Class for implementing additional contexts of the Bar. e.g. in sap.m.Dialog
+     *
+     * @ui5-protected DO NOT USE IN APPLICATIONS (only for related classes in the framework)
+     */
+    class BarInAnyContentEnabler
+      extends /* was: sap.m.BarInPageEnabler */ Object
+    {
+      /**
+       * @ui5-protected Do not call from applications (only from related classes in the framework)
+       */
+      protected constructor();
+
+      /**
+       * Creates a new subclass of class sap.m.BarInAnyContentEnabler with name `sClassName` and enriches it with
+       * the information contained in `oClassInfo`.
+       *
+       * `oClassInfo` might contain the same kind of information as described in {@link sap.m.BarInPageEnabler.extend}.
+       *
+       * @ui5-protected Do not call from applications (only from related classes in the framework)
+       *
+       * @returns Created class / constructor function
+       */
+      static extend<T extends Record<string, unknown>>(
+        /**
+         * Name of the class being created
+         */
+        sClassName: string,
+        /**
+         * Object literal with information about the class
+         */
+        oClassInfo?: ClassInfo<T, BarInAnyContentEnabler>,
+        /**
+         * Constructor function for the metadata object; if not given, it defaults to the metadata implementation
+         * used by this class
+         */
+        FNMetaImpl?: Function
+      ): Function;
+      /**
+       * Returns a metadata object for class sap.m.BarInAnyContentEnabler.
+       *
+       * @ui5-protected Do not call from applications (only from related classes in the framework)
+       *
+       * @returns Metadata object describing this class
+       */
+      static getMetadata(): import("sap/ui/base/Metadata").default;
+    }
+    /**
      * The public facade of the {@link sap.m.SelectionDetailsItem} element.
      *
      * @since 1.48.0
@@ -171490,6 +175111,10 @@ declare namespace sap {
 
     "sap/m/ListBase": undefined;
 
+    "sap/m/ListItemAction": undefined;
+
+    "sap/m/ListItemActionBase": undefined;
+
     "sap/m/ListItemBase": undefined;
 
     "sap/m/MaskInput": undefined;
@@ -171564,6 +175189,8 @@ declare namespace sap {
 
     "sap/m/OverflowToolbarToggleButton": undefined;
 
+    "sap/m/OverflowToolbarTokenizer": undefined;
+
     "sap/m/p13n/AbstractContainer": undefined;
 
     "sap/m/p13n/AbstractContainerItem": undefined;
@@ -171590,6 +175217,8 @@ declare namespace sap {
 
     "sap/m/p13n/modules/AdaptationProvider": undefined;
 
+    "sap/m/p13n/PersistenceProvider": undefined;
+
     "sap/m/p13n/Popup": undefined;
 
     "sap/m/p13n/QueryPanel": undefined;
@@ -171601,6 +175230,8 @@ declare namespace sap {
     "sap/m/p13n/SortController": undefined;
 
     "sap/m/p13n/SortPanel": undefined;
+
+    "sap/m/p13n/util/diff": undefined;
 
     "sap/m/P13nColumnsItem": undefined;
 
@@ -171651,6 +175282,8 @@ declare namespace sap {
     "sap/m/PlanningCalendarView": undefined;
 
     "sap/m/plugins/CellSelector": undefined;
+
+    "sap/m/plugins/ColumnAIAction": undefined;
 
     "sap/m/plugins/ColumnResizer": undefined;
 
@@ -171860,6 +175493,8 @@ declare namespace sap {
 
     "sap/m/table/columnmenu/QuickGroupItem": undefined;
 
+    "sap/m/table/columnmenu/QuickResize": undefined;
+
     "sap/m/table/columnmenu/QuickSort": undefined;
 
     "sap/m/table/columnmenu/QuickSortItem": undefined;
@@ -171869,6 +175504,8 @@ declare namespace sap {
     "sap/m/table/columnmenu/QuickTotalItem": undefined;
 
     "sap/m/table/ColumnWidthController": undefined;
+
+    "sap/m/table/Title": undefined;
 
     "sap/m/table/Util": undefined;
 

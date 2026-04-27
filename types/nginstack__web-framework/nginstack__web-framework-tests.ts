@@ -1,5 +1,5 @@
-import * as Grid from "@nginstack/web-framework/lib/grid/Grid";
-import * as GridField from "@nginstack/web-framework/lib/grid/GridField";
+import Grid from "@nginstack/web-framework/lib/grid/Grid";
+import GridField from "@nginstack/web-framework/lib/grid/GridField";
 
 const grid = new Grid("*", "name"); // $ExpectType Grid
 const gridField = new GridField("name", "type", null); // $ExpectType GridField
@@ -64,7 +64,6 @@ grid.definitionClass; // $ExpectType number | null
 grid.definitionName; // $ExpectType number | null
 grid.column; // $ExpectType number
 grid.breakLine; // $ExpectType boolean
-grid.cssClass; // $ExpectType any
 grid.width; // $ExpectType string
 grid.confirmDelete; // $ExpectType boolean
 grid.confirmCancel; // $ExpectType boolean
@@ -92,7 +91,6 @@ grid.hintFieldNames; // $ExpectType string
 grid.automaticClearUnselectableRecords; // $ExpectType boolean
 grid.viewMode; // $ExpectType number
 grid.classKeyToValidatePermission; // $ExpectType number | DBKey
-grid.selectedRecordsChanged; // $ExpectType boolean
 grid.edit(); // $ExpectType void
 grid.insert(); // $ExpectType void
 grid.del(true); // $ExpectType void
@@ -109,15 +107,12 @@ grid.persist(); // $ExpectType number
 grid.write(); // $ExpectType void
 grid.userKeyToValidatePermissions; // $ExpectType number
 grid.validateFieldPermissions; // $ExpectType boolean
-grid.scroll("action"); // $ExpectType void
-grid.duplicateRecord(); // $ExpectType void
 grid.lookup(gridField); // $ExpectType void
 grid.expand("nodeValue"); // $ExpectType void
-grid.colapse("nodeValue"); // $ExpectType void
 grid.toggleKeyVisibility(); // $ExpectType void
 grid.toggleFieldVisibility("field"); // $ExpectType void
 
 function getVersion(): string {
-    return "71.0.256";
+    return "81.0.1";
 }
 getVersion(); // $ExpectType string

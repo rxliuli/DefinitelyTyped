@@ -9,6 +9,8 @@ import {
     DefineAuthChallengeTriggerEvent,
     DefineAuthChallengeTriggerHandler,
     Handler,
+    InboundFederationTriggerEvent,
+    InboundFederationTriggerHandler,
     PostAuthenticationTriggerEvent,
     PostAuthenticationTriggerHandler,
     PostConfirmationTriggerEvent,
@@ -21,6 +23,8 @@ import {
     PreTokenGenerationTriggerHandler,
     PreTokenGenerationV2TriggerEvent,
     PreTokenGenerationV2TriggerHandler,
+    PreTokenGenerationV3TriggerEvent,
+    PreTokenGenerationV3TriggerHandler,
     UserMigrationTriggerEvent,
     UserMigrationTriggerHandler,
     VerifyAuthChallengeResponseTriggerEvent,
@@ -37,9 +41,11 @@ type CognitoTriggerEvent =
     | VerifyAuthChallengeResponseTriggerEvent
     | PreTokenGenerationTriggerEvent
     | PreTokenGenerationV2TriggerEvent
+    | PreTokenGenerationV3TriggerEvent
     | UserMigrationTriggerEvent
     | CustomMessageTriggerEvent
-    | CustomEmailSenderTriggerEvent;
+    | CustomEmailSenderTriggerEvent
+    | InboundFederationTriggerEvent;
 
 const baseTest: Handler<CognitoTriggerEvent> = async (event: CognitoTriggerEvent, _, callback) => {
     str = event.version;
@@ -273,6 +279,42 @@ const preTokenGenerationv2: PreTokenGenerationV2TriggerHandler = async (event, _
     objectOrUndefined = request.clientMetadata;
 };
 
+const preTokenGenerationv3: PreTokenGenerationV3TriggerHandler = async (event, _, callback) => {
+    const { request, response, triggerSource } = event;
+
+    obj = request.userAttributes;
+    str = request.userAttributes.email;
+    obj = request.groupConfiguration;
+    strArrayOrUndefined = request.groupConfiguration.groupsToOverride;
+    strArrayOrUndefined = request.groupConfiguration.iamRolesToOverride;
+    strOrUndefined = request.groupConfiguration.preferredRole;
+
+    strArrayOrUndefined = request.scopes;
+
+    obj = response.claimsAndScopeOverrideDetails;
+    objectOrUndefined = response.claimsAndScopeOverrideDetails.idTokenGeneration;
+    objectOrUndefined = response.claimsAndScopeOverrideDetails.accessTokenGeneration;
+
+    objectOrUndefined = response.claimsAndScopeOverrideDetails.idTokenGeneration;
+    objectOrUndefined = response.claimsAndScopeOverrideDetails.idTokenGeneration?.claimsToAddOrOverride;
+    strArrayOrUndefined = response.claimsAndScopeOverrideDetails.idTokenGeneration?.claimsToSuppress;
+
+    objectOrUndefined = response.claimsAndScopeOverrideDetails.accessTokenGeneration;
+    objectOrUndefined = response.claimsAndScopeOverrideDetails.accessTokenGeneration?.claimsToAddOrOverride;
+    strArrayOrUndefined = response.claimsAndScopeOverrideDetails.accessTokenGeneration?.claimsToSuppress;
+    strArrayOrUndefined = response.claimsAndScopeOverrideDetails.accessTokenGeneration?.scopesToAdd;
+    strArrayOrUndefined = response.claimsAndScopeOverrideDetails.accessTokenGeneration?.scopesToSuppress;
+
+    const groupOverrideDetails = response.claimsAndScopeOverrideDetails.groupOverrideDetails!;
+    strArrayOrUndefined = groupOverrideDetails.groupsToOverride;
+    strArrayOrUndefined = groupOverrideDetails.iamRolesToOverride;
+    strOrUndefined = groupOverrideDetails.preferredRole;
+
+    triggerSource === "TokenGeneration_ClientCredentials";
+
+    objectOrUndefined = request.clientMetadata;
+};
+
 const userMigration: UserMigrationTriggerHandler = async (event, _, callback) => {
     const { request, response, triggerSource } = event;
 
@@ -340,6 +382,7 @@ const customEmailSender: CustomEmailSenderTriggerHandler = async (event, _, call
     triggerSource === "CustomEmailSender_UpdateUserAttribute";
     triggerSource === "CustomEmailSender_ResendCode";
     triggerSource === "CustomEmailSender_SignUp";
+    triggerSource === "CustomEmailSender_Authentication";
     triggerSource === "CustomEmailSender_AccountTakeOverNotification";
 };
 
@@ -358,4 +401,31 @@ const customSmsSender: CustomSMSSenderTriggerHandler = async (event, _, callback
     triggerSource === "CustomSMSSender_ResendCode";
     triggerSource === "CustomSMSSender_SignUp";
     triggerSource === "CustomSMSSender_Authentication";
+};
+
+const inboundFederation: InboundFederationTriggerHandler = async (event, _, callback) => {
+    const { request, response, triggerSource } = event;
+
+    str = request.providerName;
+    str = request.providerType;
+    request.providerType === "OIDC";
+    request.providerType === "SAML";
+    request.providerType === "Facebook";
+    request.providerType === "Google";
+    request.providerType === "SignInWithApple";
+    request.providerType === "LoginWithAmazon";
+
+    objectOrUndefined = request.attributes.tokenResponse;
+    objectOrUndefined = request.attributes.idToken;
+    objectOrUndefined = request.attributes.userInfo;
+    objectOrUndefined = request.attributes.samlResponse;
+    strOrUndefined = request.attributes.idToken?.["email"];
+    strOrUndefined = request.attributes.samlResponse?.["given_name"];
+
+    obj = response.userAttributesToMap;
+    str = response.userAttributesToMap["email"];
+    response.userAttributesToMap = {};
+    response.userAttributesToMap = { email: "user@example.com", given_name: "Jane" };
+
+    triggerSource === "InboundFederation_ExternalProvider";
 };

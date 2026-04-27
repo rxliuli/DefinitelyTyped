@@ -15,6 +15,7 @@ const arb = new Arborist({
     progress: true,
     formatPackageLock: true,
 });
+new Arborist.Arborist();
 
 arb.loadActual().then(tree => {
     tree; // $ExpectType Node
@@ -52,6 +53,7 @@ arb.loadActual().then(tree => {
             edge.overrides.key; // $ExpectType string
         }
         edge.bundled;
+        edge.workspace;
         edge.prod;
         edge.dev;
         edge.optional;

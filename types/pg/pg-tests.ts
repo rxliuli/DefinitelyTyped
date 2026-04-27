@@ -1,6 +1,16 @@
 import { connect } from "net";
 import * as pg from "pg";
-import { Client, Connection, CustomTypesConfig, DatabaseError, defaults, Pool, QueryArrayConfig, types } from "pg";
+import {
+    Client,
+    Connection,
+    CustomTypesConfig,
+    DatabaseError,
+    defaults,
+    Pool,
+    QueryArrayConfig,
+    TypeOverrides as TypeOverridesNamed,
+    types,
+} from "pg";
 import TypeOverrides = require("pg/lib/type-overrides");
 import { NoticeMessage } from "pg-protocol/dist/messages.js";
 
@@ -37,19 +47,19 @@ const escapeIdentifier: (str: string) => string = pg.escapeIdentifier;
 const escapeLiteral: (str: string) => string = pg.escapeLiteral;
 
 client.on("notice", (notice: NoticeMessage) => console.warn(`${notice.severity}: ${notice.message}`));
-client.connect(err => {
+client.connect((err, c) => {
     if (err) {
         console.error("Could not connect to postgres", err);
         return;
     }
-    client.query("SELECT NOW() AS 'theTime'", (err, result) => {
+    c.query("SELECT NOW() AS 'theTime'", (err, result) => {
         if (err) {
             console.error("Error running query", err);
             return;
         }
         console.log(result.rowCount);
         console.log(result.rows[0]["theTime"]);
-        client.end();
+        c.end();
         return null;
     });
     return null;
@@ -58,7 +68,7 @@ client.on("end", () => console.log("Client was disconnected."));
 
 client
     .connect()
-    .then(() => console.log("connected"))
+    .then((c) => console.log("connected"))
     .catch(e => console.error("connection error", e.stack));
 
 client.query("SELECT NOW()", (err, res) => {
@@ -208,6 +218,15 @@ customTypeOverrides.setTypeParser(types.builtins.INT8, BigInt);
 const customCustomTypeOverrides = new TypeOverrides(customTypes);
 customTypeOverrides.setTypeParser(types.builtins.INT8, BigInt);
 
+const customTypeOverridesFromNamed = new TypeOverridesNamed();
+customTypeOverrides.setTypeParser(types.builtins.INT8, BigInt);
+
+client.connection.once("rowDescription", () => {
+    console.log("client connection rowDescription event");
+});
+// @ts-expect-error – connection is readonly
+client.connection = new Connection();
+
 // pg.Pool
 // https://node-postgres.com/apis/pool
 
@@ -293,6 +312,8 @@ pool.on("connect", (client) => {
     // $ExpectType PoolClient
     client;
 });
+// @ts-expect-error - test wrong number of arguments
+pool.on("connect", (error, client) => {});
 pool.on("acquire", (client) => {
     // $ExpectType PoolClient
     client;
@@ -304,10 +325,27 @@ pool.on("release", (err, client) => {
         console.error("connection released to pool: ", err.message);
     }
 });
+pool.on("release", (error) => {
+    // $ExpectType Error
+    error;
+});
 pool.on("remove", (client) => {
     // $ExpectType PoolClient
     client;
 });
+
+const listeners: {
+    [K in "error" | "release" | "connect" | "remove" | "acquire"]?: K extends "error" | "release"
+        ? (err: Error, client: pg.PoolClient) => void
+        : (client: pg.PoolClient) => void;
+} = {};
+
+for (const eventName in listeners) {
+    const listener = listeners[eventName as keyof typeof listeners];
+    if (listener) {
+        pool.on(eventName as keyof typeof listeners, listener);
+    }
+}
 
 (async () => {
     const client = await pool.connect();
@@ -394,3 +432,16 @@ const bindConfig = {
 
 const con = new Connection();
 con.bind(bindConfig, true);
+
+const poolWithOnConnect = new Pool({
+    onConnect: (client) => {
+        client.query("SELECT 1").then(result => {
+            console.log(result.rows[0].number);
+        });
+        console.log("onConnect callback is working!");
+    },
+});
+
+poolWithOnConnect.connect().then(client => {
+    console.log("client connected");
+});

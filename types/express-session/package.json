@@ -1,7 +1,7 @@
 {
     "private": true,
     "name": "@types/express-session",
-    "version": "1.18.9999",
+    "version": "1.19.9999",
     "projects": [
         "https://github.com/expressjs/session"
     ],
@@ -39,6 +39,10 @@
         {
             "name": "Ravi van Rooijen",
             "githubUsername": "HoldYourWaffle"
+        },
+        {
+            "name": "Sebastian Beltran",
+            "githubUsername": "bjohansebas"
         }
     ]
 }

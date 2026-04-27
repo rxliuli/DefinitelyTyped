@@ -1150,16 +1150,11 @@ declare namespace Xrm {
          * Gets an attribute matching attributeName.
          * @param T An Attribute type.
          * @param attributeNameOrIndex Name of the attribute.
-         * @returns The attribute.
-         */
-        getAttribute<T extends Attributes.Attribute>(attributeNameOrIndex: string | number): T | null;
-
-        /**
-         * Gets an attribute by name or index.
-         * @param attributeNameOrIndex Name of the attribute or the attribute index.
          * @returns The attribute or null if attribute does not exist.
          */
-        getAttribute(attributeNameOrIndex: string | number): Attributes.Attribute | null;
+        getAttribute<T extends Attributes.Attribute = Attributes.Attribute>(
+            attributeNameOrIndex: string | number,
+        ): T | null;
 
         /**
          * Gets a collection of attributes using a delegate function or gets all attributes if delegateFunction is not provided.
@@ -2611,9 +2606,14 @@ declare namespace Xrm {
             | StringAttributeFormat;
 
         /**
+         * Possible attribute values that can be set or retrieved from an attribute.
+         */
+        type AttributeValues = string | number | number[] | boolean | Date | LookupValue[] | OptionSetValue;
+
+        /**
          * Interface for an Entity attribute.
          */
-        interface Attribute<T = any> {
+        interface Attribute<T extends AttributeValues = AttributeValues> {
             /**
              * Adds a handler to be called when the attribute's value is changed.
              * @param handler The function reference.
@@ -3026,7 +3026,7 @@ declare namespace Xrm {
              * A collection of all the controls on the form that interface with this attribute.
              * @see {@link https://docs.microsoft.com/en-us/dynamics365/customer-engagement/developer/clientapi/reference/collections External Link: Collections (Client API reference)}
              */
-            controls: Collection.ItemCollection<Controls.OptionSetControl>;
+            controls: Collection.ItemCollection<Controls.MultiSelectOptionSetControl>;
         }
 
         /**
@@ -3896,7 +3896,7 @@ declare namespace Xrm {
          * @remarks     An Iframe control provides additional methods, so use {@link IframeControl} where
          *              appropriate.  Silverlight controls should use {@link SilverlightControl}.
          */
-        interface FramedControl extends Control {
+        interface FramedControl extends Control, UiCanSetVisibleElement {
             /**
              * Returns the content window that represents an IFRAME or web resource.
              * @returns A promise that contains a content window instance representing an IFRAME or web resource.
@@ -4709,7 +4709,7 @@ declare namespace Xrm {
              * Returns a collection of steps in the stage.
              * @returns An array of Step.
              */
-            getSteps(): Step[];
+            getSteps(): Xrm.Collection.ItemCollection<Step>;
         }
 
         interface Step {
@@ -5336,7 +5336,7 @@ declare namespace Xrm {
             /**
              * The error code. If you just set errorCode, the message for the error code is automatically
              * retrieved from the server and displayed in the error dialog.
-             * If you specify an invalid errorCode value, an error dialog with a default error message is displyed.
+             * If you specify an invalid errorCode value, an error dialog with a default error message is displayed.
              */
             errorCode?: number | undefined;
             /**

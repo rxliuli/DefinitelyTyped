@@ -3,8 +3,65 @@ import { Batch } from "@mparticle/event-models";
 // Placeholder for Dictionary-like Types
 export type Dictionary<V = any> = Record<string, V>;
 
+// Rokt Manager Types
+export type RoktAttributeValueArray = Array<string | number | boolean>;
+export type RoktAttributeValueType = string | number | boolean | undefined | null;
+export type RoktAttributeValue = RoktAttributeValueType | RoktAttributeValueArray;
+export type RoktAttributes = Record<string, RoktAttributeValue>;
+
+export interface RoktPartnerExtensionData<T> {
+    [extensionName: string]: T;
+}
+
+export interface RoktSelectPlacementsOptions {
+    attributes: RoktAttributes;
+    identifier?: string;
+}
+
+export interface RoktPlacementEvent<T = void> {
+    body: T;
+    event: string;
+    placement: RoktPlacement;
+}
+
+export interface RoktSubscriber<T> {
+    subscribe(handler: (value: T) => void): RoktUnsubscriber;
+}
+
+export interface RoktUnsubscriber {
+    unsubscribe(): void;
+}
+
+export interface RoktPlacement {
+    id: string;
+    element: HTMLIFrameElement;
+    close(): Promise<void>;
+    on(event: string): RoktSubscriber<RoktPlacementEvent<unknown>>;
+    ready(): Promise<void>;
+    send(event: string, data?: unknown): Promise<void>;
+    onClose(): Promise<void>;
+}
+
+export interface RoktSelection {
+    close(): Promise<void>;
+    getPlacements(): Promise<Array<RoktPlacement>>;
+    on(eventName: string): RoktSubscriber<RoktPlacementEvent<unknown>>;
+    ready(): Promise<void>;
+    send(event: string, data?: unknown): Promise<void>;
+    setAttributes(attributes: RoktAttributes): Promise<void>;
+}
+
 export as namespace mParticle;
 export {};
+
+export interface LauncherOptions {
+    noTargeting?: boolean | undefined;
+    noFunctional?: boolean | undefined;
+    [key: string]: unknown;
+}
+
+export type AliasRequestScope = "device" | "mpid";
+
 export interface MPConfiguration {
     isDevelopmentMode?: boolean | undefined;
     identifyRequest?: IdentifyRequest | undefined;
@@ -41,9 +98,52 @@ export interface MPConfiguration {
      * @warning only change minWebviewBridgeVersion if you are absolutely sure you know what you are doing
      */
     minWebviewBridgeVersion?: 1 | 2 | undefined;
+    // Additional configuration options
+    aliasMaxWindow?: number | undefined;
+    forceHttps?: boolean | undefined;
+    integrationDelayTimeout?: number | undefined;
+    isIOS?: boolean | undefined;
+    maxProducts?: number | undefined;
+    requestConfig?: boolean | undefined;
+    useNativeSdk?: boolean | undefined;
+    domain?: string | undefined;
+    userAudienceUrl?: string | undefined;
+    flags?: Dictionary | undefined;
+    launcherOptions?: LauncherOptions | undefined;
+    RoktExtensions?: Array<string> | undefined;
 }
 
 export type MPForwarder = Dictionary;
+
+export interface KitFilterSettings {
+    eventTypeFilters: number[];
+    eventNameFilters: number[];
+    screenNameFilters: number[];
+    screenAttributeFilters: number[];
+    userIdentityFilters: number[];
+    userAttributeFilters: number[];
+    attributeFilters: number[];
+    consentRegulationFilters: number[];
+    consentRegulationPurposeFilters: number[];
+    messageTypeFilters: number[];
+    messageTypeStateFilters: number[];
+    filteringEventAttributeValue: Record<string, unknown>;
+    filteringUserAttributeValue: Record<string, unknown>;
+    filteringConsentRuleValues: Record<string, unknown>;
+}
+
+export class MPSideloadedKit {
+    constructor(kitInstance: MPForwarder);
+    kitInstance: MPForwarder;
+    filterDictionary: KitFilterSettings;
+    addEventTypeFilter(eventType: EventType): void;
+    addEventNameFilter(eventType: EventType, eventName: string): void;
+    addEventAttributeFilter(eventType: EventType, eventName: string, customAttributeKey: string): void;
+    addScreenNameFilter(screenName: string): void;
+    addScreenAttributeFilter(screenName: string, screenAttribute: string): void;
+    addUserIdentityFilter(userIdentity: IdentityType): void;
+    addUserAttributeFilter(userAttributeKey: string): void;
+}
 
 export interface Logger {
     error?: ((error: string) => void) | undefined;
@@ -55,7 +155,8 @@ export interface SDKEventCustomFlags {
 }
 
 export interface SDKEventOptions {
-    shouldUploadEvent: boolean;
+    shouldUploadEvent?: boolean;
+    sourceMessageId?: string;
 }
 
 export interface DataPlanConfig {
@@ -167,32 +268,36 @@ interface Upload {
     (): void;
 }
 
+interface GenerateHash {
+    (value: string): string;
+}
+
 interface CreateConsentState {
     (): ConsentState;
 }
 interface CreateGDPRConsent {
     (
         consented: boolean,
-        timestamp: number,
-        consentDocument: string,
-        location: string,
-        hardwareId: string,
+        timestamp?: number,
+        consentDocument?: string,
+        location?: string,
+        hardwareId?: string,
     ): PrivacyConsentState;
 }
 interface CreateCCPAConsent {
     (
         consented: boolean,
-        timestamp: number,
-        consentDocument: string,
-        location: string,
-        hardwareId: string,
+        timestamp?: number,
+        consentDocument?: string,
+        location?: string,
+        hardwareId?: string,
     ): PrivacyConsentState;
 }
 interface AliasUsers {
     (aliasRequest: UserAliasRequest, callback?: AliasUsersCallback): void;
 }
 interface CreateAliasRequest {
-    (sourceUser: User, destinationUser: User): UserAliasRequest;
+    (sourceUser: User, destinationUser: User, scope?: AliasRequestScope): UserAliasRequest;
 }
 
 interface GetCurrentUser {
@@ -309,6 +414,27 @@ interface GetSession {
     (): string;
 }
 
+// Rokt Manager Method Interfaces
+interface SelectPlacements {
+    (options: RoktSelectPlacementsOptions): Promise<RoktSelection>;
+}
+
+interface Use {
+    (name: string): Promise<unknown>;
+}
+
+interface HashAttributes {
+    (attributes: RoktAttributes): Promise<Record<string, string>>;
+}
+
+interface HashSha256 {
+    (attribute: RoktAttributeValueType): Promise<string | undefined | null>;
+}
+
+interface SetExtensionData {
+    (extensionData: RoktPartnerExtensionData<unknown>): void;
+}
+
 export const endSession: EndSession;
 export const getAppName: GetAppName;
 export const getAppVersion: GetAppVersion;
@@ -317,6 +443,7 @@ export const setDeviceId: SetDeviceId;
 export const getEnvironment: GetEnvironment;
 export function getInstance(instanceName?: string): mParticleInstance;
 export const getVersion: GetVersion;
+export const generateHash: GenerateHash;
 /**
  * @warning You should only use mParticle.init if you are in a self-hosted environment. https://docs.mparticle.com/developers/sdk/web/self-hosting/
  */
@@ -349,7 +476,6 @@ export const upload: Upload;
 // Future optional changes once we migrate all core SDK files to TS. These are used internally only and should not be used by consumers of mParticle
 // export function addForwarder
 // export function configurePixel
-// export function generateHash
 // export function _setIntegrationDelay
 // export function _getIntegrationDelay
 
@@ -371,6 +497,10 @@ export interface ConsentState {
     getCCPAConsentState: () => CCPAConsentState;
     removeGDPRConsentState: (purpose: string) => ConsentState;
     removeCCPAConsentState: () => ConsentState;
+    /**
+     * @deprecated Use removeCCPAConsentState instead
+     */
+    removeCCPAState?: () => ConsentState;
 }
 
 export interface GDPRConsentState {
@@ -378,10 +508,10 @@ export interface GDPRConsentState {
 }
 export interface PrivacyConsentState {
     Consented: boolean;
-    Timestamp: number;
-    ConsentDocument: string;
-    Location: string;
-    HardwareId: string;
+    Timestamp?: number;
+    ConsentDocument?: string;
+    Location?: string;
+    HardwareId?: string;
 }
 export type CCPAConsentState = PrivacyConsentState;
 
@@ -467,8 +597,8 @@ export enum ProductActionType {
 
 export enum PromotionType {
     Unknown = 0,
-    PromotionClick = 1,
-    PromotionView = 2,
+    PromotionView = 1,
+    PromotionClick = 2,
 }
 
 export namespace eCommerce {
@@ -489,6 +619,14 @@ export namespace eCommerce {
     // expandCommerceEvent function for internal use
 
     const Cart: Cart;
+}
+
+export namespace Rokt {
+    const selectPlacements: SelectPlacements;
+    const hashAttributes: HashAttributes;
+    const hashSha256: HashSha256;
+    const setExtensionData: SetExtensionData;
+    const use: Use;
 }
 
 export interface IdentifyRequest {
@@ -517,6 +655,7 @@ export interface User {
     isLoggedIn: () => boolean;
     getLastSeenTime: () => number;
     getFirstSeenTime: () => number;
+    getUserAudiences?: (callback?: IdentityCallback) => void;
 }
 export type UserAttributesValue = string | number | boolean | null;
 export type AllUserAttributes = Record<string, UserAttributesValue | UserAttributesValue[]>;
@@ -557,6 +696,10 @@ interface Cart {
      * @deprecated Cart persistence in mParticle has been deprecated.
      */
     clear: () => void;
+    /**
+     * @deprecated Cart Products have been deprecated
+     */
+    getCartProducts?: () => Product[];
 }
 
 export interface Product {
@@ -596,6 +739,8 @@ export interface Promotion {
 export interface IdentityApiData {
     userIdentities: UserIdentities;
 }
+
+export type IdentityApiMethods = "identify" | "login" | "logout" | "modify";
 
 export interface Callback {
     (): void;
@@ -648,7 +793,7 @@ export interface IdentityResult {
     httpCode: any;
     getPreviousUser(): User;
     getUser(): User;
-    body: IdentityResultBody;
+    body: IdentityResultBody | IdentityModifyResultBody;
 }
 
 export interface IdentityResultBody {
@@ -657,6 +802,14 @@ export interface IdentityResultBody {
     is_logged_in: boolean;
     // matched_identities should be UserIdentities + mpid, for not keep as object
     matched_identities: Record<string, unknown>;
+    mpid?: MPID;
+}
+
+export interface IdentityModifyResultBody {
+    change_results?: {
+        identity_type: string;
+        modified_mpid: MPID;
+    };
 }
 
 export interface UserAliasRequest {
@@ -664,7 +817,7 @@ export interface UserAliasRequest {
     sourceMpid: string;
     startTime: number;
     endTime: number;
-    scope?: string;
+    scope?: AliasRequestScope;
 }
 
 export interface AliasUsersCallback {
@@ -681,6 +834,7 @@ declare class mParticleInstance {
     setDeviceId: SetDeviceId;
     getEnvironment: GetEnvironment;
     getVersion: GetVersion;
+    generateHash: GenerateHash;
     init: Init;
     isInitialized: IsInitialized;
     logBaseEvent: LogBaseEvent;
@@ -709,7 +863,6 @@ declare class mParticleInstance {
     // Future optional changes once we migrate all core SDK files to TS. These are used internally only and should not be used by consumers of mParticle
     // export function addForwarder
     // export function configurePixel
-    // export function generateHash
     // export function _setIntegrationDelay
     // export function _getIntegrationDelay
 
@@ -744,10 +897,18 @@ declare class mParticleInstance {
         setCurrencyCode: SetCurrencyCode;
         Cart: Cart;
     };
+    Rokt: {
+        selectPlacements: SelectPlacements;
+        hashAttributes: HashAttributes;
+        hashSha256: HashSha256;
+        setExtensionData: SetExtensionData;
+        use: Use;
+    };
+    MPSideloadedKit: typeof MPSideloadedKit;
     PromotionType: {
         Unknown: PromotionType.Unknown;
-        PromotionClick: PromotionType.PromotionClick;
         PromotionView: PromotionType.PromotionView;
+        PromotionClick: PromotionType.PromotionClick;
     };
     ProductActionType: {
         Unknown: ProductActionType.Unknown;

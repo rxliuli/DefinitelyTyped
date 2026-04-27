@@ -1,28 +1,41 @@
-/// <reference lib="es5" />
+/// <reference lib="es6" />
 /// <reference lib="dom" />
-import { ComponentConstructorOptions, SvelteComponent } from "svelte";
+import type { Component } from "svelte";
 
-export default Calendar;
+export function createCalendar(
+    target: Element | Document | ShadowRoot,
+    plugins?: Calendar.Plugin[],
+    options?: Calendar.Options,
+): Calendar;
+export function destroyCalendar(calendar: Calendar): Promise<void>;
 
-declare class Calendar extends SvelteComponent<Calendar.ComponentProps> {
-    constructor(options: ComponentConstructorOptions<Calendar.ComponentProps>);
-    getOption<K extends keyof Calendar.Options>(option: K): Calendar.Options[K];
-    setOption<K extends keyof Calendar.Options>(option: K, value: Calendar.Options[K]): Calendar;
+export const DayGrid: Calendar.Plugin;
+export const Interaction: Calendar.Plugin;
+export const List: Calendar.Plugin;
+export const ResourceTimeGrid: Calendar.Plugin;
+export const ResourceTimeline: Calendar.Plugin;
+export const TimeGrid: Calendar.Plugin;
+
+export const Calendar: Component<{ plugins?: Calendar.Plugin[]; options?: Calendar.Options }>;
+
+export interface Calendar {
+    getOption<K extends keyof Calendar.Options>(name: K): Calendar.Options[K];
+    setOption<K extends keyof Calendar.Options>(name: K, value: Calendar.Options[K]): Calendar;
     addEvent(event: Calendar.Event | Calendar.EventInput): Calendar.Event | null;
     getEventById(id: number | string): Calendar.Event | null;
     getEvents(): Calendar.Event[];
     removeEventById(id: number | string): Calendar;
     updateEvent(event: Calendar.Event | Calendar.EventInput): Calendar;
     refetchEvents(): Calendar;
-    dateFromPoint(clientX: number, clientY: number): Calendar.DateClickInfo | null;
-    destroy(): undefined;
+    refetchResources(): Calendar;
+    dateFromPoint(x: number, y: number): Calendar.DateClickInfo | null;
     getView(): Calendar.View;
     next(): Calendar;
     prev(): Calendar;
     unselect(): Calendar;
 }
 
-declare namespace Calendar {
+export namespace Calendar {
     type Plugin = object;
 
     type DomEvent = GlobalEventHandlersEventMap[keyof GlobalEventHandlersEventMap];
@@ -43,6 +56,14 @@ declare namespace Calendar {
         active?: boolean;
     }
 
+    interface CustomButtons {
+        [key: string]: CustomButton;
+    }
+
+    interface Icons {
+        [key: string]: Content;
+    }
+
     interface View {
         type: string;
         title: string;
@@ -57,6 +78,7 @@ declare namespace Calendar {
         title?: Content;
         eventBackgroundColor?: string;
         eventTextColor?: string;
+        expanded?: boolean;
         extendedProps?: Record<string, unknown>;
         children?: ResourceInput[];
     }
@@ -66,6 +88,7 @@ declare namespace Calendar {
         title: Content;
         eventBackgroundColor: string | undefined;
         eventTextColor: string | undefined;
+        expanded: boolean;
         extendedProps: Record<string, unknown>;
     }
 
@@ -108,6 +131,13 @@ declare namespace Calendar {
         startStr: string;
         endStr: string;
         view: View;
+    }
+
+    interface DayCellContentArg {
+        allDay: boolean;
+        date: Date;
+        isToday: boolean;
+        resource: Resource;
     }
 
     interface EventClassNamesInfo {
@@ -158,6 +188,19 @@ declare namespace Calendar {
         view: View;
     }
 
+    interface EventFilterInfo {
+        event: Event;
+        index: number;
+        events: Event[];
+        view: View;
+    }
+
+    interface EventOrderInfo {
+        start: Date;
+        end: Date;
+        event: Event;
+    }
+
     interface EventResizeInfo {
         event: Event;
         oldEvent: Event;
@@ -195,6 +238,12 @@ declare namespace Calendar {
         view: View;
     }
 
+    interface ResourceExpandInfo {
+        resource: Resource;
+        jsEvent: DomEvent;
+        view: View;
+    }
+
     interface ResourceLabelInfo {
         resource: Resource;
         date: Date;
@@ -213,6 +262,7 @@ declare namespace Calendar {
 
     interface EventInput {
         id?: number | string;
+        allDay?: boolean;
         start: Date | isoDateTimeString;
         end: Date | isoDateTimeString;
         title?: Content;
@@ -271,6 +321,7 @@ declare namespace Calendar {
         events: EventSourceFunc | EventSourceFuncPromise;
     };
 
+    type cssLength = string;
     type dayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
     type isoDateString = string;
     type isoDateTimeString = string;
@@ -279,17 +330,22 @@ declare namespace Calendar {
         allDayContent?: Content;
         allDaySlot?: boolean;
         buttonText?: ButtonTextMapping | ((text: ButtonTextMapping) => ButtonTextMapping);
-        customButtons?: Record<string, CustomButton>;
+        columnWidth?: cssLength;
+        customButtons?: CustomButtons | ((customButtons: CustomButtons) => CustomButtons);
+        customScrollbars?: boolean;
         date?: Date | string | undefined;
         dateClick?: (info: DateClickInfo) => void;
+        dateIncrement?: DurationInput;
         datesAboveResources?: boolean;
         datesSet?: (info: DatesSetInfo) => void;
+        dayCellContent?: Content | ((arg: DayCellContentArg) => Content);
         dayCellFormat?: Intl.DateTimeFormatOptions | ((d: Date) => Content);
         dayHeaderAriaLabelFormat?: Intl.DateTimeFormatOptions | ((d: Date) => Content);
         dayHeaderFormat?: Intl.DateTimeFormatOptions | ((d: Date) => Content);
         dayMaxEvents?: boolean;
         dayPopoverFormat?: Intl.DateTimeFormatOptions | ((d: Date) => Content);
         displayEventEnd?: boolean;
+        dragConstraint?: (info: EventDropInfo) => boolean;
         dragScroll?: boolean;
         duration?: DurationInput;
         editable?: boolean;
@@ -306,9 +362,12 @@ declare namespace Calendar {
         eventDragStop?: (info: EventDragInfo) => void;
         eventDrop?: (info: EventDropInfo) => void;
         eventDurationEditable?: boolean;
+        eventFilter?: (info: EventFilterInfo) => boolean;
         eventLongPressDelay?: number;
         eventMouseEnter?: (info: MouseEnterInfo) => void;
         eventMouseLeave?: (info: MouseEnterInfo) => void;
+        eventOrder?: (a: EventOrderInfo, b: EventOrderInfo) => number;
+        eventResizableFromStart?: boolean;
         eventResize?: (info: EventResizeInfo) => void;
         eventResizeStart?: (info: EventDuringResizeInfo) => void;
         eventResizeStop?: (info: EventDuringResizeInfo) => void;
@@ -328,22 +387,28 @@ declare namespace Calendar {
         height?: string;
         hiddenDays?: dayOfWeek[];
         highlightedDates?: Array<isoDateString | Date>;
+        icons?: Icons | ((icons: Icons) => Icons);
         lazyFetching?: boolean;
         listDayFormat?: Intl.DateTimeFormatOptions | ((d: Date) => Content);
         listDaySideFormat?: Intl.DateTimeFormatOptions | ((d: Date) => Content);
         loading?: (isLoading: boolean) => void;
         locale?: string;
         longPressDelay?: number;
+        monthHeaderFormat?: Intl.DateTimeFormatOptions | ((date: Date) => Content);
         moreLinkContent?: Content | ((info: MoreLinkInfo) => Content);
         noEventsClick?: (info: NoEventsClickInfo) => void;
         noEventsContent?: Content | (() => Content);
         nowIndicator?: boolean;
         pointer?: boolean;
+        refetchResourcesOnNavigate?: boolean;
+        resizeConstraint?: (info: EventResizeInfo) => boolean;
+        resourceExpand?: (info: ResourceExpandInfo) => void;
         resources?: ResourceInput[];
         resourceLabelContent?: Content | ((info: ResourceLabelInfo) => Content);
         resourceLabelDidMount?: (info: ResourceDidMountInfo) => void;
         select?: (info: SelectInfo) => void;
         selectable?: boolean;
+        selectConstraint?: (info: SelectInfo) => boolean;
         selectBackgroundColor?: string;
         selectLongPressDelay?: number;
         selectMinDistance?: number;
@@ -352,14 +417,17 @@ declare namespace Calendar {
         slotEventOverlap?: boolean;
         slotHeight?: number;
         slotLabelFormat?: Intl.DateTimeFormatOptions | ((time: Date) => Content);
+        slotLabelInterval?: DurationInput;
         slotMaxTime?: DurationInput;
         slotMinTime?: DurationInput;
         slotWidth?: number;
+        snapDuration?: DurationInput;
         theme?: Theme | ((theme: Theme) => Theme);
         titleFormat?: Intl.DateTimeFormatOptions | ((start: Date, end: Date) => Content);
         unselect?: (info: UnselectInfo) => void;
         unselectAuto?: boolean;
         unselectCancel?: string;
+        validRange?: { start?: Date | isoDateString; end?: Date | isoDateString };
         view?: string;
         viewDidMount?: (info: { view: View }) => void;
         views?: Record<string, Options>;

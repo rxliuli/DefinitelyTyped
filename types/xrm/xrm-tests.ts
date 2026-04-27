@@ -205,6 +205,9 @@ if (multiSelectOptionSetAttributeEnum !== null) {
     const multiSelectOptionEnumValue: TestMultiSelectOptionSet[] | null = multiSelectOptionSetAttributeEnum.getValue();
 }
 
+// Demonstrate that controls on a MultiSelectOptionSetAttribute are typed as MultiSelectOptionSetControl
+multiSelectOptionSetAttribute?.controls; // $ExpectType ItemCollection<MultiSelectOptionSetControl> | undefined
+
 /// Demonstrate setFormNotification
 
 let level: Xrm.FormNotificationLevel;
@@ -759,6 +762,14 @@ function GetAll(context: Xrm.FormContext) {
     }
 }
 
+function getPossibleAttributeValues(formContext: Xrm.FormContext) {
+    const attribute = formContext.getAttribute("statuscode");
+    if (attribute === null) {
+        throw new Error("Attribute does not exist!");
+    }
+    // $ExpectType AttributeValues | null
+    const values = attribute.getValue();
+}
 function testAttributeType(formContext: Xrm.FormContext) {
     const attribute = formContext.getAttribute<Xrm.Attributes.StringAttribute>("myattribute");
     if (attribute === null) {
@@ -769,3 +780,22 @@ function testAttributeType(formContext: Xrm.FormContext) {
     const isNumberAttribute = attributeType === "number"; // This errors because the attribute is a StringAttribute, not a NumberAttribute
     const isStringAttribute = attributeType === "string"; // This works because the attribute is a StringAttribute
 }
+
+// Demonstrate getSteps from active stage returns collection of steps
+function getStepsFromActiveStage(formContext: Xrm.FormContext) {
+    const process = formContext.data.process;
+
+    // $ExpectType ItemCollection<Step>
+    const steps = process.getActiveStage().getSteps();
+}
+
+// Demonstrate set visibility for framed control (webresource)
+const framedControlSetVisible = (formContext: Xrm.FormContext) => {
+    const framedControl = formContext.getControl<Xrm.Controls.FramedControl>("myWebResource");
+    if (framedControl === null) {
+        return;
+    }
+
+    // setVisible
+    framedControl.setVisible(true);
+};

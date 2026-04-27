@@ -16,10 +16,10 @@ Definitely Typed 最近已转为正确的 `pnpm` monorepo(包含多项目或模�
 
 此章节跟踪了当前仓库及发布流程的健康状况。如果贡献者的 PR 和软件包遇到任何问题，此处的内容可能有帮助。
 
-- 最新构建全部通过[类型检查/Lint](https://github.com/microsoft/DefinitelyTyped-tools/tree/master/packages/dtslint)：[![构建状态](https://dev.azure.com/definitelytyped/DefinitelyTyped/_apis/build/status/DefinitelyTyped.DefinitelyTyped?branchName=master)](https://dev.azure.com/definitelytyped/DefinitelyTyped/_build/latest?definitionId=1&branchName=master)
-- 所有软件包在 typescript@next 版本中全部通过类型检查/Lint：[![构建状态](https://dev.azure.com/definitelytyped/DefinitelyTyped/_apis/build/status/Nightly%20dtslint)](https://dev.azure.com/definitelytyped/DefinitelyTyped/_build/latest?definitionId=8)
-- 所有软件包都在一个半小时内[发布至 npm](https://github.com/microsoft/DefinitelyTyped-tools/tree/master/packages/publisher): [![发布状态](https://dev.azure.com/definitelytyped/DefinitelyTyped/_apis/build/status/DefinitelyTyped.types-publisher-watchdog?branchName=master)](https://dev.azure.com/definitelytyped/DefinitelyTyped/_build/latest?definitionId=5&branchName=master)
-- [typescript-bot](https://github.com/typescript-bot) 在 Definitely Typed 上处于活动状态：[![活动状态](https://dev.azure.com/definitelytyped/DefinitelyTyped/_apis/build/status/DefinitelyTyped.typescript-bot-watchdog?branchName=master)](https://dev.azure.com/definitelytyped/DefinitelyTyped/_build/latest?definitionId=6&branchName=master)
+- 最新构建全部通过[类型检查/Lint](https://github.com/microsoft/DefinitelyTyped-tools/tree/master/packages/dtslint)： [![Build status](https://github.com/DefinitelyTyped/DefinitelyTyped/actions/workflows/CI.yml/badge.svg?branch=master&event=push)](https://github.com/DefinitelyTyped/DefinitelyTyped/actions/workflows/CI.yml?query=branch%3Amaster+event%3Apush)
+- 所有软件包在 typescript@next 版本中全部通过类型检查/Lint： [![Build status](https://github.com/DefinitelyTyped/DefinitelyTyped/actions/workflows/CI.yml/badge.svg?branch=master&event=schedule)](https://github.com/DefinitelyTyped/DefinitelyTyped/actions/workflows/CI.yml?query=branch%3Amaster+event%3Aschedule)
+- 所有软件包都在一个半小时内[发布至 npm](https://github.com/microsoft/DefinitelyTyped-tools/tree/master/packages/publisher): [![Publish Status](https://github.com/DefinitelyTyped/DefinitelyTyped/actions/workflows/watchdog-publisher.yml/badge.svg)](https://github.com/DefinitelyTyped/DefinitelyTyped/actions/workflows/watchdog-publisher.yml)
+- [typescript-bot](https://github.com/typescript-bot) 在 Definitely Typed 上处于活动状态： [![Activity Status](https://github.com/DefinitelyTyped/DefinitelyTyped/actions/workflows/watchdog-typescript-bot.yml/badge.svg)](https://github.com/DefinitelyTyped/DefinitelyTyped/actions/workflows/watchdog-typescript-bot.yml)
 - [基础设施更新现状](https://github.com/DefinitelyTyped/DefinitelyTyped/issues/44317)
 
 如果此处有任何错误或上述任何操作失败，请在 [TypeScript 社群 Discord 服务器中的 Definitely Typed 频道](https://discord.gg/typescript)提出。
@@ -105,7 +105,7 @@ declare module "libname" {
 
 你可直接编辑 `node_modules/@types/foo/index.d.ts` 来验证你的修改。接着，请使用下文所述的步骤将这些修改加入本仓库。
 
-你亦可以使用[模块扩充（Module Argumentation）](https://www.typescriptlang.org/docs/handbook/declaration-merging.html#module-augmentation)来向 Definitely Typed 模块中添加类型，或使用上文所示的 `declare module` 方法来覆盖 `node_modules` 中的版本。
+你亦可以使用[模块扩充（Module Augmentation](https://www.typescriptlang.org/docs/handbook/declaration-merging.html#module-augmentation)来向 Definitely Typed 模块中添加类型，或使用上文所示的 `declare module` 方法来覆盖 `node_modules` 中的版本。
 
 #### 为新增的软件包添加测试
 

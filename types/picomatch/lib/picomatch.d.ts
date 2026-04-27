@@ -69,10 +69,6 @@ declare namespace picomatch {
          */
         contains?: boolean | undefined;
         /**
-         * Current working directory. Used by `picomatch.split()`
-         */
-        cwd?: string | undefined;
-        /**
          * Debug regular expressions when an error is thrown.
          */
         debug?: boolean | undefined;
@@ -87,10 +83,6 @@ declare namespace picomatch {
          */
         expandRange?(from: string, to: string, options: PicomatchOptions): string;
         expandRange?(from: string, to: string, step: string, options: PicomatchOptions): string;
-        /**
-         * Throws an error if no matches are found. Based on the bash option of the same name.
-         */
-        failglob?: boolean | undefined;
         /**
          * To speed up processing, full parsing is skipped for a handful common glob patterns. Disable this behavior by setting this option to `false`.
          */
@@ -116,10 +108,6 @@ declare namespace picomatch {
          */
         literalBrackets?: boolean | undefined;
         /**
-         * Support regex positive and negative lookbehinds. Note that you must be using Node 8.1.10 or higher to enable regex lookbehinds.
-         */
-        lookbehinds?: boolean | undefined;
-        /**
          * Alias for `basename`
          */
         matchBase?: boolean | undefined;
@@ -132,19 +120,13 @@ declare namespace picomatch {
          */
         nobrace?: boolean | undefined;
         /**
-         * Disable brace matching, so that `{a,b}` and `{1..3}` would be treated as literal characters.
+         * Disable matching with regex brackets.
          */
         nobracket?: boolean | undefined;
         /**
          * Make matching case-insensitive. Equivalent to the regex `i` flag. Note that this option is overridden by the `flags` option.
          */
         nocase?: boolean | undefined;
-        /**
-         * @deprecated use `nounique` instead.
-         * This option will be removed in a future major release. By default duplicates are removed.
-         * Disable uniquification by setting this option to false.
-         */
-        nodupes?: boolean | undefined;
         /**
          * Alias for `noextglob`
          */
@@ -162,10 +144,6 @@ declare namespace picomatch {
          */
         nonegate?: boolean | undefined;
         /**
-         * Disable support for regex quantifiers (like `a{1,2}`) and treat them as brace patterns to be expanded.
-         */
-        noquantifiers?: boolean | undefined;
-        /**
          * Function to be called on ignored items.
          */
         onIgnore?: ((result: Result) => void) | undefined;
@@ -182,11 +160,7 @@ declare namespace picomatch {
          */
         posix?: boolean | undefined;
         /**
-         * Convert all slashes in file paths to forward slashes. This does not convert slashes in the glob pattern itself
-         */
-        posixSlashes?: boolean | undefined;
-        /**
-         * Convert all slashes in file paths to forward slashes. This does not convert slashes in the glob pattern itself
+         * String to prepend to the generated regex used for matching.
          */
         prepend?: boolean | undefined;
         /**

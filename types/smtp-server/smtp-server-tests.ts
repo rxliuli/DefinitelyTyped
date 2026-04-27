@@ -179,3 +179,28 @@ function test_with_handlers_in_subclass() {
         console.log("Server closed");
     });
 }
+
+function test_newly_added_options() {
+    const smtpServerInstance = new SMTPServer({
+        hideSize: false,
+        size: 1024,
+        hideENHANCEDSTATUSCODES: false,
+        onSecure(socket, session, callback) {
+            callback();
+        },
+    });
+}
+
+function test_hideDSN_option() {
+    const smtpServerInstance = new SMTPServer({
+        hideDSN: true,
+    });
+}
+
+function test_onData_with_message() {
+    const smtpServerInstance = new SMTPServer({
+        onData(stream, session, callback) {
+            callback(null, "Message queued");
+        },
+    });
+}

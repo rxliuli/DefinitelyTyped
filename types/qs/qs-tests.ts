@@ -406,9 +406,58 @@ qs.parse("a=b&c=d", { delimiter: "&" });
 (() => {
     try {
         qs.parse("a[b][c][d][e][f][g][h][i]=j", { depth: 1, strictDepth: true });
-    } catch (err) {
+    } catch (err: any) {
         assert.strictEqual(err.message, "Input depth exceeded depth option of 1 and strictDepth is true");
     }
+});
+
+(() => {
+    assert.deepEqual(qs.parse("a=1&b=2&c=3", { parameterLimit: 5, throwOnLimitExceeded: true }), {
+        a: "1",
+        b: "2",
+        c: "3",
+    });
+});
+
+(() => {
+    assert.throws(
+        () => qs.parse("a=1&b=2&c=3", { parameterLimit: 2, throwOnLimitExceeded: true }),
+        RangeError,
+    );
+});
+
+(() => {
+    assert.deepEqual(
+        qs.parse("a[b]=c&a=d", { strictMerge: false }),
+        { a: { b: "c", d: true } },
+    );
+
+    assert.deepEqual(
+        qs.parse("a[b]=c&a=toString", { strictMerge: false }),
+        { a: { b: "c" } },
+    );
+
+    assert.deepEqual(
+        qs.parse("a[b]=c&a=toString", { strictMerge: false, allowPrototypes: true }),
+        { a: { b: "c", toString: true } },
+    );
+});
+
+(() => {
+    assert.deepEqual(
+        qs.parse("a[b]=c&a=d"),
+        { a: [{ b: "c" }, "d"] },
+    );
+
+    assert.deepEqual(
+        qs.parse("a=d&a[b]=c"),
+        { a: ["d", { b: "c" }] },
+    );
+
+    assert.deepEqual(
+        qs.parse("a[b]=c&a=toString"),
+        { a: [{ b: "c" }, "toString"] },
+    );
 });
 
 declare const myQuery: { a: string; b?: string | undefined };

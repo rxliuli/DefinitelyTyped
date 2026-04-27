@@ -1,4 +1,3 @@
-export type exports = number;
-declare let DDD: number;
-declare let DDD_DD: number;
-export {};
+export const DDD = -1892603107;
+export const DDD_DD = -1892603106;
+export type AngleFormatType = typeof DDD | typeof DDD_DD;

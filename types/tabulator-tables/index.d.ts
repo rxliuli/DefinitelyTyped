@@ -206,7 +206,7 @@ export interface OptionsPagination {
     paginationMode?: SortMode;
 
     /** Set the number of rows in each page. */
-    paginationSize?: number | undefined;
+    paginationSize?: number | true | undefined;
 
     /**
      * Setting this option to true will cause Tabulator to create a list of page size options, that are multiples of the current page size. In the example below, the list will have the values of 5, 10, 15 and 20.
@@ -719,8 +719,8 @@ export interface OptionsColumns {
     /** If you set the autoColumns option to true, every time data is loaded into the table through the data option or through the setData function, Tabulator will examine the first row of the data and build columns to match that data. */
     autoColumns?: boolean | undefined | "full";
     autoColumnsDefinitions?:
-        | ((columnDefinitions?: ColumnDefinition[]) => ColumnDefinition[])
-        | ColumnDefinition[]
+        | ((columnDefinitions?: ColumnDefinition[]) => Partial<ColumnDefinition>[])
+        | Partial<ColumnDefinition>[]
         | Record<string, Partial<ColumnDefinition>>
         | undefined;
 
@@ -843,7 +843,7 @@ export interface OptionsGeneral {
     renderVerticalBuffer?: boolean | number | undefined;
 
     /** placeholder element to display on empty table. */
-    placeholder?: string | HTMLElement | ((this: Tabulator | TabulatorFull) => string) | undefined;
+    placeholder?: string | HTMLElement | ((this: Tabulator | TabulatorFull) => string | HTMLElement) | undefined;
     placeholderHeaderFilter?: string | HTMLElement | ((this: Tabulator | TabulatorFull) => string) | undefined;
 
     /** Footer  element to display for the table. */
@@ -1253,7 +1253,14 @@ export interface ColumnDefinition extends ColumnLayout, CellCallbacks {
      *
      * Validators can be applied by using the validator property in a columns definition object (see Define Columns for more details).
      */
-    validator?: StandardValidatorType | StandardValidatorType[] | Validator | Validator[] | string | undefined;
+    validator?:
+        | StandardValidatorType
+        | StandardValidatorType[]
+        | Validator
+        | Validator[]
+        | string
+        | undefined
+        | ((cell: CellComponent, value: any) => boolean);
 
     /**
      * Mutators are used to alter data as it is parsed into  For example if you wanted to convert a numeric column into a boolean based on its value, before the data is used to build the table.
@@ -1408,7 +1415,7 @@ export interface ColumnDefinition extends ColumnLayout, CellCallbacks {
      */
     headerFilterFunc?:
         | FilterType
-        | ((headerValue: any, rowValue: any, rowData: any, filterParams: any) => boolean)
+        | HeaderFilterFunc
         | undefined;
 
     /** additional parameters object passed to the headerFilterFunc function. */
@@ -1556,7 +1563,9 @@ export type GroupValuesArg = any[][];
 
 export type TextDirection = "auto" | "ltr" | "rtl";
 
-export type GlobalTooltipOption = boolean | ((event: MouseEvent, cell: CellComponent, onRender: () => void) => string);
+export type GlobalTooltipOption =
+    | boolean
+    | ((event: MouseEvent, cell: CellComponent, onRender: () => void) => string | HTMLElement);
 
 export type CustomMutator = (
     value: any,
@@ -1655,7 +1664,7 @@ export type Editor =
         onRendered: EmptyCallback,
         success: ValueBooleanCallback,
         cancel: ValueVoidCallback,
-        editorParams: {},
+        editorParams: Record<string, unknown>,
     ) => HTMLElement | false);
 
 export type EditorParams =
@@ -1667,7 +1676,7 @@ export type EditorParams =
     | DateParams
     | TimeParams
     | DateTimeEditorParams
-    | ((cell: CellComponent) => {});
+    | ((cell: CellComponent) => Record<string, unknown>);
 
 export type ScrollToRowPosition = "top" | "center" | "bottom" | "nearest";
 export type PopupPosition = ColumnDefinitionAlign | "top" | "bottom";
@@ -2895,7 +2904,7 @@ declare class Tabulator {
     getRowFromPosition: (position: number, activeOnly?: boolean) => RowComponent;
 
     /** You can delete any row in the table using the deleteRow function. */
-    deleteRow: (index: RowLookup | RowLookup[]) => void;
+    deleteRow: (index: RowLookup | RowLookup[]) => Promise<void>;
 
     /**
      * You can add a row to the table using the addRow function.
@@ -3069,7 +3078,7 @@ declare class Tabulator {
     addFilter: FilterFunction;
 
     /** You can retrieve an array of the current programmatic filters using the getFilters function, this will not include any of the header filters: */
-    getFilters: (includeHeaderFilters: boolean) => Filter[];
+    getFilters: (includeHeaderFilters?: boolean) => Filter[];
 
     /** You can programmatically set the header filter value of a column by calling the setHeaderFilterValue function, This function takes any of the standard column component look up options as its first parameter, with the value for the header filter as the second option. */
     setHeaderFilterValue: (column: ColumnLookup, value: string) => void;
@@ -3138,10 +3147,10 @@ declare class Tabulator {
     setPageToRow: (row: RowLookup) => Promise<void>;
 
     /** You can change the page size at any point by using the setPageSize function. (this setting will be ignored if using remote pagination with the page size set by the server) */
-    setPageSize: (size: number) => void;
+    setPageSize: (size: number | true) => void;
 
     /** To retrieve the number of rows allowed per page you can call the getPageSize function: */
-    getPageSize: () => number;
+    getPageSize: () => number | true;
 
     /** You can change to show the previous page using the previousPage function. */
     previousPage: () => Promise<void>;
@@ -3424,6 +3433,11 @@ declare class Module {
      */
     initialize(): void;
 }
+
+export interface HeaderFilterFunc {
+    (headerValue: any, rowValue: any, rowData: any, filterParams: any): boolean;
+}
+
 declare class AccessorModule extends Module {}
 declare class AjaxModule extends Module {}
 declare class ClipboardModule extends Module {}
@@ -3432,7 +3446,14 @@ declare class DataTreeModule extends Module {}
 declare class DownloadModule extends Module {}
 declare class EditModule extends Module {}
 declare class ExportModule extends Module {}
-declare class FilterModule extends Module {}
+declare class FilterModule extends Module {
+    /**
+     * Default filter functions (i.e. '=', '<', 'regex', etc.)
+     */
+    static filters: {
+        [key: string]: HeaderFilterFunc;
+    };
+}
 declare class FormatModule extends Module {}
 declare class FrozenColumnsModule extends Module {}
 declare class FrozenRowsModule extends Module {}
@@ -3458,7 +3479,9 @@ declare class ResizeTableModule extends Module {}
 declare class ResponsiveLayoutModule extends Module {}
 declare class SelectRowModule extends Module {}
 declare class SelectRangeModule extends Module {}
-declare class SortModule extends Module {}
+declare class SortModule extends Module {
+    setSort: (sortList: string | Sorter[], dir?: SortDirection) => void;
+}
 declare class SpreadsheetModule extends Module {}
 declare class TabulatorFull extends Tabulator {}
 declare class TooltipModule extends Module {}

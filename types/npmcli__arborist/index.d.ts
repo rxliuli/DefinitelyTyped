@@ -42,9 +42,10 @@ declare class Arborist extends EventEmitter {
     /** returns a set of root dependencies, excluding dependencies that are exclusively workspace dependencies */
     excludeWorkspacesDependencySet(tree: Arborist.Node): Set<Arborist.Node>;
 }
+type ArboristConstructor = typeof Arborist;
 
 declare namespace Arborist {
-    const Arborist: Arborist;
+    const Arborist: ArboristConstructor;
     interface Options extends PacoteOptions, Partial<Pick<import("cacache").get.Options, "memoize">> {
         path?: string;
         nodeVersion?: string;
@@ -354,6 +355,7 @@ declare namespace Arborist {
 
         explain(seen?: Node[]): Explanation;
         get bundled(): boolean;
+        get workspace(): boolean;
         get prod(): boolean;
         get dev(): boolean;
         get optional(): boolean;

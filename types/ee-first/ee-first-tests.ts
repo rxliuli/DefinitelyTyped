@@ -2,11 +2,11 @@ import first = require("ee-first");
 import { EventEmitter } from "events";
 
 class Foo extends EventEmitter {
-    foo: "foo";
+    foo!: "foo";
 }
 
 class Bar extends EventEmitter {
-    bar: "bar";
+    bar!: "bar";
 }
 
 const ee1 = new Foo();
@@ -17,7 +17,7 @@ const thunk = first<Foo | Bar>(
     (err, ee, event, args) => {
         err; // $ExpectType any
         ee; // $ExpectType Foo | Bar
-        event; // $ExpectType string[]
+        event; // $ExpectType string
         args; // $ExpectType any[]
     },
 );
@@ -25,7 +25,7 @@ const thunk = first<Foo | Bar>(
 thunk((err, ee, event, args) => {
     err; // $ExpectType any
     ee; // $ExpectType Foo | Bar
-    event; // $ExpectType string[]
+    event; // $ExpectType string
     args; // $ExpectType any[]
 });
 

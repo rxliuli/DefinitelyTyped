@@ -27,6 +27,8 @@ app.onEvent("viewportChanged", (e) => {
     else console.log("Changing, currently at ", app.viewportHeight);
 });
 
+app.hideKeyboard();
+
 app.showPopup(
     {
         message: "Hello",
@@ -115,4 +117,28 @@ app.shareToStory("url", {
 
 app.openInvoice("url", (status: "paid" | "cancelled" | "failed" | "pending") => {
     const test = status; // $ExpectType "paid" | "cancelled" | "failed" | "pending"
+});
+
+app.Accelerometer.isStarted; // $ExpectType boolean
+
+app.isActive; // $ExpectType boolean
+
+app.isFullscreen; // $ExpectType boolean
+
+app.isOrientationLocked; // $ExpectType boolean
+
+app.MainButton.iconCustomEmojiId; // $ExpectType string
+
+app.MainButton.setParams({
+    icon_custom_emoji_id: "", // $ExpectType string
+});
+
+app.SecondaryButton.iconCustomEmojiId; // $ExpectType string
+
+app.SecondaryButton.setParams({
+    icon_custom_emoji_id: "", // $ExpectType string
+});
+
+app.requestChat("req_id", (success) => {
+    success; // $ExpectType boolean
 });
